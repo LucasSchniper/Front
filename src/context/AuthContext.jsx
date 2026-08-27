@@ -7,9 +7,14 @@ import {
 } from "../utils/signupValidation";
 
 const SESSION_KEY = "deca_session";
-const USERS_KEY = "deca_users";
-const REQUESTS_KEY = "deca_solicitudes_medico";
+const USERS_KEY = "deca_users_v2";
+const REQUESTS_KEY = "deca_solicitudes_medico_v2";
 
+// Cuando el back tenga rol admin, poner VITE_ALLOW_DEMO_LOGIN=false.
+const DEMO_LOGIN = import.meta.env.VITE_ALLOW_DEMO_LOGIN !== "false";
+
+// El administrador todavia no existe en el backend, asi que su cuenta se
+// resuelve localmente. Pacientes y medicos se autentican siempre contra la API.
 const SEED_USERS = [
   {
     email: "admin@deca.com",
@@ -19,48 +24,9 @@ const SEED_USERS = [
     apellido: "DECA",
     estado: "aprobado",
   },
-  {
-    email: "medico@deca.com",
-    password: "deca123",
-    role: "medico",
-    nombre: "Laura",
-    apellido: "Gómez",
-    matricula: "MP-10234",
-    estado: "aprobado",
-  },
-  {
-    email: "paciente@deca.com",
-    password: "deca123",
-    role: "paciente",
-    nombre: "Marcos",
-    apellido: "Ibáñez",
-    dni: "34221098",
-    obraSocial: "OSDE",
-    credencial: "620100123456",
-    estado: "aprobado",
-  },
-  {
-    email: "nuevo.medico@deca.com",
-    password: "deca123",
-    role: "medico",
-    nombre: "Diego",
-    apellido: "Sarmiento",
-    matricula: "MP-45120",
-    estado: "pendiente",
-  },
 ];
 
-const SEED_REQUESTS = [
-  {
-    id: "sol-demo-1",
-    email: "nuevo.medico@deca.com",
-    nombre: "Diego",
-    apellido: "Sarmiento",
-    matricula: "MP-45120",
-    estado: "pendiente",
-    fecha: "2026-08-10",
-  },
-];
+const SEED_REQUESTS = [];
 
 function loadStored(key, seed) {
   try {
@@ -174,20 +140,35 @@ export function AuthProvider({ children }) {
   };
 
   const login = async ({ email, password }) => {
+    const credenciales = { mail: email.trim(), contrasena: password };
+
+    // Probamos paciente y despues medico. Solo un rechazo de credenciales
+    // (kind "auth") justifica seguir probando: si no llegamos al server o el
+    // server fallo, cortamos y lo decimos, en vez de caer al login local y
+    // simular una sesion que no tiene token.
     try {
-      const { token, paciente } = await api.usuarios.login({ mail: email, contrasena: password });
+      const { token, paciente } = await api.usuarios.login(credenciales);
       setPendingAuth({ token, session: sessionFromPaciente(paciente), email });
       return { ok: true };
-    } catch {}
+    } catch (err) {
+      if (err.kind !== "auth") return { ok: false, error: err.message };
+    }
 
     try {
-      const { token, medico } = await api.medicos.login({ mail: email, contrasena: password });
+      const { token, medico } = await api.medicos.login(credenciales);
       setPendingAuth({ token, session: sessionFromMedico(medico), email });
       return { ok: true };
-    } catch {}
+    } catch (err) {
+      if (err.kind !== "auth") return { ok: false, error: err.message };
+    }
 
-    const local = loginLocal({ email, password });
-    if (local) return local;
+    // Llegamos aca solo si el back respondio y dijo que no son credenciales
+    // suyas. El admin todavia vive local, asi que este fallback sigue siendo
+    // legitimo.
+    if (DEMO_LOGIN) {
+      const local = loginLocal({ email, password });
+      if (local) return local;
+    }
 
     return { ok: false, error: "Mail o contraseña incorrectos." };
   };

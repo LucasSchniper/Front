@@ -1,11 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import {
-  MOCK_ANALISIS,
-  MOCK_CONTACTS,
-  MOCK_NOVEDADES,
-  MOCK_PROXIMO_ANALISIS,
-} from "../../data/mockData";
+import { MOCK_NOVEDADES } from "../../data/mockData";
 import {
   IconAlert,
   IconCalendar,
@@ -19,8 +14,6 @@ import {
   IconUserCircle,
 } from "../../components/icons/Icons";
 
-const DEMO_PATIENT_EMAIL = "paciente@deca.com";
-
 const fechaCorta = (iso) => {
   const [y, m, d] = iso.split("-");
   return `${Number(d)}/${Number(m)}/${y}`;
@@ -28,15 +21,14 @@ const fechaCorta = (iso) => {
 
 function PacienteHome() {
   const { currentUser } = useAuth();
-  const isDemoPatient = currentUser.email === DEMO_PATIENT_EMAIL;
-
-  const misAnalisis = isDemoPatient ? MOCK_ANALISIS.filter((a) => a.pacienteId === "p1") : [];
+  // TODO(back): traer los analisis, el proximo turno y los contactos del paciente.
+  const misAnalisis = [];
   const ultimo = misAnalisis[0];
   const normales = misAnalisis.filter((a) => a.estado === "negativo").length;
   const altos = misAnalisis.length - normales;
 
-  const proximo = isDemoPatient ? MOCK_PROXIMO_ANALISIS : null;
-  const chats = isDemoPatient ? MOCK_CONTACTS.paciente : [];
+  const proximo = null;
+  const chats = [];
 
   const nombre = currentUser.nombre
     ? `${currentUser.nombre} ${currentUser.apellido || ""}`.trim()

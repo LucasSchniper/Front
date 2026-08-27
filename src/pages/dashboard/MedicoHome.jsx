@@ -1,21 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { MOCK_PACIENTES, MOCK_ANALISIS } from "../../data/mockData";
 import { IconUserCircle, IconSearch, IconUpload, IconCheck } from "../../components/icons/Icons";
-
-const DEMO_DOCTOR_EMAIL = "medico@deca.com";
 
 function MedicoHome() {
   const { currentUser } = useAuth();
-  const isDemoDoctor = currentUser.email === DEMO_DOCTOR_EMAIL;
-  const misPacientes = isDemoDoctor ? MOCK_PACIENTES.filter((p) => p.medicoId === "m1") : [];
-  const misAnalisis = (isDemoDoctor
-    ? MOCK_ANALISIS.filter((a) => misPacientes.some((p) => p.id === a.pacienteId))
-    : []
-  )
-    .slice()
-    .sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
+  // TODO(back): traer los pacientes asignados y los analisis del medico logueado.
+  const misPacientes = [];
+  const misAnalisis = [];
 
   const [query, setQuery] = useState("");
   const pacientesFiltrados = misPacientes.filter((p) =>

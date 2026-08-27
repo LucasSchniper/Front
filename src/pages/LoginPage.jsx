@@ -60,10 +60,6 @@ function LoginPage() {
         <p className="auth-card__switch">
           ¿No tenés cuenta? <Link to="/signup">Registrate</Link>
         </p>
-        <p className="auth-card__hint">
-          Demo: medico@deca.com / paciente@deca.com / admin@deca.com — clave deca123.
-          nuevo.medico@deca.com está pendiente de aprobación del administrador.
-        </p>
       </form>
     </AuthShell>
   );

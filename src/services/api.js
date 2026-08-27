@@ -10,8 +10,26 @@ export function setToken(token) {
   else localStorage.removeItem(TOKEN_KEY);
 }
 
+/**
+ * Error de API con el motivo tipado, para que quien llama pueda distinguir
+ * "el server me rechazo" de "no llegue al server".
+ *   network -> no hubo respuesta (back caido, sin internet, CORS)
+ *   auth    -> 401/403, credenciales o token invalidos
+ *   server  -> cualquier otro error con respuesta (400, 404, 5xx)
+ */
+export class ApiError extends Error {
+  constructor(message, { kind, status } = {}) {
+    super(message);
+    this.name = "ApiError";
+    this.kind = kind;
+    this.status = status;
+  }
+}
+
 async function request(path, { method = "GET", body, auth = true } = {}) {
-  const headers = { "Content-Type": "application/json" };
+  // Con FormData el Content-Type lo pone el browser (necesita el boundary).
+  const esForm = typeof FormData !== "undefined" && body instanceof FormData;
+  const headers = esForm ? {} : { "Content-Type": "application/json" };
   if (auth) {
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -22,16 +40,22 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
     res = await fetch(`${BASE_URL}${path}`, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: esForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error("No se pudo conectar con el servidor. ¿Está corriendo el backend?");
+    throw new ApiError("No se pudo conectar con el servidor. ¿Está corriendo el backend?", {
+      kind: "network",
+    });
   }
 
   const data = await res.json().catch(() => null);
 
   if (!res.ok || !data?.ok) {
-    throw new Error(data?.error || `Error ${res.status} al conectar con el servidor.`);
+    const kind = res.status === 401 || res.status === 403 ? "auth" : "server";
+    throw new ApiError(data?.error || `Error ${res.status} al conectar con el servidor.`, {
+      kind,
+      status: res.status,
+    });
   }
 
   return data;

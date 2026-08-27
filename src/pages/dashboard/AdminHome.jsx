@@ -5,6 +5,7 @@ import {
   MOCK_NOVEDADES_ADMIN,
   MOCK_PACIENTES,
 } from "../../data/mockData";
+import { leerAsignaciones } from "../../services/asignaciones";
 import { useAuth } from "../../context/AuthContext";
 import {
   IconBolt,
@@ -25,7 +26,8 @@ function AdminHome() {
     ? `${currentUser.nombre} ${currentUser.apellido || ""}`.trim()
     : currentUser.email.split("@")[0];
 
-  const asignaciones = MOCK_PACIENTES.filter((p) => p.medicoId).length;
+  // Misma fuente que usa la pantalla de asignacion del admin.
+  const asignaciones = Object.keys(leerAsignaciones(MOCK_PACIENTES)).length;
 
   const stats = [
     { icon: IconDoctor, label: "Médicos registrados", value: MOCK_MEDICOS.length },
