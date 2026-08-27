@@ -197,6 +197,7 @@ export function AuthProvider({ children }) {
           email: nuevo.email,
           nombre: nuevo.nombre,
           apellido: nuevo.apellido,
+          dni: nuevo.dni,
           matricula: nuevo.matricula,
           estado: "pendiente",
           fecha: hoy(),

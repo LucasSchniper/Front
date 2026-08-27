@@ -2,12 +2,13 @@ import { useMemo, useState } from "react";
 import { MOCK_MEDICOS } from "../../data/mockData";
 import { useAuth } from "../../context/AuthContext";
 import { IconCheck, IconClose, IconPlus, IconShield, IconTrash } from "../../components/icons/Icons";
+import { sanitizeField } from "../../utils/signupValidation";
 
 function AdminMedicos() {
   const { users, solicitudesPendientes, aprobarMedico, rechazarMedico } = useAuth();
   const [designados, setDesignados] = useState(MOCK_MEDICOS);
   const [quitados, setQuitados] = useState([]);
-  const [form, setForm] = useState({ nombre: "", email: "", matricula: "" });
+  const [form, setForm] = useState({ nombre: "", email: "", dni: "", matricula: "" });
   const [showForm, setShowForm] = useState(false);
 
   const medicos = useMemo(() => {
@@ -17,6 +18,7 @@ function AdminMedicos() {
         id: `u-${u.email}`,
         nombre: `${u.nombre} ${u.apellido || ""}`.trim(),
         email: u.email,
+        dni: u.dni,
         matricula: u.matricula,
       }));
 
@@ -31,9 +33,9 @@ function AdminMedicos() {
 
   const handleAdd = (e) => {
     e.preventDefault();
-    if (!form.nombre || !form.email) return;
+    if (!form.nombre || !form.email || !form.dni) return;
     setDesignados((prev) => [...prev, { id: `m${Date.now()}`, ...form }]);
-    setForm({ nombre: "", email: "", matricula: "" });
+    setForm({ nombre: "", email: "", dni: "", matricula: "" });
     setShowForm(false);
   };
 
@@ -67,6 +69,14 @@ function AdminMedicos() {
             required
           />
           <input
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="DNI"
+            value={form.dni}
+            onChange={(e) => setForm((f) => ({ ...f, dni: sanitizeField("dni", e.target.value) }))}
+            required
+          />
+          <input
             placeholder="Matrícula"
             value={form.matricula}
             onChange={(e) => setForm((f) => ({ ...f, matricula: e.target.value }))}
@@ -96,7 +106,8 @@ function AdminMedicos() {
                     {s.nombre} {s.apellido}
                   </p>
                   <p className="request-card__meta">
-                    {s.email} · Matrícula {s.matricula || "—"} · solicitado el {s.fecha}
+                    {s.email} · DNI {s.dni || "—"} · Matrícula {s.matricula || "—"} · solicitado el{" "}
+                    {s.fecha}
                   </p>
                 </div>
                 <div className="request-card__actions">
@@ -120,6 +131,7 @@ function AdminMedicos() {
             <tr>
               <th>Nombre</th>
               <th>Mail</th>
+              <th>DNI</th>
               <th>Matrícula</th>
               <th aria-label="Acciones" />
             </tr>
@@ -129,6 +141,7 @@ function AdminMedicos() {
               <tr key={m.id}>
                 <td>{m.nombre}</td>
                 <td>{m.email}</td>
+                <td>{m.dni || "—"}</td>
                 <td>{m.matricula || "—"}</td>
                 <td>
                   <button
@@ -143,7 +156,7 @@ function AdminMedicos() {
             ))}
             {medicos.length === 0 && (
               <tr>
-                <td colSpan={4} className="data-table__empty">
+                <td colSpan={5} className="data-table__empty">
                   Todavía no hay médicos designados.
                 </td>
               </tr>

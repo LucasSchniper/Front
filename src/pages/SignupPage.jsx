@@ -209,22 +209,24 @@ function SignupPage() {
         </fieldset>
         {errors.role && <span className="form-field__error">{errors.role}</span>}
 
+        {form.role && (
+          <FormField label="DNI" id="signup-dni" error={errors.dni}>
+            <input
+              id="signup-dni"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              required
+              maxLength={MAX_LENGTH.dni}
+              placeholder="00000000"
+              value={form.dni}
+              onChange={update("dni")}
+            />
+            <span className="form-field__hint">Sólo números, 7 u 8 dígitos.</span>
+          </FormField>
+        )}
+
         {form.role === "paciente" && (
           <>
-            <FormField label="DNI" id="signup-dni" error={errors.dni}>
-              <input
-                id="signup-dni"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                required
-                maxLength={MAX_LENGTH.dni}
-                placeholder="00000000"
-                value={form.dni}
-                onChange={update("dni")}
-              />
-              <span className="form-field__hint">Sólo números, 7 u 8 dígitos.</span>
-            </FormField>
-
             <FormField label="Obra social" id="signup-obra" error={errors.obraSocial}>
               <select id="signup-obra" required value={form.obraSocial} onChange={update("obraSocial")}>
                 <option value="">Elegí tu obra social</option>

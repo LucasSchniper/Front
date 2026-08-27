@@ -3,7 +3,7 @@ export const BASE_FIELDS = ["nombre", "apellido", "fechaNacimiento", "email", "p
 
 export const FIELDS_BY_ROLE = {
   paciente: ["dni", "obraSocial"],
-  medico: ["matricula"],
+  medico: ["dni", "matricula"],
 };
 
 export const SIN_OBRA_SOCIAL = "Particular / sin obra social";
@@ -109,7 +109,7 @@ export function validateSignup(form) {
     }
   }
 
-  if (!errors.dni && form.role === "paciente") {
+  if (!errors.dni && (form.role === "paciente" || form.role === "medico")) {
     const dni = soloDigitos(form.dni);
     if (dni.length < MIN_LENGTH.dni || dni.length > MAX_LENGTH.dni) {
       errors.dni = `El DNI tiene que tener ${MIN_LENGTH.dni} u ${MAX_LENGTH.dni} dígitos.`;
@@ -151,7 +151,7 @@ export function normalizeSignup(form) {
   };
 
   if (form.role === "medico") {
-    return { ...base, matricula: trim(form.matricula) };
+    return { ...base, dni: soloDigitos(form.dni), matricula: trim(form.matricula) };
   }
 
   return {

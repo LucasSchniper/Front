@@ -24,8 +24,8 @@ export const OBRAS_SOCIALES = [
 ];
 
 export const MOCK_MEDICOS = [
-  { id: "m1", nombre: "Laura Gómez", email: "medico@deca.com", matricula: "MP-10234" },
-  { id: "m2", nombre: "Ricardo Paz", email: "ricardo.paz@deca.com", matricula: "MP-88210" },
+  { id: "m1", nombre: "Laura Gómez", email: "medico@deca.com", dni: "30112445", matricula: "MP-10234" },
+  { id: "m2", nombre: "Ricardo Paz", email: "ricardo.paz@deca.com", dni: "27884310", matricula: "MP-88210" },
 ];
 
 export const MOCK_PACIENTES = [
