@@ -8,13 +8,11 @@ import {
 
 const SESSION_KEY = "deca_session";
 const USERS_KEY = "deca_users_v2";
-const REQUESTS_KEY = "deca_solicitudes_medico_v2";
 
-// Cuando el back tenga rol admin, poner VITE_ALLOW_DEMO_LOGIN=false.
+// Respaldo para entornos sin un admin sembrado en la base (ver seedAdmin.js).
+// Con un admin real, poner VITE_ALLOW_DEMO_LOGIN=false.
 const DEMO_LOGIN = import.meta.env.VITE_ALLOW_DEMO_LOGIN !== "false";
 
-// El administrador todavia no existe en el backend, asi que su cuenta se
-// resuelve localmente. Pacientes y medicos se autentican siempre contra la API.
 const SEED_USERS = [
   {
     email: "admin@deca.com",
@@ -25,8 +23,6 @@ const SEED_USERS = [
     estado: "aprobado",
   },
 ];
-
-const SEED_REQUESTS = [];
 
 function loadStored(key, seed) {
   try {
@@ -39,8 +35,6 @@ function loadStored(key, seed) {
 
 const loadUsers = () =>
   loadStored(USERS_KEY, SEED_USERS).map((u) => ({ ...u, estado: u.estado || "aprobado" }));
-
-const loadRequests = () => loadStored(REQUESTS_KEY, SEED_REQUESTS);
 
 function loadSession() {
   try {
@@ -77,6 +71,16 @@ function sessionFromMedico(medico) {
   };
 }
 
+function sessionFromAdmin(admin) {
+  return {
+    id: admin.id,
+    role: "administrador",
+    email: admin.mail,
+    nombre: admin.nombre,
+    apellido: admin.apellido,
+  };
+}
+
 function sessionFromLocal(user) {
   return {
     role: user.role,
@@ -86,14 +90,24 @@ function sessionFromLocal(user) {
   };
 }
 
-const hoy = () => new Date().toISOString().slice(0, 10);
-
 const AuthContext = createContext(null);
+
+function mapSolicitud(medico) {
+  return {
+    id: medico.id,
+    email: medico.mail,
+    nombre: medico.nombre,
+    apellido: medico.apellido,
+    dni: medico.dni,
+    matricula: medico.matricula,
+    fecha: medico.created_at,
+  };
+}
 
 export function AuthProvider({ children }) {
   const [users, setUsers] = useState(loadUsers);
   const [currentUser, setCurrentUser] = useState(loadSession);
-  const [solicitudesMedicos, setSolicitudesMedicos] = useState(loadRequests);
+  const [solicitudesMedicos, setSolicitudesMedicos] = useState([]);
   const [pendingAuth, setPendingAuth] = useState(null);
 
   useEffect(() => {
@@ -104,16 +118,23 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(REQUESTS_KEY, JSON.stringify(solicitudesMedicos));
-    } catch {}
-  }, [solicitudesMedicos]);
-
-  useEffect(() => {
-    try {
       if (currentUser) localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
       else localStorage.removeItem(SESSION_KEY);
     } catch {}
   }, [currentUser]);
+
+  const cargarSolicitudesPendientes = async () => {
+    try {
+      const { medicos } = await api.medicos.pendientes();
+      setSolicitudesMedicos(medicos.map(mapSolicitud));
+    } catch {
+      // El admin todavia va a ver el resto del dashboard aunque esto falle.
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser?.role === "administrador") cargarSolicitudesPendientes();
+  }, [currentUser?.role]);
 
   const loginLocal = ({ email, password }) => {
     const mail = email.trim().toLowerCase();
@@ -162,9 +183,17 @@ export function AuthProvider({ children }) {
       if (err.kind !== "auth") return { ok: false, error: err.message };
     }
 
+    try {
+      const { token, admin } = await api.admins.login(credenciales);
+      setPendingAuth({ token, session: sessionFromAdmin(admin), email });
+      return { ok: true };
+    } catch (err) {
+      if (err.kind !== "auth") return { ok: false, error: err.message };
+    }
+
     // Llegamos aca solo si el back respondio y dijo que no son credenciales
-    // suyas. El admin todavia vive local, asi que este fallback sigue siendo
-    // legitimo.
+    // suyas de ningun rol. Sirve como respaldo si todavia no se corrio
+    // npm run seed:admin en el back (sin admin real en la base).
     if (DEMO_LOGIN) {
       const local = loginLocal({ email, password });
       if (local) return local;
@@ -190,20 +219,18 @@ export function AuthProvider({ children }) {
     }
 
     if (nuevo.role === "medico") {
-      setUsers((prev) => [...prev, { ...nuevo, estado: "pendiente" }]);
-      setSolicitudesMedicos((prev) => [
-        {
-          id: `sol-${Date.now()}`,
-          email: nuevo.email,
+      try {
+        await api.medicos.registro({
           nombre: nuevo.nombre,
           apellido: nuevo.apellido,
+          mail: nuevo.email,
+          contrasena: nuevo.password,
           dni: nuevo.dni,
           matricula: nuevo.matricula,
-          estado: "pendiente",
-          fecha: hoy(),
-        },
-        ...prev,
-      ]);
+        });
+      } catch (err) {
+        return { ok: false, error: err.message, errors: {} };
+      }
       return { ok: true, pendingApproval: true };
     }
 
@@ -243,22 +270,15 @@ export function AuthProvider({ children }) {
     setPendingAuth(null);
   };
 
-  const resolverSolicitud = (id, estado) => {
-    const solicitud = solicitudesMedicos.find((s) => s.id === id);
-    if (!solicitud) return;
-    setSolicitudesMedicos((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, estado, resueltaEl: hoy() } : s))
-    );
-    setUsers((prev) => prev.map((u) => (u.email === solicitud.email ? { ...u, estado } : u)));
+  const aprobarMedico = async (id) => {
+    await api.medicos.aprobar(id);
+    setSolicitudesMedicos((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const aprobarMedico = (id) => resolverSolicitud(id, "aprobado");
-  const rechazarMedico = (id) => resolverSolicitud(id, "rechazado");
-
-  const solicitudesPendientes = useMemo(
-    () => solicitudesMedicos.filter((s) => s.estado === "pendiente"),
-    [solicitudesMedicos]
-  );
+  const rechazarMedico = async (id) => {
+    await api.medicos.eliminar(id);
+    setSolicitudesMedicos((prev) => prev.filter((s) => s.id !== id));
+  };
 
   const value = useMemo(
     () => ({
@@ -269,12 +289,11 @@ export function AuthProvider({ children }) {
       confirmCode,
       logout,
       users,
-      solicitudesMedicos,
-      solicitudesPendientes,
+      solicitudesPendientes: solicitudesMedicos,
       aprobarMedico,
       rechazarMedico,
     }),
-    [currentUser, pendingAuth, users, solicitudesMedicos, solicitudesPendientes]
+    [currentUser, pendingAuth, users, solicitudesMedicos]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -62,6 +62,10 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
 }
 
 export const api = {
+  admins: {
+    login: (payload) => request("/api/admins/login", { method: "POST", body: payload, auth: false }),
+    perfil: () => request("/api/admins/perfil"),
+  },
   usuarios: {
     registro: (payload) => request("/api/usuarios/registro", { method: "POST", body: payload, auth: false }),
     login: (payload) => request("/api/usuarios/login", { method: "POST", body: payload, auth: false }),
@@ -69,9 +73,13 @@ export const api = {
     listar: () => request("/api/usuarios"),
   },
   medicos: {
+    registro: (payload) => request("/api/medicos/registro", { method: "POST", body: payload, auth: false }),
     login: (payload) => request("/api/medicos/login", { method: "POST", body: payload, auth: false }),
     perfil: () => request("/api/medicos/perfil"),
     listar: () => request("/api/medicos"),
+    pendientes: () => request("/api/medicos/pendientes"),
+    aprobar: (id) => request(`/api/medicos/${id}/aprobar`, { method: "PUT" }),
+    eliminar: (id) => request(`/api/medicos/${id}`, { method: "DELETE" }),
   },
   mensajes: {
     conversacion: (contraparteId) => request(`/api/mensajes/${contraparteId}`),

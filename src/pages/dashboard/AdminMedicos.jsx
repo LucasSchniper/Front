@@ -1,91 +1,66 @@
-import { useMemo, useState } from "react";
-import { MOCK_MEDICOS } from "../../data/mockData";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { IconCheck, IconClose, IconPlus, IconShield, IconTrash } from "../../components/icons/Icons";
-import { sanitizeField } from "../../utils/signupValidation";
+import { api } from "../../services/api";
+import { IconCheck, IconClose, IconShield, IconTrash } from "../../components/icons/Icons";
 
 function AdminMedicos() {
-  const { users, solicitudesPendientes, aprobarMedico, rechazarMedico } = useAuth();
-  const [designados, setDesignados] = useState(MOCK_MEDICOS);
-  const [quitados, setQuitados] = useState([]);
-  const [form, setForm] = useState({ nombre: "", email: "", dni: "", matricula: "" });
-  const [showForm, setShowForm] = useState(false);
+  const { solicitudesPendientes, aprobarMedico, rechazarMedico } = useAuth();
+  const [medicos, setMedicos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const medicos = useMemo(() => {
-    const registrados = users
-      .filter((u) => u.role === "medico" && u.estado === "aprobado")
-      .map((u) => ({
-        id: `u-${u.email}`,
-        nombre: `${u.nombre} ${u.apellido || ""}`.trim(),
-        email: u.email,
-        dni: u.dni,
-        matricula: u.matricula,
-      }));
-
-    const vistos = new Set();
-    return [...designados, ...registrados].filter((m) => {
-      const email = m.email.toLowerCase();
-      if (vistos.has(email) || quitados.includes(email)) return false;
-      vistos.add(email);
-      return true;
-    });
-  }, [users, designados, quitados]);
-
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!form.nombre || !form.email || !form.dni) return;
-    setDesignados((prev) => [...prev, { id: `m${Date.now()}`, ...form }]);
-    setForm({ nombre: "", email: "", dni: "", matricula: "" });
-    setShowForm(false);
+  const cargarMedicos = () => {
+    setLoading(true);
+    api.medicos
+      .listar()
+      .then((data) => setMedicos(data.medicos))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   };
 
-  const handleRemove = (email) => setQuitados((prev) => [...prev, email.toLowerCase()]);
+  useEffect(() => {
+    cargarMedicos();
+  }, []);
+
+  const handleAprobar = async (id) => {
+    setError("");
+    try {
+      await aprobarMedico(id);
+      cargarMedicos();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleRechazar = async (id) => {
+    setError("");
+    try {
+      await rechazarMedico(id);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleEliminar = async (id) => {
+    setError("");
+    try {
+      await api.medicos.eliminar(id);
+      setMedicos((prev) => prev.filter((m) => m.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   return (
     <div>
       <div className="page-header">
         <div>
           <h1 className="page-title">Médicos</h1>
-          <p className="page-subtitle">Designá o quitá acceso a profesionales médicos.</p>
+          <p className="page-subtitle">Aprobá solicitudes y gestioná el acceso de profesionales médicos.</p>
         </div>
-        <button className="btn btn--primary btn--sm" onClick={() => setShowForm((v) => !v)}>
-          <IconPlus size={16} /> Designar médico
-        </button>
       </div>
 
-      {showForm && (
-        <form className="inline-form" onSubmit={handleAdd}>
-          <input
-            placeholder="Nombre y apellido"
-            value={form.nombre}
-            onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Mail"
-            value={form.email}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            required
-          />
-          <input
-            inputMode="numeric"
-            pattern="[0-9]*"
-            placeholder="DNI"
-            value={form.dni}
-            onChange={(e) => setForm((f) => ({ ...f, dni: sanitizeField("dni", e.target.value) }))}
-            required
-          />
-          <input
-            placeholder="Matrícula"
-            value={form.matricula}
-            onChange={(e) => setForm((f) => ({ ...f, matricula: e.target.value }))}
-          />
-          <button type="submit" className="btn btn--primary btn--sm">
-            Guardar
-          </button>
-        </form>
-      )}
+      {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
 
       <section className="requests">
         <h2 className="section-title">
@@ -111,10 +86,10 @@ function AdminMedicos() {
                   </p>
                 </div>
                 <div className="request-card__actions">
-                  <button className="btn btn--primary btn--sm" onClick={() => aprobarMedico(s.id)}>
+                  <button className="btn btn--primary btn--sm" onClick={() => handleAprobar(s.id)}>
                     <IconCheck size={16} /> Aprobar
                   </button>
-                  <button className="btn btn--ghost btn--sm" onClick={() => rechazarMedico(s.id)}>
+                  <button className="btn btn--ghost btn--sm" onClick={() => handleRechazar(s.id)}>
                     <IconClose size={16} /> Rechazar
                   </button>
                 </div>
@@ -131,7 +106,6 @@ function AdminMedicos() {
             <tr>
               <th>Nombre</th>
               <th>Mail</th>
-              <th>DNI</th>
               <th>Matrícula</th>
               <th aria-label="Acciones" />
             </tr>
@@ -139,25 +113,26 @@ function AdminMedicos() {
           <tbody>
             {medicos.map((m) => (
               <tr key={m.id}>
-                <td>{m.nombre}</td>
-                <td>{m.email}</td>
-                <td>{m.dni || "—"}</td>
+                <td>
+                  {m.nombre} {m.apellido}
+                </td>
+                <td>{m.mail}</td>
                 <td>{m.matricula || "—"}</td>
                 <td>
                   <button
                     className="icon-btn icon-btn--danger"
                     aria-label={`Eliminar a ${m.nombre}`}
-                    onClick={() => handleRemove(m.email)}
+                    onClick={() => handleEliminar(m.id)}
                   >
                     <IconTrash size={17} />
                   </button>
                 </td>
               </tr>
             ))}
-            {medicos.length === 0 && (
+            {!loading && medicos.length === 0 && (
               <tr>
-                <td colSpan={5} className="data-table__empty">
-                  Todavía no hay médicos designados.
+                <td colSpan={4} className="data-table__empty">
+                  Todavía no hay médicos aprobados.
                 </td>
               </tr>
             )}
