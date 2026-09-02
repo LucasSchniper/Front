@@ -71,6 +71,8 @@ export const api = {
     login: (payload) => request("/usuarios/login", { method: "POST", body: payload, auth: false }),
     perfil: () => request("/usuarios/perfil"),
     listar: () => request("/usuarios"),
+    asignarMedico: (id, medicoId) =>
+      request(`/usuarios/${id}/medico`, { method: "PUT", body: { medicoId } }),
   },
   medicos: {
     registro: (payload) => request("/medicos/registro", { method: "POST", body: payload, auth: false }),
