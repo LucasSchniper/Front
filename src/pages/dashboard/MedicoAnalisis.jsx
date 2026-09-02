@@ -5,7 +5,7 @@ import { IconEcgUpload, IconCheck } from "../../components/icons/Icons";
 /**
  * Carga de un analisis de ECG.
  *
- * Limitacion del backend actual: `POST /api/analisis` solo acepta
+ * Limitacion del backend actual: `POST /analisis` solo acepta
  * `{ pacienteId, porcentaje }` y la tabla `analisis` no tiene columna de
  * archivo ni de medico. Es decir, el ECG en si todavia no se puede guardar y
  * el porcentaje lo tiene que informar el medico a mano.

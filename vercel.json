@@ -1,6 +1,11 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://deca-back.vercel.app/api/:path*" },
+    { "source": "/usuarios/:path*", "destination": "https://deca-back.vercel.app/usuarios/:path*" },
+    { "source": "/medicos/:path*", "destination": "https://deca-back.vercel.app/medicos/:path*" },
+    { "source": "/admins/:path*", "destination": "https://deca-back.vercel.app/admins/:path*" },
+    { "source": "/mensajes/:path*", "destination": "https://deca-back.vercel.app/mensajes/:path*" },
+    { "source": "/notificaciones/:path*", "destination": "https://deca-back.vercel.app/notificaciones/:path*" },
+    { "source": "/analisis/:path*", "destination": "https://deca-back.vercel.app/analisis/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

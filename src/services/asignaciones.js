@@ -7,8 +7,8 @@
  * funciones por llamadas a `api.asignaciones.*` y devolver promesas.
  *
  * Contrato sugerido para el back:
- *   GET    /api/asignaciones              -> { ok, asignaciones: [{ pacienteId, medicoId }] }
- *   PUT    /api/pacientes/:id/medico      -> body { medicoId } | { medicoId: null }
+ *   GET    /asignaciones              -> { ok, asignaciones: [{ pacienteId, medicoId }] }
+ *   PUT    /pacientes/:id/medico      -> body { medicoId } | { medicoId: null }
  */
 
 const KEY = "deca_asignaciones";
