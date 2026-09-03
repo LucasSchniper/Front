@@ -1,11 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  MOCK_ANALISIS,
-  MOCK_MEDICOS,
-  MOCK_NOVEDADES_ADMIN,
-  MOCK_PACIENTES,
-} from "../../data/mockData";
-import { leerAsignaciones } from "../../services/asignaciones";
+import { MOCK_ANALISIS, MOCK_NOVEDADES_ADMIN } from "../../data/mockData";
+import { leerAsignaciones, medicoDePaciente } from "../../services/asignaciones";
+import { api } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import {
   IconBolt,
@@ -26,12 +23,37 @@ function AdminHome() {
     ? `${currentUser.nombre} ${currentUser.apellido || ""}`.trim()
     : currentUser.email.split("@")[0];
 
-  // Misma fuente que usa la pantalla de asignacion del admin.
-  const asignaciones = Object.keys(leerAsignaciones(MOCK_PACIENTES)).length;
+  // Mismas fuentes que usa la pantalla de asignacion del admin.
+  const [medicos, setMedicos] = useState([]);
+  const [pacientes, setPacientes] = useState([]);
+
+  useEffect(() => {
+    let cancelado = false;
+    Promise.all([api.medicos.listar(), api.usuarios.listar()])
+      .then(([dataMedicos, dataPacientes]) => {
+        if (cancelado) return;
+        setMedicos(dataMedicos.medicos || []);
+        setPacientes(dataPacientes.pacientes || []);
+      })
+      .catch(() => {
+        // El resto del dashboard sigue siendo util aunque falle el conteo.
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
+  // Contamos solo asignaciones vigentes: pacientes que existen hoy y cuyo
+  // medico sigue teniendo acceso.
+  const asignaciones = (() => {
+    const mapa = leerAsignaciones();
+    const medicosVigentes = new Set(medicos.map((m) => String(m.id)));
+    return pacientes.filter((p) => medicosVigentes.has(medicoDePaciente(mapa, p.id))).length;
+  })();
 
   const stats = [
-    { icon: IconDoctor, label: "Médicos registrados", value: MOCK_MEDICOS.length },
-    { icon: IconPatient, label: "Pacientes registrados", value: MOCK_PACIENTES.length },
+    { icon: IconDoctor, label: "Médicos registrados", value: medicos.length },
+    { icon: IconPatient, label: "Pacientes registrados", value: pacientes.length },
     { icon: IconUsers, label: "Asignaciones activas", value: asignaciones },
     { icon: IconTrendUp, label: "Análisis realizados", value: MOCK_ANALISIS.length },
   ];
@@ -48,7 +70,7 @@ function AdminHome() {
       to: "/administrador/pacientes",
       icon: IconPatient,
       label: "Gestionar pacientes",
-      hint: "Alta de pacientes y asignación de su médico",
+      hint: "Asignar el médico a cargo de cada paciente",
     },
     {
       to: "/administrador/chats",

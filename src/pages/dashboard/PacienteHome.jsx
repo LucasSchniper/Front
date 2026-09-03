@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { api } from "../../services/api";
+import { leerAsignaciones, medicoDePaciente } from "../../services/asignaciones";
 import { MOCK_NOVEDADES } from "../../data/mockData";
 import {
   IconAlert,
@@ -7,6 +10,7 @@ import {
   IconChat,
   IconClipboard,
   IconClock,
+  IconDoctor,
   IconHeartCheck,
   IconNews,
   IconPulse,
@@ -30,6 +34,31 @@ function PacienteHome() {
   const proximo = null;
   const chats = [];
 
+  // Quien me sigue: lo define el admin desde su panel de asignaciones.
+  const [miMedico, setMiMedico] = useState(null);
+  const medicoId = medicoDePaciente(leerAsignaciones(), currentUser.id);
+
+  useEffect(() => {
+    if (!medicoId) {
+      setMiMedico(null);
+      return;
+    }
+    let cancelado = false;
+    api.medicos
+      .listar()
+      .then((data) => {
+        if (cancelado) return;
+        const encontrado = (data.medicos || []).find((m) => String(m.id) === String(medicoId));
+        setMiMedico(encontrado || null);
+      })
+      .catch(() => {
+        // Sin conexion mostramos la tarjeta vacia en vez de romper el home.
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [medicoId]);
+
   const nombre = currentUser.nombre
     ? `${currentUser.nombre} ${currentUser.apellido || ""}`.trim()
     : currentUser.email.split("@")[0];
@@ -38,6 +67,30 @@ function PacienteHome() {
     <div>
       <h1 className="page-title">¡Bienvenido/a, {nombre}!</h1>
       <p className="page-subtitle">Este es un resumen de tu salud y tu actividad.</p>
+
+      <article className="dash-card mi-medico">
+        <span className="mi-medico__icon">
+          <IconDoctor size={22} />
+        </span>
+        <div className="mi-medico__info">
+          <p className="mi-medico__label">Tu médico a cargo</p>
+          {miMedico ? (
+            <p className="mi-medico__name">
+              Dr./Dra. {miMedico.nombre} {miMedico.apellido}
+              {miMedico.matricula ? ` · Matrícula ${miMedico.matricula}` : ""}
+            </p>
+          ) : (
+            <p className="mi-medico__name mi-medico__name--empty">
+              Todavía no tenés un médico asignado.
+            </p>
+          )}
+        </div>
+        {miMedico && (
+          <Link to="/paciente/chats" className="btn btn--primary btn--sm">
+            Enviar mensaje
+          </Link>
+        )}
+      </article>
 
       <div className="paciente-home__top">
         <article className="dash-card dash-card--highlight">

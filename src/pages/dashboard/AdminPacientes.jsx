@@ -1,59 +1,47 @@
-import { useMemo, useState } from "react";
-import { MOCK_PACIENTES, MOCK_MEDICOS } from "../../data/mockData";
-import { IconPlus, IconTrash } from "../../components/icons/Icons";
+import { useEffect, useMemo, useState } from "react";
+import { api } from "../../services/api";
 import {
   SIN_ASIGNAR,
   asignarMedico,
   leerAsignaciones,
-  olvidarPaciente,
+  medicoDePaciente,
 } from "../../services/asignaciones";
 
-const PACIENTES_KEY = "deca_padron_pacientes";
-
-function cargarPadron() {
-  try {
-    const raw = localStorage.getItem(PACIENTES_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return MOCK_PACIENTES;
-}
-
-function guardarPadron(pacientes) {
-  try {
-    localStorage.setItem(PACIENTES_KEY, JSON.stringify(pacientes));
-  } catch {}
-}
+const nombreCompleto = (persona) =>
+  `${persona.nombre || ""} ${persona.apellido || ""}`.trim() || persona.mail || "—";
 
 function AdminPacientes() {
-  const [pacientes, setPacientes] = useState(cargarPadron);
-  const [asignaciones, setAsignaciones] = useState(() => leerAsignaciones(cargarPadron()));
-  const [form, setForm] = useState({ nombre: "", dni: "", medicoId: SIN_ASIGNAR });
-  const [showForm, setShowForm] = useState(false);
+  const [pacientes, setPacientes] = useState([]);
+  const [medicos, setMedicos] = useState([]);
+  const [asignaciones, setAsignaciones] = useState(leerAsignaciones);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Pacientes y medicos salen de la API: son las mismas cuentas que despues
+  // van a loguearse, asi que los ids del mapa de asignaciones son los reales.
+  useEffect(() => {
+    let cancelado = false;
+    Promise.all([api.usuarios.listar(), api.medicos.listar()])
+      .then(([dataPacientes, dataMedicos]) => {
+        if (cancelado) return;
+        setPacientes(dataPacientes.pacientes || []);
+        setMedicos(dataMedicos.medicos || []);
+      })
+      .catch((err) => {
+        if (!cancelado) setError(err.message);
+      })
+      .finally(() => {
+        if (!cancelado) setLoading(false);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   const sinAsignar = useMemo(
-    () => pacientes.filter((p) => !asignaciones[p.id]).length,
+    () => pacientes.filter((p) => !medicoDePaciente(asignaciones, p.id)).length,
     [pacientes, asignaciones]
   );
-
-  const actualizarPadron = (siguiente) => {
-    setPacientes(siguiente);
-    guardarPadron(siguiente);
-  };
-
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!form.nombre || !form.dni) return;
-    const id = `p${Date.now()}`;
-    actualizarPadron([...pacientes, { id, nombre: form.nombre, dni: form.dni }]);
-    if (form.medicoId) setAsignaciones((prev) => asignarMedico(prev, id, form.medicoId));
-    setForm({ nombre: "", dni: "", medicoId: SIN_ASIGNAR });
-    setShowForm(false);
-  };
-
-  const handleRemove = (id) => {
-    actualizarPadron(pacientes.filter((p) => p.id !== id));
-    setAsignaciones((prev) => olvidarPaciente(prev, id));
-  };
 
   const handleAsignar = (pacienteId, medicoId) => {
     setAsignaciones((prev) => asignarMedico(prev, pacienteId, medicoId));
@@ -65,13 +53,19 @@ function AdminPacientes() {
         <div>
           <h1 className="page-title">Pacientes</h1>
           <p className="page-subtitle">
-            Designá pacientes y asigná el médico que va a seguir cada caso.
+            Asigná el médico que va a seguir cada caso. Los pacientes se dan de alta
+            registrándose desde la web.
           </p>
         </div>
-        <button className="btn btn--primary btn--sm" onClick={() => setShowForm((v) => !v)}>
-          <IconPlus size={16} /> Designar paciente
-        </button>
       </div>
+
+      {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
+
+      {!loading && medicos.length === 0 && (
+        <p className="auth-card__feedback">
+          Todavía no hay médicos aprobados. Aprobá una solicitud en Médicos para poder asignar.
+        </p>
+      )}
 
       {sinAsignar > 0 && (
         <p className="auth-card__feedback">
@@ -81,38 +75,6 @@ function AdminPacientes() {
         </p>
       )}
 
-      {showForm && (
-        <form className="inline-form" onSubmit={handleAdd}>
-          <input
-            placeholder="Nombre y apellido"
-            value={form.nombre}
-            onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
-            required
-          />
-          <input
-            placeholder="DNI"
-            value={form.dni}
-            onChange={(e) => setForm((f) => ({ ...f, dni: e.target.value }))}
-            required
-          />
-          <select
-            aria-label="Médico asignado"
-            value={form.medicoId}
-            onChange={(e) => setForm((f) => ({ ...f, medicoId: e.target.value }))}
-          >
-            <option value={SIN_ASIGNAR}>Sin asignar</option>
-            {MOCK_MEDICOS.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nombre}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className="btn btn--primary btn--sm">
-            Guardar
-          </button>
-        </form>
-      )}
-
       <div className="data-table-wrap">
         <table className="data-table">
           <thead>
@@ -120,43 +82,41 @@ function AdminPacientes() {
               <th>Nombre</th>
               <th>DNI</th>
               <th>Médico asignado</th>
-              <th aria-label="Acciones" />
             </tr>
           </thead>
           <tbody>
             {pacientes.map((p) => (
               <tr key={p.id}>
-                <td>{p.nombre}</td>
-                <td>{p.dni}</td>
+                <td>{nombreCompleto(p)}</td>
+                <td>{p.dni || "—"}</td>
                 <td>
                   <select
-                    aria-label={`Médico asignado a ${p.nombre}`}
-                    value={asignaciones[p.id] || SIN_ASIGNAR}
+                    aria-label={`Médico asignado a ${nombreCompleto(p)}`}
+                    value={medicoDePaciente(asignaciones, p.id)}
                     onChange={(e) => handleAsignar(p.id, e.target.value)}
+                    disabled={medicos.length === 0}
                   >
                     <option value={SIN_ASIGNAR}>Sin asignar</option>
-                    {MOCK_MEDICOS.map((m) => (
+                    {medicos.map((m) => (
                       <option key={m.id} value={m.id}>
-                        {m.nombre}
+                        {nombreCompleto(m)}
                       </option>
                     ))}
                   </select>
                 </td>
-                <td>
-                  <button
-                    className="icon-btn icon-btn--danger"
-                    aria-label={`Eliminar a ${p.nombre}`}
-                    onClick={() => handleRemove(p.id)}
-                  >
-                    <IconTrash size={17} />
-                  </button>
-                </td>
               </tr>
             ))}
-            {pacientes.length === 0 && (
+            {loading && (
               <tr>
-                <td colSpan={4} className="data-table__empty">
-                  Todavía no hay pacientes designados.
+                <td colSpan={3} className="data-table__empty">
+                  Cargando…
+                </td>
+              </tr>
+            )}
+            {!loading && pacientes.length === 0 && (
+              <tr>
+                <td colSpan={3} className="data-table__empty">
+                  Todavía no hay pacientes registrados.
                 </td>
               </tr>
             )}

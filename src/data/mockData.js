@@ -23,17 +23,6 @@ export const OBRAS_SOCIALES = [
   "Otra",
 ];
 
-export const MOCK_MEDICOS = [
-  { id: "m1", nombre: "Laura Gómez", email: "medico@deca.com", dni: "30112445", matricula: "MP-10234" },
-  { id: "m2", nombre: "Ricardo Paz", email: "ricardo.paz@deca.com", dni: "27884310", matricula: "MP-88210" },
-];
-
-export const MOCK_PACIENTES = [
-  { id: "p1", nombre: "Marcos Ibáñez", dni: "34.221.098", medicoId: "m1" },
-  { id: "p2", nombre: "Sofía Reinoso", dni: "40.556.712", medicoId: "m1" },
-  { id: "p3", nombre: "Julián Ferreyra", dni: "29.887.410", medicoId: "m2" },
-];
-
 export const MOCK_ANALISIS = [
   {
     id: "a1",

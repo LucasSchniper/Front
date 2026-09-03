@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import { leerAsignaciones, pacientesDeMedico } from "../../services/asignaciones";
 
 function estadoDe(resultado) {
   if (resultado >= 70) return "positivo";
@@ -23,7 +25,9 @@ function fechaHora(iso) {
 }
 
 function MedicoPacientes() {
-  const [pacientes, setPacientes] = useState([]);
+  const { currentUser } = useAuth();
+  const [todos, setTodos] = useState([]);
+  const [asignaciones] = useState(leerAsignaciones);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(null);
@@ -35,7 +39,7 @@ function MedicoPacientes() {
     api.usuarios
       .listar()
       .then((data) => {
-        if (!cancelado) setPacientes(data.pacientes);
+        if (!cancelado) setTodos(data.pacientes || []);
       })
       .catch((err) => {
         if (!cancelado) setError(err.message);
@@ -47,6 +51,12 @@ function MedicoPacientes() {
       cancelado = true;
     };
   }, []);
+
+  // El admin asigna cada paciente a un medico; aca mostramos solo los mios.
+  const pacientes = useMemo(
+    () => pacientesDeMedico(asignaciones, todos, currentUser.id),
+    [asignaciones, todos, currentUser.id]
+  );
 
   const toggle = (id) => {
     const abrir = expanded !== id;
@@ -64,12 +74,14 @@ function MedicoPacientes() {
   return (
     <div>
       <h1 className="page-title">Pacientes</h1>
-      <p className="page-subtitle">Pacientes registrados en DECA y sus análisis.</p>
+      <p className="page-subtitle">Los pacientes que tenés asignados y sus análisis.</p>
 
       {loading && <p className="empty-state">Cargando…</p>}
       {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
       {!loading && pacientes.length === 0 && (
-        <p className="empty-state">Todavía no hay pacientes registrados.</p>
+        <p className="empty-state">
+          Todavía no tenés pacientes asignados. El administrador es quien te asigna cada caso.
+        </p>
       )}
 
       <div className="patient-list">

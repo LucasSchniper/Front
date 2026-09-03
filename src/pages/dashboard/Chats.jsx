@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
+import {
+  leerAsignaciones,
+  medicoDePaciente,
+  pacientesDeMedico,
+} from "../../services/asignaciones";
 import { IconSend, IconTrash, IconUserCircle } from "../../components/icons/Icons";
 
 function horaCorta(iso) {
@@ -33,7 +38,15 @@ function Chats() {
     pedido
       .then((data) => {
         if (cancelado) return;
-        const lista = (data.pacientes || data.medicos).map((c) => ({
+        // Solo se hablan los que estan asignados entre si.
+        const asignaciones = leerAsignaciones();
+        const crudos = data.pacientes || data.medicos || [];
+        const propios = esMedico
+          ? pacientesDeMedico(asignaciones, crudos, currentUser.id)
+          : crudos.filter(
+              (m) => String(m.id) === String(medicoDePaciente(asignaciones, currentUser.id))
+            );
+        const lista = propios.map((c) => ({
           id: c.id,
           nombre: `${c.nombre} ${c.apellido}`,
         }));
@@ -49,7 +62,7 @@ function Chats() {
     return () => {
       cancelado = true;
     };
-  }, [esMedico, esAdmin]);
+  }, [esMedico, esAdmin, currentUser.id]);
 
   useEffect(() => {
     if (!activeId) return;
@@ -109,7 +122,11 @@ function Chats() {
     return (
       <div>
         <h1 className="page-title">Chats</h1>
-        <p className="empty-state">Todavía no tenés contactos disponibles.</p>
+        <p className="empty-state">
+          {esMedico
+            ? "Todavía no tenés pacientes asignados para conversar."
+            : "Todavía no tenés un médico asignado para conversar."}
+        </p>
       </div>
     );
   }
