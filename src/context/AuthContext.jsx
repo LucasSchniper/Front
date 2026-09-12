@@ -9,8 +9,12 @@ import {
 const SESSION_KEY = "deca_session";
 const USERS_KEY = "deca_users_v2";
 
-// Respaldo para entornos sin un admin sembrado en la base (ver seedAdmin.js).
-// Con un admin real, poner VITE_ALLOW_DEMO_LOGIN=false.
+const ROL_BACKEND = {
+  paciente: "paciente",
+  medico: "medico",
+  administrador: "admin",
+};
+
 const DEMO_LOGIN = import.meta.env.VITE_ALLOW_DEMO_LOGIN !== "false";
 
 const SEED_USERS = [
@@ -128,7 +132,6 @@ export function AuthProvider({ children }) {
       const { medicos } = await api.medicos.pendientes();
       setSolicitudesMedicos(medicos.map(mapSolicitud));
     } catch {
-      // El admin todavia va a ver el resto del dashboard aunque esto falle.
     }
   };
 
@@ -156,44 +159,51 @@ export function AuthProvider({ children }) {
       };
     }
 
-    setPendingAuth({ token: null, session: sessionFromLocal(user), email: user.email });
-    return { ok: true };
+
+    const session = sessionFromLocal(user);
+    saveToken(null);
+    setCurrentUser(session);
+    return { ok: true, verified: true, role: session.role };
+  };
+
+ 
+  const resolverLogin = ({ token, usuario, session, email }) => {
+    if (usuario.mail_verificado) {
+      saveToken(token);
+      setCurrentUser(session);
+      return { ok: true, verified: true, role: session.role };
+    }
+
+    setPendingAuth({ token, session, email, rol: ROL_BACKEND[session.role] });
+    return { ok: true, verified: false };
   };
 
   const login = async ({ email, password }) => {
     const credenciales = { mail: email.trim(), contrasena: password };
 
-    // Probamos paciente y despues medico. Solo un rechazo de credenciales
-    // (kind "auth") justifica seguir probando: si no llegamos al server o el
-    // server fallo, cortamos y lo decimos, en vez de caer al login local y
-    // simular una sesion que no tiene token.
+
     try {
       const { token, paciente } = await api.usuarios.login(credenciales);
-      setPendingAuth({ token, session: sessionFromPaciente(paciente), email });
-      return { ok: true };
+      return resolverLogin({ token, usuario: paciente, session: sessionFromPaciente(paciente), email });
     } catch (err) {
       if (err.kind !== "auth") return { ok: false, error: err.message };
     }
 
     try {
       const { token, medico } = await api.medicos.login(credenciales);
-      setPendingAuth({ token, session: sessionFromMedico(medico), email });
-      return { ok: true };
+      return resolverLogin({ token, usuario: medico, session: sessionFromMedico(medico), email });
     } catch (err) {
       if (err.kind !== "auth") return { ok: false, error: err.message };
     }
 
     try {
       const { token, admin } = await api.admins.login(credenciales);
-      setPendingAuth({ token, session: sessionFromAdmin(admin), email });
-      return { ok: true };
+      return resolverLogin({ token, usuario: admin, session: sessionFromAdmin(admin), email });
     } catch (err) {
       if (err.kind !== "auth") return { ok: false, error: err.message };
     }
 
-    // Llegamos aca solo si el back respondio y dijo que no son credenciales
-    // suyas de ningun rol. Sirve como respaldo si todavia no se corrio
-    // npm run seed:admin en el back (sin admin real en la base).
+
     if (DEMO_LOGIN) {
       const local = loginLocal({ email, password });
       if (local) return local;
@@ -252,12 +262,22 @@ export function AuthProvider({ children }) {
     return login({ email: nuevo.email, password: nuevo.password });
   };
 
-  const confirmCode = (code) => {
+  const confirmCode = async (code) => {
     if (!pendingAuth) return { ok: false, error: "No hay una verificación en curso." };
     if (!code || code.trim().length < 4) {
       return { ok: false, error: "Ingresá el código de 4 a 6 dígitos que te enviamos." };
     }
-    const { token, session } = pendingAuth;
+
+    const { token, session, email, rol } = pendingAuth;
+
+    if (rol) {
+      try {
+        await api.verificacion.confirmar({ mail: email, rol, codigo: code.trim() });
+      } catch (err) {
+        return { ok: false, error: err.message };
+      }
+    }
+
     saveToken(token);
     setCurrentUser(session);
     setPendingAuth(null);

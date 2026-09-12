@@ -66,6 +66,10 @@ export const api = {
     login: (payload) => request("/admins/login", { method: "POST", body: payload, auth: false }),
     perfil: () => request("/admins/perfil"),
   },
+  verificacion: {
+    enviar: (payload) => request("/verificacion/enviar", { method: "POST", body: payload, auth: false }),
+    confirmar: (payload) => request("/verificacion/confirmar", { method: "POST", body: payload, auth: false }),
+  },
   usuarios: {
     registro: (payload) => request("/usuarios/registro", { method: "POST", body: payload, auth: false }),
     login: (payload) => request("/usuarios/login", { method: "POST", body: payload, auth: false }),

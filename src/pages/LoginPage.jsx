@@ -23,7 +23,7 @@ function LoginPage() {
       setError(result.error);
       return;
     }
-    navigate("/verificar");
+    navigate(result.verified ? `/${result.role}` : "/verificar", { replace: true });
   };
 
   return (
