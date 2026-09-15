@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MOCK_ANALISIS, MOCK_NOVEDADES_ADMIN } from "../../data/mockData";
-import { leerAsignaciones, medicoDePaciente } from "../../services/asignaciones";
 import { api } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -46,9 +45,8 @@ function AdminHome() {
   // Contamos solo asignaciones vigentes: pacientes que existen hoy y cuyo
   // medico sigue teniendo acceso.
   const asignaciones = (() => {
-    const mapa = leerAsignaciones();
     const medicosVigentes = new Set(medicos.map((m) => String(m.id)));
-    return pacientes.filter((p) => medicosVigentes.has(medicoDePaciente(mapa, p.id))).length;
+    return pacientes.filter((p) => p.medico_id && medicosVigentes.has(String(p.medico_id))).length;
   })();
 
   const stats = [

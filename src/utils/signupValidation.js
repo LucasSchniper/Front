@@ -1,5 +1,5 @@
 
-export const BASE_FIELDS = ["nombre", "apellido", "fechaNacimiento", "email", "password", "role"];
+export const BASE_FIELDS = ["fechaNacimiento", "role"];
 
 export const FIELDS_BY_ROLE = {
   paciente: ["dni", "obraSocial"],
@@ -11,11 +11,7 @@ export const SIN_OBRA_SOCIAL = "Particular / sin obra social";
 export const OTRA_OBRA_SOCIAL = "Otra";
 
 export const FIELD_LABEL = {
-  nombre: "Nombre",
-  apellido: "Apellido",
   fechaNacimiento: "Fecha de nacimiento",
-  email: "Mail",
-  password: "Contraseña",
   role: "Médico o paciente",
   dni: "DNI",
   obraSocial: "Obra social",
@@ -38,15 +34,10 @@ export function requiredFields(form) {
   return fields;
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 const trim = (v) => (typeof v === "string" ? v.trim() : "");
 const soloDigitos = (v) => trim(v).replace(/\D/g, "");
 
 export const MAX_LENGTH = {
-  nombre: 40,
-  apellido: 40,
-  email: 80,
-  password: 64,
   dni: 8,
   credencial: 20,
   obraSocialOtra: 40,
@@ -57,16 +48,12 @@ export const MIN_LENGTH = {
   dni: 7,
   credencial: 6,
   matricula: 4,
-  password: 6,
 };
 
 const PERMITIDO = {
-  nombre: /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g,
-  apellido: /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g,
   dni: /\D/g,
   credencial: /[^0-9 -]/g,
   matricula: /[^A-Za-z0-9-]/g,
-  email: /\s/g,
 };
 
 export function sanitizeField(field, value) {
@@ -88,14 +75,6 @@ export function validateSignup(form) {
       errors[field] = "Este dato es obligatorio.";
       missing.push(FIELD_LABEL[field]);
     }
-  }
-
-  if (!errors.email && !EMAIL_RE.test(trim(form.email))) {
-    errors.email = "Ingresá un mail válido (ejemplo: nombre@mail.com).";
-  }
-
-  if (!errors.password && trim(form.password).length < MIN_LENGTH.password) {
-    errors.password = `La contraseña necesita al menos ${MIN_LENGTH.password} caracteres.`;
   }
 
   if (!errors.fechaNacimiento) {
@@ -142,11 +121,7 @@ export function summarizeErrors({ errors, missing }) {
 
 export function normalizeSignup(form) {
   const base = {
-    nombre: trim(form.nombre),
-    apellido: trim(form.apellido),
     fechaNacimiento: form.fechaNacimiento,
-    email: trim(form.email).toLowerCase(),
-    password: form.password,
     role: form.role,
   };
 

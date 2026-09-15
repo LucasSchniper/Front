@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
-import {
-  leerAsignaciones,
-  medicoDePaciente,
-  pacientesDeMedico,
-} from "../../services/asignaciones";
 import { IconSend, IconTrash, IconUserCircle } from "../../components/icons/Icons";
 
 function horaCorta(iso) {
@@ -38,14 +33,8 @@ function Chats() {
     pedido
       .then((data) => {
         if (cancelado) return;
-        // Solo se hablan los que estan asignados entre si.
-        const asignaciones = leerAsignaciones();
-        const crudos = data.pacientes || data.medicos || [];
-        const propios = esMedico
-          ? pacientesDeMedico(asignaciones, crudos, currentUser.id)
-          : crudos.filter(
-              (m) => String(m.id) === String(medicoDePaciente(asignaciones, currentUser.id))
-            );
+        // El backend ya devuelve solo los contactos asignados entre si.
+        const propios = data.pacientes || data.medicos || [];
         const lista = propios.map((c) => ({
           id: c.id,
           nombre: `${c.nombre} ${c.apellido}`,

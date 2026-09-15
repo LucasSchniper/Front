@@ -62,25 +62,22 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
 }
 
 export const api = {
+  auth: {
+    iniciar: (provider, credential) =>
+      request(`/auth/${provider}`, { method: "POST", body: { credential }, auth: false }),
+    completarRegistro: (payload) =>
+      request("/auth/completar-registro", { method: "POST", body: payload, auth: false }),
+  },
   admins: {
-    login: (payload) => request("/admins/login", { method: "POST", body: payload, auth: false }),
     perfil: () => request("/admins/perfil"),
   },
-  verificacion: {
-    enviar: (payload) => request("/verificacion/enviar", { method: "POST", body: payload, auth: false }),
-    confirmar: (payload) => request("/verificacion/confirmar", { method: "POST", body: payload, auth: false }),
-  },
   usuarios: {
-    registro: (payload) => request("/usuarios/registro", { method: "POST", body: payload, auth: false }),
-    login: (payload) => request("/usuarios/login", { method: "POST", body: payload, auth: false }),
     perfil: () => request("/usuarios/perfil"),
     listar: () => request("/usuarios"),
     asignarMedico: (id, medicoId) =>
       request(`/usuarios/${id}/medico`, { method: "PUT", body: { medicoId } }),
   },
   medicos: {
-    registro: (payload) => request("/medicos/registro", { method: "POST", body: payload, auth: false }),
-    login: (payload) => request("/medicos/login", { method: "POST", body: payload, auth: false }),
     perfil: () => request("/medicos/perfil"),
     listar: () => request("/medicos"),
     pendientes: () => request("/medicos/pendientes"),

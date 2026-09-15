@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/auth/:path*", "destination": "https://deca-back.vercel.app/auth/:path*" },
     { "source": "/usuarios/:path*", "destination": "https://deca-back.vercel.app/usuarios/:path*" },
     { "source": "/medicos/:path*", "destination": "https://deca-back.vercel.app/medicos/:path*" },
     { "source": "/admins/:path*", "destination": "https://deca-back.vercel.app/admins/:path*" },

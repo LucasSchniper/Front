@@ -1,53 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { api, setToken } from "../services/api";
-import {
-  normalizeSignup,
-  summarizeErrors,
-  validateSignup,
-} from "../utils/signupValidation";
 
 const SESSION_KEY = "deca_session";
-const USERS_KEY = "deca_users_v2";
-
-const ROL_BACKEND = {
-  paciente: "paciente",
-  medico: "medico",
-  administrador: "admin",
-};
-
-const DEMO_LOGIN = import.meta.env.VITE_ALLOW_DEMO_LOGIN !== "false";
-
-const SEED_USERS = [
-  {
-    email: "admin@deca.com",
-    password: "deca123",
-    role: "administrador",
-    nombre: "Admin",
-    apellido: "DECA",
-    estado: "aprobado",
-  },
-];
-
-function loadStored(key, seed) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) return JSON.parse(raw);
-    localStorage.setItem(key, JSON.stringify(seed));
-  } catch {}
-  return seed;
-}
-
-const loadUsers = () =>
-  loadStored(USERS_KEY, SEED_USERS).map((u) => ({ ...u, estado: u.estado || "aprobado" }));
-
-function loadSession() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
 
 function saveToken(token) {
   try {
@@ -85,13 +39,13 @@ function sessionFromAdmin(admin) {
   };
 }
 
-function sessionFromLocal(user) {
-  return {
-    role: user.role,
-    email: user.email,
-    nombre: user.nombre,
-    apellido: user.apellido,
-  };
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 const AuthContext = createContext(null);
@@ -108,17 +62,21 @@ function mapSolicitud(medico) {
   };
 }
 
+const ROL_FRONTEND = {
+  paciente: "paciente",
+  medico: "medico",
+  admin: "administrador",
+};
+
+const SESSION_BUILDER = {
+  paciente: sessionFromPaciente,
+  medico: sessionFromMedico,
+  admin: sessionFromAdmin,
+};
+
 export function AuthProvider({ children }) {
-  const [users, setUsers] = useState(loadUsers);
   const [currentUser, setCurrentUser] = useState(loadSession);
   const [solicitudesMedicos, setSolicitudesMedicos] = useState([]);
-  const [pendingAuth, setPendingAuth] = useState(null);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    } catch {}
-  }, [users]);
 
   useEffect(() => {
     try {
@@ -139,155 +97,53 @@ export function AuthProvider({ children }) {
     if (currentUser?.role === "administrador") cargarSolicitudesPendientes();
   }, [currentUser?.role]);
 
-  const loginLocal = ({ email, password }) => {
-    const mail = email.trim().toLowerCase();
-    const user = users.find((u) => u.email.toLowerCase() === mail && u.password === password);
-    if (!user) return null;
+  const loginWithOAuth = async (provider, credential) => {
+    try {
+      const data = await api.auth.iniciar(provider, credential);
 
-    if (user.estado === "pendiente") {
-      return {
-        ok: false,
-        error:
-          "Tu registro como médico está esperando la aprobación del administrador. Te avisamos por mail cuando esté listo.",
-      };
-    }
-    if (user.estado === "rechazado") {
-      return {
-        ok: false,
-        error:
-          "El administrador no validó tu registro como médico. Escribinos a deca@gmail.com si creés que es un error.",
-      };
-    }
+      if (data.isNew) {
+        return { ok: true, isNew: true, regToken: data.regToken, perfil: data.perfil, provider };
+      }
 
+      const construirSesion = SESSION_BUILDER[data.rol];
+      const entidad = data[data.rol === "admin" ? "admin" : data.rol];
+      const session = construirSesion(entidad);
 
-    const session = sessionFromLocal(user);
-    saveToken(null);
-    setCurrentUser(session);
-    return { ok: true, verified: true, role: session.role };
-  };
-
- 
-  const resolverLogin = ({ token, usuario, session, email }) => {
-    if (usuario.mail_verificado) {
-      saveToken(token);
+      saveToken(data.token);
       setCurrentUser(session);
-      return { ok: true, verified: true, role: session.role };
+      return { ok: true, role: session.role };
+    } catch (err) {
+      return { ok: false, error: err.message };
     }
-
-    setPendingAuth({ token, session, email, rol: ROL_BACKEND[session.role] });
-    return { ok: true, verified: false };
   };
 
-  const login = async ({ email, password }) => {
-    const credenciales = { mail: email.trim(), contrasena: password };
-
-
+  const completeOAuthSignup = async ({ regToken, role, ...extra }) => {
     try {
-      const { token, paciente } = await api.usuarios.login(credenciales);
-      return resolverLogin({ token, usuario: paciente, session: sessionFromPaciente(paciente), email });
-    } catch (err) {
-      if (err.kind !== "auth") return { ok: false, error: err.message };
-    }
+      const data = await api.auth.completarRegistro({ regToken, role, ...extra });
 
-    try {
-      const { token, medico } = await api.medicos.login(credenciales);
-      return resolverLogin({ token, usuario: medico, session: sessionFromMedico(medico), email });
-    } catch (err) {
-      if (err.kind !== "auth") return { ok: false, error: err.message };
-    }
-
-    try {
-      const { token, admin } = await api.admins.login(credenciales);
-      return resolverLogin({ token, usuario: admin, session: sessionFromAdmin(admin), email });
-    } catch (err) {
-      if (err.kind !== "auth") return { ok: false, error: err.message };
-    }
-
-
-    if (DEMO_LOGIN) {
-      const local = loginLocal({ email, password });
-      if (local) return local;
-    }
-
-    return { ok: false, error: "Mail o contraseña incorrectos." };
-  };
-
-  const signUp = async (form) => {
-    const validation = validateSignup(form);
-    if (!validation.ok) {
-      return { ok: false, error: summarizeErrors(validation), errors: validation.errors };
-    }
-
-    const nuevo = normalizeSignup(form);
-    const yaExiste = users.some((u) => u.email.toLowerCase() === nuevo.email);
-    if (yaExiste) {
-      return {
-        ok: false,
-        error: "Ya existe una cuenta con ese mail.",
-        errors: { email: "Ya existe una cuenta con ese mail." },
-      };
-    }
-
-    if (nuevo.role === "medico") {
-      try {
-        await api.medicos.registro({
-          nombre: nuevo.nombre,
-          apellido: nuevo.apellido,
-          mail: nuevo.email,
-          contrasena: nuevo.password,
-          dni: nuevo.dni,
-          matricula: nuevo.matricula,
-        });
-      } catch (err) {
-        return { ok: false, error: err.message, errors: {} };
+      if (data.pendingApproval) {
+        return { ok: true, pendingApproval: true };
       }
-      return { ok: true, pendingApproval: true };
-    }
 
-    try {
-      await api.usuarios.registro({
-        nombre: nuevo.nombre,
-        apellido: nuevo.apellido,
-        mail: nuevo.email,
-        contrasena: nuevo.password,
-        fechaNacimiento: nuevo.fechaNacimiento,
-        dni: nuevo.dni,
-        obraSocial: nuevo.obraSocial || undefined,
-      });
-    } catch (err) {
-      return { ok: false, error: err.message, errors: {} };
-    }
+      const rolFrontend = ROL_FRONTEND[role] || role;
+      const construirSesion = SESSION_BUILDER[role];
+      const entidad = data[role];
+      const session = construirSesion ? construirSesion(entidad) : null;
 
-    setUsers((prev) => [...prev, { ...nuevo, estado: "aprobado" }]);
-    return login({ email: nuevo.email, password: nuevo.password });
-  };
-
-  const confirmCode = async (code) => {
-    if (!pendingAuth) return { ok: false, error: "No hay una verificación en curso." };
-    if (!code || code.trim().length < 4) {
-      return { ok: false, error: "Ingresá el código de 4 a 6 dígitos que te enviamos." };
-    }
-
-    const { token, session, email, rol } = pendingAuth;
-
-    if (rol) {
-      try {
-        await api.verificacion.confirmar({ mail: email, rol, codigo: code.trim() });
-      } catch (err) {
-        return { ok: false, error: err.message };
+      if (session) {
+        saveToken(data.token);
+        setCurrentUser(session);
       }
-    }
 
-    saveToken(token);
-    setCurrentUser(session);
-    setPendingAuth(null);
-    return { ok: true, role: session.role };
+      return { ok: true, role: rolFrontend };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
   };
 
   const logout = () => {
     saveToken(null);
     setCurrentUser(null);
-    setPendingAuth(null);
   };
 
   const aprobarMedico = async (id) => {
@@ -303,17 +159,14 @@ export function AuthProvider({ children }) {
   const value = useMemo(
     () => ({
       currentUser,
-      pendingAuth,
-      signUp,
-      login,
-      confirmCode,
+      loginWithOAuth,
+      completeOAuthSignup,
       logout,
-      users,
       solicitudesPendientes: solicitudesMedicos,
       aprobarMedico,
       rechazarMedico,
     }),
-    [currentUser, pendingAuth, users, solicitudesMedicos]
+    [currentUser, solicitudesMedicos]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

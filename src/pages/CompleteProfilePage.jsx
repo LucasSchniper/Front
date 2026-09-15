@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import AuthShell from "../components/auth/AuthShell";
 import FormField from "../components/auth/FormField";
 import { useAuth } from "../context/AuthContext";
@@ -16,11 +16,7 @@ import {
 } from "../utils/signupValidation";
 
 const EMPTY = {
-  nombre: "",
-  apellido: "",
   fechaNacimiento: "",
-  email: "",
-  password: "",
   role: "",
   dni: "",
   obraSocial: "",
@@ -43,14 +39,19 @@ const OBRA_SOCIAL_DEPENDENT_ERRORS = ["obraSocial", "obraSocialOtra", "credencia
 const sinErroresDe = (errores, campos) =>
   Object.fromEntries(Object.entries(errores).filter(([campo]) => !campos.includes(campo)));
 
-function SignupPage() {
-  const { signUp } = useAuth();
+function CompleteProfilePage() {
+  const { completeOAuthSignup } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { regToken, perfil, provider } = location.state || {};
+
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [solicitudEnviada, setSolicitudEnviada] = useState(false);
+
+  if (!regToken || !perfil) return <Navigate to="/login" replace />;
 
   const update = (field) => (e) => {
     const value = sanitizeField(field, e.target.value);
@@ -89,10 +90,22 @@ function SignupPage() {
     setErrors({});
 
     setLoading(true);
-    const result = await signUp(form);
+    const result = await completeOAuthSignup({
+      regToken,
+      role: form.role,
+      dni: form.dni,
+      fechaNacimiento: form.fechaNacimiento,
+      obraSocial:
+        form.role === "paciente"
+          ? form.obraSocial === OTRA_OBRA_SOCIAL
+            ? form.obraSocialOtra
+            : form.obraSocial
+          : undefined,
+      matricula: form.role === "medico" ? form.matricula : undefined,
+    });
     setLoading(false);
+
     if (!result.ok) {
-      setErrors(result.errors || {});
       setError(result.error);
       return;
     }
@@ -100,7 +113,7 @@ function SignupPage() {
       setSolicitudEnviada(true);
       return;
     }
-    navigate("/verificar");
+    navigate(`/${result.role}`, { replace: true });
   };
 
   if (solicitudEnviada) {
@@ -115,7 +128,7 @@ function SignupPage() {
             <span>
               El administrador de DECA va a revisar tu matrícula <strong>{form.matricula}</strong>{" "}
               para confirmar que sos profesional médico. Cuando la apruebe te avisamos a{" "}
-              <strong>{form.email}</strong> y vas a poder iniciar sesión.
+              <strong>{perfil.email}</strong> y vas a poder iniciar sesión.
             </span>
           </p>
           <Link to="/login" className="btn btn--primary auth-card__submit">
@@ -127,29 +140,11 @@ function SignupPage() {
   }
 
   return (
-    <AuthShell title="Sign up" subtitle="Creá tu cuenta en DECA.">
+    <AuthShell
+      title="Completá tu perfil"
+      subtitle={`Iniciaste sesión con ${provider === "microsoft" ? "Microsoft" : "Google"} como ${perfil.nombre} (${perfil.email}). Nos faltan algunos datos.`}
+    >
       <form className="auth-card__form" onSubmit={handleSubmit} noValidate>
-        <div className="form-row">
-          <FormField label="Nombre" id="signup-nombre" error={errors.nombre}>
-            <input
-              id="signup-nombre"
-              required
-              maxLength={MAX_LENGTH.nombre}
-              value={form.nombre}
-              onChange={update("nombre")}
-            />
-          </FormField>
-          <FormField label="Apellido" id="signup-apellido" error={errors.apellido}>
-            <input
-              id="signup-apellido"
-              required
-              maxLength={MAX_LENGTH.apellido}
-              value={form.apellido}
-              onChange={update("apellido")}
-            />
-          </FormField>
-        </div>
-
         <FormField label="Fecha de nacimiento" id="signup-fecha" error={errors.fechaNacimiento}>
           <input
             id="signup-fecha"
@@ -157,30 +152,6 @@ function SignupPage() {
             required
             value={form.fechaNacimiento}
             onChange={update("fechaNacimiento")}
-          />
-        </FormField>
-
-        <FormField label="Mail" id="signup-email" error={errors.email}>
-          <input
-            id="signup-email"
-            type="email"
-            autoComplete="email"
-            required
-            maxLength={MAX_LENGTH.email}
-            value={form.email}
-            onChange={update("email")}
-          />
-        </FormField>
-
-        <FormField label="Contraseña" id="signup-password" error={errors.password}>
-          <input
-            id="signup-password"
-            type="password"
-            autoComplete="new-password"
-            required
-            maxLength={MAX_LENGTH.password}
-            value={form.password}
-            onChange={update("password")}
           />
         </FormField>
 
@@ -306,13 +277,9 @@ function SignupPage() {
         <button type="submit" className="btn btn--primary auth-card__submit" disabled={loading}>
           {loading ? "Creando cuenta…" : "Crear cuenta"}
         </button>
-
-        <p className="auth-card__switch">
-          ¿Ya tenés cuenta? <Link to="/login">Iniciá sesión</Link>
-        </p>
       </form>
     </AuthShell>
   );
 }
 
-export default SignupPage;
+export default CompleteProfilePage;

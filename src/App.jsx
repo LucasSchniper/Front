@@ -3,8 +3,7 @@ import "./App.css";
 
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import VerifyCodePage from "./pages/VerifyCodePage";
+import CompleteProfilePage from "./pages/CompleteProfilePage";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
@@ -25,8 +24,8 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/verificar" element={<VerifyCodePage />} />
+      <Route path="/signup" element={<Navigate to="/login" replace />} />
+      <Route path="/completar-perfil" element={<CompleteProfilePage />} />
 
       <Route
         path="/administrador"

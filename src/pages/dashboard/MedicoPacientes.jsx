@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import { leerAsignaciones, pacientesDeMedico } from "../../services/asignaciones";
 
 function estadoDe(resultado) {
   if (resultado >= 70) return "positivo";
@@ -25,9 +23,7 @@ function fechaHora(iso) {
 }
 
 function MedicoPacientes() {
-  const { currentUser } = useAuth();
   const [todos, setTodos] = useState([]);
-  const [asignaciones] = useState(leerAsignaciones);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(null);
@@ -52,11 +48,8 @@ function MedicoPacientes() {
     };
   }, []);
 
-  // El admin asigna cada paciente a un medico; aca mostramos solo los mios.
-  const pacientes = useMemo(
-    () => pacientesDeMedico(asignaciones, todos, currentUser.id),
-    [asignaciones, todos, currentUser.id]
-  );
+  // El backend ya devuelve solo los pacientes asignados a este médico.
+  const pacientes = todos;
 
   const toggle = (id) => {
     const abrir = expanded !== id;

@@ -1,66 +1,71 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import { useMsal } from "@azure/msal-react";
 import AuthShell from "../components/auth/AuthShell";
-import FormField from "../components/auth/FormField";
 import { useAuth } from "../context/AuthContext";
 
+const MSAL_SCOPES = ["openid", "profile", "email"];
+
 function LoginPage() {
-  const { login } = useAuth();
+  const { loginWithOAuth } = useAuth();
+  const { instance } = useMsal();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleOAuth = async (provider, credential) => {
     setError("");
     setLoading(true);
-    const result = await login(form);
+    const result = await loginWithOAuth(provider, credential);
     setLoading(false);
+
     if (!result.ok) {
       setError(result.error);
       return;
     }
-    navigate(result.verified ? `/${result.role}` : "/verificar", { replace: true });
+
+    if (result.isNew) {
+      navigate("/completar-perfil", {
+        state: { regToken: result.regToken, perfil: result.perfil, provider: result.provider },
+      });
+      return;
+    }
+
+    navigate(`/${result.role}`, { replace: true });
+  };
+
+  const handleMicrosoft = async () => {
+    setError("");
+    try {
+      const respuesta = await instance.loginPopup({ scopes: MSAL_SCOPES });
+      await handleOAuth("microsoft", respuesta.idToken);
+    } catch (err) {
+      setError(err.message || "No se pudo iniciar sesión con Microsoft.");
+    }
   };
 
   return (
-    <AuthShell title="Log in" subtitle="Ingresá con tu mail y contraseña.">
-      <form className="auth-card__form" onSubmit={handleSubmit} noValidate>
-        <FormField label="Mail" id="login-email">
-          <input
-            id="login-email"
-            type="email"
-            autoComplete="email"
-            required
-            value={form.email}
-            onChange={update("email")}
+    <AuthShell title="Log in" subtitle="Ingresá con tu cuenta de Google o Microsoft.">
+      <div className="auth-card__form">
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <GoogleLogin
+            onSuccess={(credentialResponse) => handleOAuth("google", credentialResponse.credential)}
+            onError={() => setError("No se pudo iniciar sesión con Google.")}
           />
-        </FormField>
+        </div>
 
-        <FormField label="Contraseña" id="login-password">
-          <input
-            id="login-password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={form.password}
-            onChange={update("password")}
-          />
-        </FormField>
-
-        {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
-
-        <button type="submit" className="btn btn--primary auth-card__submit" disabled={loading}>
-          {loading ? "Ingresando…" : "Ingresar"}
+        <button
+          type="button"
+          className="btn btn--primary auth-card__submit"
+          onClick={handleMicrosoft}
+          disabled={loading}
+        >
+          Continuar con Microsoft
         </button>
 
-        <p className="auth-card__switch">
-          ¿No tenés cuenta? <Link to="/signup">Registrate</Link>
-        </p>
-      </form>
+        {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
+      </div>
     </AuthShell>
   );
 }

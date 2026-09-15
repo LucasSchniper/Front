@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
-import { leerAsignaciones, medicoDePaciente } from "../../services/asignaciones";
 import { MOCK_NOVEDADES } from "../../data/mockData";
 import {
   IconAlert,
@@ -34,22 +33,15 @@ function PacienteHome() {
   const proximo = null;
   const chats = [];
 
-  // Quien me sigue: lo define el admin desde su panel de asignaciones.
+  // Quien me sigue: el backend ya devuelve solo el médico asignado (o ninguno).
   const [miMedico, setMiMedico] = useState(null);
-  const medicoId = medicoDePaciente(leerAsignaciones(), currentUser.id);
 
   useEffect(() => {
-    if (!medicoId) {
-      setMiMedico(null);
-      return;
-    }
     let cancelado = false;
     api.medicos
       .listar()
       .then((data) => {
-        if (cancelado) return;
-        const encontrado = (data.medicos || []).find((m) => String(m.id) === String(medicoId));
-        setMiMedico(encontrado || null);
+        if (!cancelado) setMiMedico((data.medicos || [])[0] || null);
       })
       .catch(() => {
         // Sin conexion mostramos la tarjeta vacia en vez de romper el home.
@@ -57,7 +49,7 @@ function PacienteHome() {
     return () => {
       cancelado = true;
     };
-  }, [medicoId]);
+  }, []);
 
   const nombre = currentUser.nombre
     ? `${currentUser.nombre} ${currentUser.apellido || ""}`.trim()
