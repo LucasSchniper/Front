@@ -1,17 +1,62 @@
+import type { Rol } from "../types";
 
-export const ROLE_LABEL = {
+export interface AnalisisMock {
+  id: string;
+  pacienteId: string;
+  resumen: string;
+  fecha: string;
+  hora: string;
+  estado: EstadoAnalisis;
+  resultado: number;
+}
+
+export type EstadoAnalisis = "negativo" | "seguimiento" | "positivo";
+
+export interface ContactoMock {
+  id: string;
+  nombre: string;
+  ultimo: string;
+  hora: string;
+}
+
+export interface NovedadMock {
+  id: string;
+  titulo: string;
+  texto: string;
+  fecha: string;
+}
+
+export interface MensajeMock {
+  id: number;
+  from: "me" | "them";
+  text: string;
+}
+
+export interface NotificacionMock {
+  id: number;
+  tipo: string;
+  texto: string;
+  fecha: string;
+}
+
+export interface ProximoAnalisisMock {
+  fecha: string;
+  hora: string;
+  lugar: string;
+}
+export const ROLE_LABEL: Record<Rol, string> = {
   administrador: "Administrador",
   medico: "Médico",
   paciente: "Paciente",
 };
 
-export const ROLE_COLOR = {
+export const ROLE_COLOR: Record<Rol, string> = {
   administrador: "#2f9e5c",
   medico: "#c0687a",
   paciente: "#d9a441",
 };
 
-export const OBRAS_SOCIALES = [
+export const OBRAS_SOCIALES: string[] = [
   "OSDE",
   "Swiss Medical",
   "Galeno",
@@ -23,7 +68,7 @@ export const OBRAS_SOCIALES = [
   "Otra",
 ];
 
-export const MOCK_ANALISIS = [
+export const MOCK_ANALISIS: AnalisisMock[] = [
   {
     id: "a1",
     pacienteId: "p1",
@@ -62,7 +107,7 @@ export const MOCK_ANALISIS = [
   },
 ];
 
-export const MOCK_CONTACTS = {
+export const MOCK_CONTACTS: Record<Rol, ContactoMock[]> = {
   administrador: [
     { id: "m1", nombre: "Dra. Laura Gómez", ultimo: "¿Podés habilitarme un paciente nuevo?", hora: "10:05" },
     { id: "m2", nombre: "Dr. Ricardo Paz", ultimo: "Ya cargué los ECG de la semana.", hora: "ayer" },
@@ -77,13 +122,13 @@ export const MOCK_CONTACTS = {
   ],
 };
 
-export const MOCK_PROXIMO_ANALISIS = {
+export const MOCK_PROXIMO_ANALISIS: ProximoAnalisisMock = {
   fecha: "2026-08-20",
   hora: "09:00",
   lugar: "Centro DECA · Sede Centro",
 };
 
-export const MOCK_NOVEDADES = [
+export const MOCK_NOVEDADES: NovedadMock[] = [
   {
     id: "n1",
     titulo: "Nueva versión del análisis de ECG",
@@ -104,7 +149,7 @@ export const MOCK_NOVEDADES = [
   },
 ];
 
-export const MOCK_NOVEDADES_ADMIN = [
+export const MOCK_NOVEDADES_ADMIN: NovedadMock[] = [
   {
     id: "na1",
     titulo: "Nuevos pacientes designados",
@@ -125,13 +170,13 @@ export const MOCK_NOVEDADES_ADMIN = [
   },
 ];
 
-export const MOCK_MESSAGES = [
+export const MOCK_MESSAGES: MensajeMock[] = [
   { id: 1, from: "them", text: "Hola, ¿cómo te sentiste después del último análisis?" },
   { id: 2, from: "me", text: "Bien, sin síntomas raros esta semana." },
   { id: 3, from: "them", text: "Perfecto, nos vemos en el control." },
 ];
 
-export const MOCK_NOTIFICATIONS = [
+export const MOCK_NOTIFICATIONS: NotificacionMock[] = [
   { id: 1, tipo: "resultado", texto: "Tu análisis del 30/07 ya está disponible.", fecha: "hace 2 días" },
   { id: 2, tipo: "chat", texto: "Tenés un mensaje nuevo de Dra. Laura Gómez.", fecha: "hace 3 días" },
   { id: 3, tipo: "novedad", texto: "DECA sumó recordatorios de turnos.", fecha: "hace 1 semana" },

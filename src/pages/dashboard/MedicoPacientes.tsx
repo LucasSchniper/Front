@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import { api } from "../../services/api";
+import { mensajeDeError } from "../../utils/errors";
+import type { Analisis, Paciente } from "../../types";
 
-function estadoDe(resultado) {
+type Estado = "positivo" | "seguimiento" | "negativo";
+
+function estadoDe(resultado: number): Estado {
   if (resultado >= 70) return "positivo";
   if (resultado >= 30) return "seguimiento";
   return "negativo";
 }
 
-const ESTADO_LABEL = {
+const ESTADO_LABEL: Record<Estado, string> = {
   negativo: "Sin hallazgos",
   positivo: "Sugestivo",
   seguimiento: "En seguimiento",
 };
 
-function fechaHora(iso) {
+function fechaHora(iso: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return { fecha: iso, hora: "" };
   return {
@@ -23,11 +27,13 @@ function fechaHora(iso) {
 }
 
 function MedicoPacientes() {
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState<Paciente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [expanded, setExpanded] = useState(null);
-  const [analisisPorPaciente, setAnalisisPorPaciente] = useState({});
+  const [expanded, setExpanded] = useState<Paciente["id"] | null>(null);
+  const [analisisPorPaciente, setAnalisisPorPaciente] = useState<
+    Record<string, Analisis[]>
+  >({});
   const [cargandoAnalisis, setCargandoAnalisis] = useState(false);
 
   useEffect(() => {
@@ -38,7 +44,7 @@ function MedicoPacientes() {
         if (!cancelado) setTodos(data.pacientes || []);
       })
       .catch((err) => {
-        if (!cancelado) setError(err.message);
+        if (!cancelado) setError(mensajeDeError(err));
       })
       .finally(() => {
         if (!cancelado) setLoading(false);
@@ -51,7 +57,7 @@ function MedicoPacientes() {
   // El backend ya devuelve solo los pacientes asignados a este médico.
   const pacientes = todos;
 
-  const toggle = (id) => {
+  const toggle = (id: Paciente["id"]) => {
     const abrir = expanded !== id;
     setExpanded(abrir ? id : null);
     if (abrir && !analisisPorPaciente[id]) {
@@ -59,7 +65,7 @@ function MedicoPacientes() {
       api.analisis
         .listarDePaciente(id)
         .then((data) => setAnalisisPorPaciente((prev) => ({ ...prev, [id]: data.analisis })))
-        .catch((err) => setError(err.message))
+        .catch((err: unknown) => setError(mensajeDeError(err)))
         .finally(() => setCargandoAnalisis(false));
     }
   };

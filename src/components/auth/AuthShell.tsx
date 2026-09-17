@@ -1,8 +1,15 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import EcgLine from "../EcgLine";
 import Logo from "../Logo";
 
-function AuthShell({ title, subtitle, children }) {
+interface AuthShellProps {
+  title: ReactNode;
+  subtitle?: ReactNode;
+  children?: ReactNode;
+}
+
+function AuthShell({ title, subtitle, children }: AuthShellProps) {
   return (
     <div className="auth-page">
       <div className="auth-page__circle auth-page__circle--a" />

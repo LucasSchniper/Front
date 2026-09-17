@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import AuthShell from "../components/auth/AuthShell";
 import FormField from "../components/auth/FormField";
@@ -14,8 +14,16 @@ import {
   summarizeErrors,
   validateSignup,
 } from "../utils/signupValidation";
+import type { PerfilOAuth, Provider, SignupErrors, SignupField, SignupForm } from "../types";
 
-const EMPTY = {
+/** Lo que LoginPage deja en el state de la navegación al venir del OAuth. */
+interface CompleteProfileState {
+  regToken?: string;
+  perfil?: PerfilOAuth;
+  provider?: Provider;
+}
+
+const EMPTY: SignupForm = {
   fechaNacimiento: "",
   role: "",
   dni: "",
@@ -25,7 +33,7 @@ const EMPTY = {
   matricula: "",
 };
 
-const ROLE_DEPENDENT_ERRORS = [
+const ROLE_DEPENDENT_ERRORS: SignupField[] = [
   "role",
   "dni",
   "obraSocial",
@@ -34,26 +42,28 @@ const ROLE_DEPENDENT_ERRORS = [
   "matricula",
 ];
 
-const OBRA_SOCIAL_DEPENDENT_ERRORS = ["obraSocial", "obraSocialOtra", "credencial"];
+const OBRA_SOCIAL_DEPENDENT_ERRORS: SignupField[] = ["obraSocial", "obraSocialOtra", "credencial"];
 
-const sinErroresDe = (errores, campos) =>
-  Object.fromEntries(Object.entries(errores).filter(([campo]) => !campos.includes(campo)));
+const sinErroresDe = (errores: SignupErrors, campos: SignupField[]): SignupErrors =>
+  Object.fromEntries(
+    Object.entries(errores).filter(([campo]) => !campos.includes(campo as SignupField))
+  );
 
 function CompleteProfilePage() {
   const { completeOAuthSignup } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { regToken, perfil, provider } = location.state || {};
+  const { regToken, perfil, provider } = (location.state as CompleteProfileState | null) || {};
 
   const [form, setForm] = useState(EMPTY);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<SignupErrors>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [solicitudEnviada, setSolicitudEnviada] = useState(false);
 
   if (!regToken || !perfil) return <Navigate to="/login" replace />;
 
-  const update = (field) => (e) => {
+  const update = (field: SignupField) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = sanitizeField(field, e.target.value);
     setForm((f) => ({ ...f, [field]: value }));
 
@@ -77,7 +87,7 @@ function CompleteProfilePage() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 

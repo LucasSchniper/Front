@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import { api } from "../../services/api";
+import { mensajeDeError } from "../../utils/errors";
+import type { Analisis } from "../../types";
 
-function estadoDe(resultado) {
+type Estado = "positivo" | "seguimiento" | "negativo";
+
+function estadoDe(resultado: number): Estado {
   if (resultado >= 70) return "positivo";
   if (resultado >= 30) return "seguimiento";
   return "negativo";
 }
 
-const ESTADO_LABEL = {
+const ESTADO_LABEL: Record<Estado, string> = {
   negativo: "Sin hallazgos",
   positivo: "Sugestivo",
   seguimiento: "En seguimiento",
 };
 
-function fechaHora(iso) {
+function fechaHora(iso: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return { fecha: iso, hora: "" };
   return {
@@ -28,7 +32,7 @@ function fechaHora(iso) {
  * confidence percentage.
  */
 function PacienteAnalisis() {
-  const [analisis, setAnalisis] = useState([]);
+  const [analisis, setAnalisis] = useState<Analisis[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,7 +44,7 @@ function PacienteAnalisis() {
         if (!cancelado) setAnalisis(data.analisis);
       })
       .catch((err) => {
-        if (!cancelado) setError(err.message);
+        if (!cancelado) setError(mensajeDeError(err));
       })
       .finally(() => {
         if (!cancelado) setLoading(false);

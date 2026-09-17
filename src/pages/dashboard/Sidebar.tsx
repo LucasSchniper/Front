@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { NavLink } from "react-router-dom";
 import heartEcgMark from "../../assets/brand/heart-ecg-mark.png";
 import {
@@ -9,8 +10,18 @@ import {
   IconSettings,
   IconLogout,
 } from "../../components/icons/Icons";
+import type { IconProps } from "../../components/icons/Icons";
+import type { Rol } from "../../types";
 
-const NAV_BY_ROLE = {
+interface NavItem {
+  to: string;
+  label: string;
+  icon: (p: IconProps) => ReactElement;
+  /** Sólo marca activo el match exacto (para el link de "Inicio"). */
+  end?: boolean;
+}
+
+const NAV_BY_ROLE: Record<Rol, NavItem[]> = {
   administrador: [
     { to: "/administrador", label: "Inicio", icon: IconHome, end: true },
     { to: "/administrador/medicos", label: "Médicos", icon: IconUsers },
@@ -32,7 +43,14 @@ const NAV_BY_ROLE = {
   ],
 };
 
-function Sidebar({ role, onLogout, open, onNavigate }) {
+interface SidebarProps {
+  role: Rol;
+  onLogout: () => void;
+  open: boolean;
+  onNavigate: () => void;
+}
+
+function Sidebar({ role, onLogout, open, onNavigate }: SidebarProps) {
   const items = NAV_BY_ROLE[role] || [];
 
   return (

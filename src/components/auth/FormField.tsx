@@ -1,4 +1,13 @@
-function FormField({ label, id, error, children }) {
+import type { ReactNode } from "react";
+
+interface FormFieldProps {
+  label: ReactNode;
+  id: string;
+  error?: string;
+  children?: ReactNode;
+}
+
+function FormField({ label, id, error, children }: FormFieldProps) {
   return (
     <div className="form-field">
       <label htmlFor={id}>{label}</label>

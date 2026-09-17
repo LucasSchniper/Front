@@ -1,15 +1,28 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { api, setToken } from "../services/api";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { api, setToken, type CompletarRegistroPayload } from "../services/api";
+import { mensajeDeError } from "../utils/errors";
+import type {
+  Admin,
+  Medico,
+  Paciente,
+  PerfilOAuth,
+  Provider,
+  RespuestaAuth,
+  Rol,
+  RolBackend,
+  Session,
+  SolicitudMedico,
+} from "../types";
 
 const SESSION_KEY = "deca_session";
 
-function saveToken(token) {
+function saveToken(token: string | null): void {
   try {
     setToken(token || null);
   } catch {}
 }
 
-function sessionFromPaciente(paciente) {
+function sessionFromPaciente(paciente: Paciente): Session {
   return {
     id: paciente.id,
     role: "paciente",
@@ -19,7 +32,7 @@ function sessionFromPaciente(paciente) {
   };
 }
 
-function sessionFromMedico(medico) {
+function sessionFromMedico(medico: Medico): Session {
   return {
     id: medico.id,
     role: "medico",
@@ -29,7 +42,7 @@ function sessionFromMedico(medico) {
   };
 }
 
-function sessionFromAdmin(admin) {
+function sessionFromAdmin(admin: Admin): Session {
   return {
     id: admin.id,
     role: "administrador",
@@ -39,18 +52,41 @@ function sessionFromAdmin(admin) {
   };
 }
 
-function loadSession() {
+function loadSession(): Session | null {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return raw ? (JSON.parse(raw) as Session) : null;
   } catch {
     return null;
   }
 }
 
-const AuthContext = createContext(null);
+/** Resultado de un login/registro, para que la pantalla decida a dónde ir. */
+export type AuthResultado =
+  | {
+      ok: true;
+      isNew?: boolean;
+      regToken?: string;
+      perfil?: PerfilOAuth;
+      provider?: Provider;
+      pendingApproval?: boolean;
+      role?: Rol;
+    }
+  | { ok: false; error: string };
 
-function mapSolicitud(medico) {
+export interface AuthContextValue {
+  currentUser: Session | null;
+  loginWithOAuth: (provider: Provider, credential: string | undefined) => Promise<AuthResultado>;
+  completeOAuthSignup: (payload: CompletarRegistroPayload) => Promise<AuthResultado>;
+  logout: () => void;
+  solicitudesPendientes: SolicitudMedico[];
+  aprobarMedico: (id: Medico["id"]) => Promise<void>;
+  rechazarMedico: (id: Medico["id"]) => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+function mapSolicitud(medico: Medico): SolicitudMedico {
   return {
     id: medico.id,
     email: medico.mail,
@@ -62,21 +98,30 @@ function mapSolicitud(medico) {
   };
 }
 
-const ROL_FRONTEND = {
+const ROL_FRONTEND: Record<string, Rol> = {
   paciente: "paciente",
   medico: "medico",
   admin: "administrador",
 };
 
-const SESSION_BUILDER = {
-  paciente: sessionFromPaciente,
-  medico: sessionFromMedico,
-  admin: sessionFromAdmin,
-};
+/** Cada rol del backend trae la entidad en una clave distinta de la respuesta. */
+function sesionDesde(rol: RolBackend | string | undefined, data: RespuestaAuth): Session | null {
+  switch (rol) {
+    case "paciente":
+      return data.paciente ? sessionFromPaciente(data.paciente) : null;
+    case "medico":
+      return data.medico ? sessionFromMedico(data.medico) : null;
+    case "admin":
+    case "administrador":
+      return data.admin ? sessionFromAdmin(data.admin) : null;
+    default:
+      return null;
+  }
+}
 
-export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(loadSession);
-  const [solicitudesMedicos, setSolicitudesMedicos] = useState([]);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [currentUser, setCurrentUser] = useState<Session | null>(loadSession);
+  const [solicitudesMedicos, setSolicitudesMedicos] = useState<SolicitudMedico[]>([]);
 
   useEffect(() => {
     try {
@@ -85,7 +130,7 @@ export function AuthProvider({ children }) {
     } catch {}
   }, [currentUser]);
 
-  const cargarSolicitudesPendientes = async () => {
+  const cargarSolicitudesPendientes = async (): Promise<void> => {
     try {
       const { medicos } = await api.medicos.pendientes();
       setSolicitudesMedicos(medicos.map(mapSolicitud));
@@ -97,7 +142,10 @@ export function AuthProvider({ children }) {
     if (currentUser?.role === "administrador") cargarSolicitudesPendientes();
   }, [currentUser?.role]);
 
-  const loginWithOAuth = async (provider, credential) => {
+  const loginWithOAuth = async (
+    provider: Provider,
+    credential: string | undefined
+  ): Promise<AuthResultado> => {
     try {
       const data = await api.auth.iniciar(provider, credential);
 
@@ -105,19 +153,22 @@ export function AuthProvider({ children }) {
         return { ok: true, isNew: true, regToken: data.regToken, perfil: data.perfil, provider };
       }
 
-      const construirSesion = SESSION_BUILDER[data.rol];
-      const entidad = data[data.rol === "admin" ? "admin" : data.rol];
-      const session = construirSesion(entidad);
+      const session = sesionDesde(data.rol, data);
+      if (!session) throw new Error("El servidor devolvió una sesión que no pudimos interpretar.");
 
-      saveToken(data.token);
+      saveToken(data.token ?? null);
       setCurrentUser(session);
       return { ok: true, role: session.role };
     } catch (err) {
-      return { ok: false, error: err.message };
+      return { ok: false, error: mensajeDeError(err) };
     }
   };
 
-  const completeOAuthSignup = async ({ regToken, role, ...extra }) => {
+  const completeOAuthSignup = async ({
+    regToken,
+    role,
+    ...extra
+  }: CompletarRegistroPayload): Promise<AuthResultado> => {
     try {
       const data = await api.auth.completarRegistro({ regToken, role, ...extra });
 
@@ -125,38 +176,36 @@ export function AuthProvider({ children }) {
         return { ok: true, pendingApproval: true };
       }
 
-      const rolFrontend = ROL_FRONTEND[role] || role;
-      const construirSesion = SESSION_BUILDER[role];
-      const entidad = data[role];
-      const session = construirSesion ? construirSesion(entidad) : null;
+      const rolFrontend = ROL_FRONTEND[role] ?? (role as Rol);
+      const session = sesionDesde(role, data);
 
       if (session) {
-        saveToken(data.token);
+        saveToken(data.token ?? null);
         setCurrentUser(session);
       }
 
       return { ok: true, role: rolFrontend };
     } catch (err) {
-      return { ok: false, error: err.message };
+      return { ok: false, error: mensajeDeError(err) };
     }
   };
 
-  const logout = () => {
+  const logout = (): void => {
     saveToken(null);
     setCurrentUser(null);
   };
 
-  const aprobarMedico = async (id) => {
+  const aprobarMedico = async (id: Medico["id"]): Promise<void> => {
     await api.medicos.aprobar(id);
     setSolicitudesMedicos((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const rechazarMedico = async (id) => {
+  const rechazarMedico = async (id: Medico["id"]): Promise<void> => {
     await api.medicos.eliminar(id);
     setSolicitudesMedicos((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const value = useMemo(
+  const value = useMemo<AuthContextValue>(
     () => ({
       currentUser,
       loginWithOAuth,
@@ -172,8 +221,18 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth debe usarse dentro de <AuthProvider>");
   return ctx;
+}
+
+/**
+ * Sesión garantizada, para las pantallas que viven detrás de <ProtectedRoute>
+ * y por lo tanto sólo se montan con un usuario logueado.
+ */
+export function useSesion(): Session {
+  const { currentUser } = useAuth();
+  if (!currentUser) throw new Error("Esta pantalla necesita una sesión activa.");
+  return currentUser;
 }

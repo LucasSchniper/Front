@@ -1,7 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
 
-function Reveal({ children, delay = 0, className = "", as: Tag = "div" }) {
-  const ref = useRef(null);
+interface RevealProps {
+  children?: ReactNode;
+  delay?: number;
+  className?: string;
+  /** Etiqueta a renderizar; por defecto un <div>. */
+  as?: ElementType;
+}
+
+function Reveal({ children, delay = 0, className = "", as: Tag = "div" }: RevealProps) {
+  const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

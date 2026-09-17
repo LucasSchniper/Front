@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useSesion } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { IconUserCircle } from "../../components/icons/Icons";
+import { mensajeDeError } from "../../utils/errors";
+import type { Medico, Paciente } from "../../types";
 
 function Perfil() {
-  const { currentUser } = useAuth();
-  const [datos, setDatos] = useState(null);
+  const currentUser = useSesion();
+  const [datos, setDatos] = useState<Paciente | Medico | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -14,16 +16,16 @@ function Perfil() {
     setLoading(true);
     setError("");
 
-    const pedido =
+    const pedido: Promise<{ paciente?: Paciente; medico?: Medico }> =
       currentUser.role === "medico" ? api.medicos.perfil() : api.usuarios.perfil();
 
     pedido
       .then((data) => {
         if (cancelado) return;
-        setDatos(data.paciente || data.medico);
+        setDatos(data.paciente || data.medico || null);
       })
       .catch((err) => {
-        if (!cancelado) setError(err.message);
+        if (!cancelado) setError(mensajeDeError(err));
       })
       .finally(() => {
         if (!cancelado) setLoading(false);

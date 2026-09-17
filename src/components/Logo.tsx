@@ -3,7 +3,13 @@ import decaWordmark from "../assets/brand/deca-wordmark.png";
 
 export const LOGO_SIZE = 42;
 
-function Logo({ size = LOGO_SIZE, pulse = false, className = "" }) {
+interface LogoProps {
+  size?: number;
+  pulse?: boolean;
+  className?: string;
+}
+
+function Logo({ size = LOGO_SIZE, pulse = false, className = "" }: LogoProps) {
   return (
     <span className={`logo ${className}`}>
       <img

@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth, useSesion } from "../../context/AuthContext";
 import Logo from "../../components/Logo";
 import { IconMenu, IconClose, IconBell } from "../../components/icons/Icons";
 
 function DashboardLayout() {
-  const { currentUser, logout, solicitudesPendientes } = useAuth();
+  const currentUser = useSesion();
+  const { logout, solicitudesPendientes } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const contentRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {

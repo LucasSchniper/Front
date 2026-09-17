@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { IconCheck, IconClose, IconShield, IconTrash } from "../../components/icons/Icons";
+import { mensajeDeError } from "../../utils/errors";
+import type { Medico } from "../../types";
 
 function AdminMedicos() {
   const { solicitudesPendientes, aprobarMedico, rechazarMedico } = useAuth();
-  const [medicos, setMedicos] = useState([]);
+  const [medicos, setMedicos] = useState<Medico[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -14,7 +16,7 @@ function AdminMedicos() {
     api.medicos
       .listar()
       .then((data) => setMedicos(data.medicos))
-      .catch((err) => setError(err.message))
+      .catch((err: unknown) => setError(mensajeDeError(err)))
       .finally(() => setLoading(false));
   };
 
@@ -22,32 +24,32 @@ function AdminMedicos() {
     cargarMedicos();
   }, []);
 
-  const handleAprobar = async (id) => {
+  const handleAprobar = async (id: Medico["id"]) => {
     setError("");
     try {
       await aprobarMedico(id);
       cargarMedicos();
     } catch (err) {
-      setError(err.message);
+      setError(mensajeDeError(err));
     }
   };
 
-  const handleRechazar = async (id) => {
+  const handleRechazar = async (id: Medico["id"]) => {
     setError("");
     try {
       await rechazarMedico(id);
     } catch (err) {
-      setError(err.message);
+      setError(mensajeDeError(err));
     }
   };
 
-  const handleEliminar = async (id) => {
+  const handleEliminar = async (id: Medico["id"]) => {
     setError("");
     try {
       await api.medicos.eliminar(id);
       setMedicos((prev) => prev.filter((m) => m.id !== id));
     } catch (err) {
-      setError(err.message);
+      setError(mensajeDeError(err));
     }
   };
 

@@ -1,30 +1,35 @@
-
+import type { Paciente } from "../types";
 
 const KEY = "deca_asignaciones";
 
 const SIN_ASIGNAR = "";
 
-function leerCrudo() {
+/** Mapa `pacienteId -> medicoId`, tal como lo guarda localStorage. */
+export type MapaAsignaciones = Record<string, string | number>;
+
+type PacienteAsignable = Pick<Paciente, "id"> & { medicoId?: Paciente["medico_id"] };
+
+function leerCrudo(): MapaAsignaciones | null {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? JSON.parse(raw) : null;
+    return raw ? (JSON.parse(raw) as MapaAsignaciones) : null;
   } catch {
     return null;
   }
 }
 
-function guardarCrudo(mapa) {
+function guardarCrudo(mapa: MapaAsignaciones): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(mapa));
   } catch {}
 }
 
 
-export function leerAsignaciones(pacientes = []) {
+export function leerAsignaciones(pacientes: PacienteAsignable[] = []): MapaAsignaciones {
   const guardado = leerCrudo();
   if (guardado) return guardado;
 
-  const inicial = {};
+  const inicial: MapaAsignaciones = {};
   for (const p of pacientes) {
     if (p.medicoId) inicial[p.id] = p.medicoId;
   }
@@ -32,7 +37,11 @@ export function leerAsignaciones(pacientes = []) {
   return inicial;
 }
 
-export function asignarMedico(mapa, pacienteId, medicoId) {
+export function asignarMedico(
+  mapa: MapaAsignaciones,
+  pacienteId: string | number,
+  medicoId: string | number | null | undefined
+): MapaAsignaciones {
   const siguiente = { ...mapa };
   if (medicoId === SIN_ASIGNAR || medicoId == null) delete siguiente[pacienteId];
   else siguiente[pacienteId] = medicoId;
@@ -41,7 +50,10 @@ export function asignarMedico(mapa, pacienteId, medicoId) {
 }
 
 
-export function olvidarPaciente(mapa, pacienteId) {
+export function olvidarPaciente(
+  mapa: MapaAsignaciones,
+  pacienteId: string | number
+): MapaAsignaciones {
   const siguiente = { ...mapa };
   delete siguiente[pacienteId];
   guardarCrudo(siguiente);

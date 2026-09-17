@@ -1,3 +1,15 @@
+import type { CSSProperties } from "react";
+
+export interface EcgLineProps {
+  color?: string;
+  height?: number;
+  /** Segundos que tarda un ciclo; por defecto se deriva del alto. */
+  duration?: number;
+  opacity?: number;
+  reverse?: boolean;
+  className?: string;
+}
+
 export const UNIT_PATH =
   "M0,50 L28,50 L38,50 L46,20 L54,80 L62,12 L70,58 L78,50 L96,50 L106,38 L114,62 L122,50 L300,50";
 
@@ -15,7 +27,7 @@ function EcgLine({
   opacity = ECG_OPACITY,
   reverse = false,
   className = "",
-}) {
+}: EcgLineProps) {
   const unit = Math.round(height * UNIT_RATIO);
   const copies = Math.ceil(COVER_WIDTH / unit) + 1;
   const seconds = duration ?? unit / ECG_SPEED;
@@ -23,7 +35,7 @@ function EcgLine({
   return (
     <div
       className={`ecg-line ${className}`}
-      style={{ height, opacity, "--ecg-unit": `${unit}px` }}
+      style={{ height, opacity, "--ecg-unit": `${unit}px` } as CSSProperties}
       aria-hidden="true"
     >
       <svg

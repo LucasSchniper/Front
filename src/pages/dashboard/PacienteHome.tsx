@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useSesion } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { MOCK_NOVEDADES } from "../../data/mockData";
 import {
@@ -16,25 +16,27 @@ import {
   IconSummary,
   IconUserCircle,
 } from "../../components/icons/Icons";
+import type { AnalisisMock, ContactoMock, ProximoAnalisisMock } from "../../data/mockData";
+import type { Medico } from "../../types";
 
-const fechaCorta = (iso) => {
+const fechaCorta = (iso: string) => {
   const [y, m, d] = iso.split("-");
   return `${Number(d)}/${Number(m)}/${y}`;
 };
 
 function PacienteHome() {
-  const { currentUser } = useAuth();
+  const currentUser = useSesion();
   // TODO(back): traer los analisis, el proximo turno y los contactos del paciente.
-  const misAnalisis = [];
+  const misAnalisis: AnalisisMock[] = [];
   const ultimo = misAnalisis[0];
   const normales = misAnalisis.filter((a) => a.estado === "negativo").length;
   const altos = misAnalisis.length - normales;
 
-  const proximo = null;
-  const chats = [];
+  const proximo = null as ProximoAnalisisMock | null;
+  const chats: ContactoMock[] = [];
 
   // Quien me sigue: el backend ya devuelve solo el médico asignado (o ninguno).
-  const [miMedico, setMiMedico] = useState(null);
+  const [miMedico, setMiMedico] = useState<Medico | null>(null);
 
   useEffect(() => {
     let cancelado = false;

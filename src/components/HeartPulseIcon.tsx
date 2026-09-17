@@ -1,4 +1,9 @@
-function HeartPulseIcon({ size = 36, color = "#ffffff" }) {
+interface HeartPulseIconProps {
+  size?: number;
+  color?: string;
+}
+
+function HeartPulseIcon({ size = 36, color = "#ffffff" }: HeartPulseIconProps) {
   return (
     <svg
       className="heart-pulse-icon"

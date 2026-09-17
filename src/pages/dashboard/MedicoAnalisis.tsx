@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../services/api";
 import { IconEcgUpload, IconCheck } from "../../components/icons/Icons";
+import { mensajeDeError } from "../../utils/errors";
+import type { Paciente } from "../../types";
 
 /**
  * Carga de un analisis de ECG.
@@ -18,12 +20,12 @@ import { IconEcgUpload, IconCheck } from "../../components/icons/Icons";
  *   await api.analisis.realizar(fd);   // request() ya soporta FormData
  */
 function MedicoAnalisis() {
-  const [pacientes, setPacientes] = useState([]);
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState("");
 
   const [pacienteId, setPacienteId] = useState("");
-  const [archivo, setArchivo] = useState(null);
+  const [archivo, setArchivo] = useState<File | null>(null);
   const [porcentaje, setPorcentaje] = useState("");
   const [notas, setNotas] = useState("");
 
@@ -41,7 +43,7 @@ function MedicoAnalisis() {
         setPacienteId((actual) => actual || String(data.pacientes[0]?.id ?? ""));
       })
       .catch((err) => {
-        if (!cancelado) setErrorCarga(err.message);
+        if (!cancelado) setErrorCarga(mensajeDeError(err));
       })
       .finally(() => {
         if (!cancelado) setCargando(false);
@@ -51,7 +53,7 @@ function MedicoAnalisis() {
     };
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setDone(false);
@@ -74,7 +76,7 @@ function MedicoAnalisis() {
       setPorcentaje("");
       setNotas("");
     } catch (err) {
-      setError(err.message);
+      setError(mensajeDeError(err));
     } finally {
       setEnviando(false);
     }

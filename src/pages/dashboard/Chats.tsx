@@ -1,22 +1,31 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useEffect, useState, type FormEvent } from "react";
+import { useSesion } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { IconSend, IconTrash, IconUserCircle } from "../../components/icons/Icons";
+import { mensajeDeError } from "../../utils/errors";
+import type { EnviarMensajePayload } from "../../services/api";
+import type { Medico, Mensaje, Paciente } from "../../types";
 
-function horaCorta(iso) {
+/** La contraparte del chat: un paciente si soy médico, mi médico si soy paciente. */
+interface Contacto {
+  id: number | string;
+  nombre: string;
+}
+
+function horaCorta(iso: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
 }
 
 function Chats() {
-  const { currentUser } = useAuth();
+  const currentUser = useSesion();
   const esMedico = currentUser.role === "medico";
 
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState<Contacto[]>([]);
   const [loadingContacts, setLoadingContacts] = useState(true);
-  const [activeId, setActiveId] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [activeId, setActiveId] = useState<Contacto["id"] | null>(null);
+  const [messages, setMessages] = useState<Mensaje[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
@@ -29,13 +38,15 @@ function Chats() {
       return;
     }
     let cancelado = false;
-    const pedido = esMedico ? api.usuarios.listar() : api.medicos.listar();
+    const pedido: Promise<{ pacientes?: Paciente[]; medicos?: Medico[] }> = esMedico
+      ? api.usuarios.listar()
+      : api.medicos.listar();
     pedido
       .then((data) => {
         if (cancelado) return;
         // El backend ya devuelve solo los contactos asignados entre si.
         const propios = data.pacientes || data.medicos || [];
-        const lista = propios.map((c) => ({
+        const lista: Contacto[] = propios.map((c) => ({
           id: c.id,
           nombre: `${c.nombre} ${c.apellido}`,
         }));
@@ -43,7 +54,7 @@ function Chats() {
         setActiveId(lista[0]?.id ?? null);
       })
       .catch((err) => {
-        if (!cancelado) setError(err.message);
+        if (!cancelado) setError(mensajeDeError(err));
       })
       .finally(() => {
         if (!cancelado) setLoadingContacts(false);
@@ -63,7 +74,7 @@ function Chats() {
         if (!cancelado) setMessages(data.mensajes);
       })
       .catch((err) => {
-        if (!cancelado) setError(err.message);
+        if (!cancelado) setError(mensajeDeError(err));
       })
       .finally(() => {
         if (!cancelado) setLoadingMessages(false);
@@ -75,26 +86,28 @@ function Chats() {
 
   const active = contacts.find((c) => c.id === activeId);
 
-  const handleSend = async (e) => {
+  const handleSend = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!draft.trim() || !activeId) return;
     const contenido = draft.trim();
     setDraft("");
     try {
-      const payload = esMedico ? { pacienteId: activeId, contenido } : { medicoId: activeId, contenido };
+      const payload: EnviarMensajePayload = esMedico
+        ? { pacienteId: activeId, contenido }
+        : { medicoId: activeId, contenido };
       const { mensaje } = await api.mensajes.enviar(payload);
       setMessages((prev) => [...prev, mensaje]);
     } catch (err) {
-      setError(err.message);
+      setError(mensajeDeError(err));
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: Mensaje["id"]) => {
     try {
       await api.mensajes.eliminar(id);
       setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, eliminado: true, contenido: null } : m)));
     } catch (err) {
-      setError(err.message);
+      setError(mensajeDeError(err));
     }
   };
 

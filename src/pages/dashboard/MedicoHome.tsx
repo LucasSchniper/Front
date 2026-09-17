@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useSesion } from "../../context/AuthContext";
+import type { AnalisisMock } from "../../data/mockData";
+import type { Paciente } from "../../types";
 import { IconUserCircle, IconSearch, IconUpload, IconCheck } from "../../components/icons/Icons";
 
 function MedicoHome() {
-  const { currentUser } = useAuth();
+  const currentUser = useSesion();
   // TODO(back): traer los pacientes asignados y los analisis del medico logueado.
-  const misPacientes = [];
-  const misAnalisis = [];
+  const misPacientes: Paciente[] = [];
+  const misAnalisis: AnalisisMock[] = [];
 
   const [query, setQuery] = useState("");
   const pacientesFiltrados = misPacientes.filter((p) =>
@@ -18,8 +20,9 @@ function MedicoHome() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  const nombrePaciente = (id) => misPacientes.find((p) => p.id === id)?.nombre || "—";
-  const fechaCorta = (iso) => {
+  const nombrePaciente = (id: Paciente["id"]) =>
+    misPacientes.find((p) => p.id === id)?.nombre || "—";
+  const fechaCorta = (iso: string) => {
     const [y, m, d] = iso.split("-");
     return `${d}/${m}/${y}`;
   };

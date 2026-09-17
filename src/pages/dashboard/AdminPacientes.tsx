@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../services/api";
+import { mensajeDeError } from "../../utils/errors";
+import type { Medico, Paciente } from "../../types";
 
 const SIN_ASIGNAR = "";
 
 function AdminPacientes() {
-  const [pacientes, setPacientes] = useState([]);
-  const [medicos, setMedicos] = useState([]);
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [medicos, setMedicos] = useState<Medico[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [asignandoId, setAsignandoId] = useState(null);
+  const [asignandoId, setAsignandoId] = useState<Paciente["id"] | null>(null);
 
   const cargar = () => {
     setLoading(true);
@@ -18,7 +20,7 @@ function AdminPacientes() {
         setPacientes(pacientesData.pacientes);
         setMedicos(medicosData.medicos);
       })
-      .catch((err) => setError(err.message))
+      .catch((err: unknown) => setError(mensajeDeError(err)))
       .finally(() => setLoading(false));
   };
 
@@ -31,14 +33,14 @@ function AdminPacientes() {
     [pacientes]
   );
 
-  const handleAsignar = async (pacienteId, medicoId) => {
+  const handleAsignar = async (pacienteId: Paciente["id"], medicoId: string) => {
     setError("");
     setAsignandoId(pacienteId);
     try {
       const { paciente } = await api.usuarios.asignarMedico(pacienteId, medicoId || null);
       setPacientes((prev) => prev.map((p) => (p.id === pacienteId ? paciente : p)));
     } catch (err) {
-      setError(err.message);
+      setError(mensajeDeError(err));
     } finally {
       setAsignandoId(null);
     }

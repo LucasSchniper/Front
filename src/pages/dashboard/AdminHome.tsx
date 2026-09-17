@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MOCK_ANALISIS, MOCK_NOVEDADES_ADMIN } from "../../data/mockData";
 import { api } from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth, useSesion } from "../../context/AuthContext";
 import {
   IconBolt,
   IconChat,
@@ -14,17 +14,19 @@ import {
   IconTrendUp,
   IconUsers,
 } from "../../components/icons/Icons";
+import type { Medico, Paciente } from "../../types";
 
 function AdminHome() {
-  const { currentUser, solicitudesPendientes } = useAuth();
+  const currentUser = useSesion();
+  const { solicitudesPendientes } = useAuth();
 
   const nombre = currentUser.nombre
     ? `${currentUser.nombre} ${currentUser.apellido || ""}`.trim()
     : currentUser.email.split("@")[0];
 
   // Mismas fuentes que usa la pantalla de asignacion del admin.
-  const [medicos, setMedicos] = useState([]);
-  const [pacientes, setPacientes] = useState([]);
+  const [medicos, setMedicos] = useState<Medico[]>([]);
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
 
   useEffect(() => {
     let cancelado = false;
@@ -131,7 +133,7 @@ function AdminHome() {
                     <span className="quick-action__label">{label}</span>
                     <span className="quick-action__hint">{hint}</span>
                   </span>
-                  {badge > 0 && <span className="quick-action__badge">{badge}</span>}
+                  {(badge ?? 0) > 0 && <span className="quick-action__badge">{badge}</span>}
                   <IconChevronRight size={18} />
                 </Link>
               </li>

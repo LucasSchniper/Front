@@ -4,10 +4,16 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useMsal } from "@azure/msal-react";
 import AuthShell from "../components/auth/AuthShell";
 import { useAuth } from "../context/AuthContext";
+import { mensajeDeError } from "../utils/errors";
+import type { Provider } from "../types";
 
 const MSAL_SCOPES = ["openid", "profile", "email"];
 
-function LoginPage({ mode = "login" }) {
+interface LoginPageProps {
+  mode?: "login" | "signup";
+}
+
+function LoginPage({ mode = "login" }: LoginPageProps) {
   const isSignup = mode === "signup";
   const { loginWithOAuth } = useAuth();
   const { instance } = useMsal();
@@ -15,7 +21,7 @@ function LoginPage({ mode = "login" }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleOAuth = async (provider, credential) => {
+  const handleOAuth = async (provider: Provider, credential: string | undefined) => {
     setError("");
     setLoading(true);
     const result = await loginWithOAuth(provider, credential);
@@ -42,7 +48,7 @@ function LoginPage({ mode = "login" }) {
       const respuesta = await instance.loginPopup({ scopes: MSAL_SCOPES });
       await handleOAuth("microsoft", respuesta.idToken);
     } catch (err) {
-      setError(err.message || "No se pudo iniciar sesión con Microsoft.");
+      setError(mensajeDeError(err, "No se pudo iniciar sesión con Microsoft."));
     }
   };
 
