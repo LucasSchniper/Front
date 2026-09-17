@@ -24,7 +24,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<Navigate to="/login" replace />} />
+      <Route path="/signup" element={<LoginPage mode="signup" />} />
       <Route path="/completar-perfil" element={<CompleteProfilePage />} />
 
       <Route

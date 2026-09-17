@@ -7,7 +7,8 @@ import { useAuth } from "../context/AuthContext";
 
 const MSAL_SCOPES = ["openid", "profile", "email"];
 
-function LoginPage() {
+function LoginPage({ mode = "login" }) {
+  const isSignup = mode === "signup";
   const { loginWithOAuth } = useAuth();
   const { instance } = useMsal();
   const navigate = useNavigate();
@@ -46,7 +47,14 @@ function LoginPage() {
   };
 
   return (
-    <AuthShell title="Log in" subtitle="Ingresá con tu cuenta de Google o Microsoft.">
+    <AuthShell
+      title={isSignup ? "Sign up" : "Log in"}
+      subtitle={
+        isSignup
+          ? "Creá tu cuenta con Google o Microsoft."
+          : "Ingresá con tu cuenta de Google o Microsoft."
+      }
+    >
       <div className="auth-card__form">
         <div style={{ display: "flex", justifyContent: "center" }}>
           <GoogleLogin
