@@ -22,7 +22,7 @@ function Hero() {
       <div className="container hero__grid">
         <Reveal className="hero__text">
           <h1>
-            Inteligencia artificial que analiza tu corazón.
+            DECA analiza tu corazón.
             <span className="hero__accent">
               Detecta Chagas.
               <svg
@@ -36,7 +36,7 @@ function Hero() {
             </span>
           </h1>
           <p className="hero__lead">
-            Analizamos tu electrocardiograma con IA para detectar la posible
+            Analizamos tu electrocardiograma con DECA para detectar la posible
             presencia de Chagas, de forma rápida y confiable.
           </p>
           <div className="hero__cta">

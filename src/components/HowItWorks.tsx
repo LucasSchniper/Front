@@ -11,7 +11,7 @@ const PASOS = [
   {
     icon: IconPulse,
     title: "El modelo lee el trazado",
-    body: "La IA busca en el ritmo los patrones asociados a la cardiopatía chagásica y devuelve una probabilidad, no un diagnóstico cerrado.",
+    body: "DECA busca en el ritmo los patrones asociados a la cardiopatía chagásica y devuelve una probabilidad, no un diagnóstico cerrado.",
   },
   {
     icon: IconHeartCheck,
@@ -30,14 +30,28 @@ function HowItWorks() {
         </Reveal>
 
         <div className="how__steps">
-          <svg className="how__trace" viewBox="0 0 900 100" preserveAspectRatio="none" aria-hidden="true">
+          <svg
+            className="how__trace"
+            viewBox="0 0 900 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
             {[0, 1, 2].map((i) => (
-              <path key={i} d={UNIT_PATH} transform={`translate(${300 * i},0)`} />
+              <path
+                key={i}
+                d={UNIT_PATH}
+                transform={`translate(${300 * i},0)`}
+              />
             ))}
           </svg>
 
           {PASOS.map(({ icon: Icon, title, body }, i) => (
-            <Reveal as="article" key={title} delay={i * 110} className="how__step">
+            <Reveal
+              as="article"
+              key={title}
+              delay={i * 110}
+              className="how__step"
+            >
               <span className="how__badge">
                 <Icon size={22} />
                 <span className="how__number">{i + 1}</span>
