@@ -1325,10 +1325,10 @@ html {
 .sidebar__decor::before {
   content: "";
   position: absolute;
-  left: 50%;
-  bottom: -34px;
-  width: 224px;
-  height: 224px;
+  left: calc(50% + 50px);
+  bottom: -30px;
+  width: 260px;
+  height: 260px;
   transform: translateX(-50%);
   border-radius: 50%;
   background: var(--pink-circle);
@@ -1339,7 +1339,7 @@ html {
   display: block;
   width: 208px;
   max-width: none;
-  margin-bottom: 4px;
+  margin-bottom: 40px;
   object-fit: contain;
 }
 
