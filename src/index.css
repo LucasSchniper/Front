@@ -15,6 +15,12 @@
   --text-muted: #6f5350;
   --white: #ffffff;
 
+  --dash-header: #f19c9c;
+  --dash-sidebar: #ffdddd;
+  --dash-line: #c23a3a;
+  --dash-soft: #fff1f1;
+  --dash-fade: #f29d9d;
+
   --beat-duration: 1.6s;
   --divider-h: 20px;
 

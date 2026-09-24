@@ -1203,7 +1203,7 @@ html {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--pink-bg);
+  background: var(--dash-soft);
   overflow: hidden;
 }
 
@@ -1213,8 +1213,7 @@ html {
   align-items: center;
   gap: 16px;
   padding: 12px 28px;
-  background: linear-gradient(120deg, var(--pink-header-1), var(--pink-header-2));
-  border-bottom: 1px solid var(--pink-card-strong);
+  background: var(--dash-header);
 }
 .dashboard__brand {
   display: flex;
@@ -1253,7 +1252,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--pink-bg);
+  border: 2px solid var(--dash-header);
 }
 .dashboard__burger {
   display: none;
@@ -1275,8 +1274,8 @@ html {
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: var(--pink-bg);
-  border-right: 1px solid var(--pink-card);
+  background: var(--dash-sidebar);
+  border-right: 2px solid var(--dash-line);
   display: flex;
   flex-direction: column;
   padding: 22px 16px;
@@ -1292,9 +1291,9 @@ html {
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 14px;
-  border: 1.5px solid var(--maroon);
-  background: #fff;
+  border-radius: 10px;
+  border: 1.5px solid var(--dash-line);
+  background: var(--dash-soft);
   color: var(--maroon);
   font-weight: 700;
   font-size: 0.9rem;
@@ -1303,7 +1302,7 @@ html {
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 .sidebar__link:hover {
-  background: var(--pink-card);
+  background: #fff;
   transform: translateY(-1px);
 }
 .sidebar__link.is-active {
@@ -1325,14 +1324,13 @@ html {
 .sidebar__decor::before {
   content: "";
   position: absolute;
-  left: calc(50% + 50px);
-  bottom: -30px;
+  left: calc(50% - 4px);
+  bottom: -40px;
   width: 260px;
   height: 260px;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: var(--pink-circle);
-  opacity: 0.75;
+  background: var(--dash-soft);
 }
 .sidebar__decor-img {
   position: relative;
@@ -1341,6 +1339,7 @@ html {
   max-width: none;
   margin-bottom: 40px;
   object-fit: contain;
+  opacity: 0.62;
 }
 
 .dashboard__scrim {
@@ -1350,6 +1349,7 @@ html {
 .dashboard__main {
   flex: 1;
   min-width: 0;
+  background: linear-gradient(180deg, var(--dash-soft) 0%, var(--dash-soft) 42%, var(--dash-fade) 100%);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -1365,7 +1365,7 @@ html {
 
 .dashboard__footer {
   flex-shrink: 0;
-  background: var(--maroon-dark);
+  background: var(--maroon);
   color: #fff;
   font-weight: 800;
   font-size: 0.98rem;
