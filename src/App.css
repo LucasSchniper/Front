@@ -1315,30 +1315,32 @@ html {
 }
 .sidebar__decor {
   position: relative;
-  margin-top: auto;
-  border-top: 28px solid transparent;
-  width: 100%;
-  max-width: 220px;
-  align-self: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin: auto -16px -22px;
+  padding-top: 96px;
+  display: flex;
+  justify-content: center;
 }
 .sidebar__decor::before {
   content: "";
   position: absolute;
-  left: 51%;
-  top: 27%;
-  width: 66%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
+  left: 50%;
+  bottom: -34px;
+  width: 224px;
+  height: 224px;
+  transform: translateX(-50%);
   border-radius: 50%;
   background: var(--pink-circle);
-  opacity: 0.45;
+  opacity: 0.75;
 }
 .sidebar__decor-img {
   position: relative;
   display: block;
-  width: 100%;
+  width: 208px;
+  max-width: none;
+  margin-bottom: 4px;
   object-fit: contain;
-  opacity: 0.92;
 }
 
 .dashboard__scrim {
