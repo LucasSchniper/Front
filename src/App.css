@@ -1347,7 +1347,6 @@ html {
   max-width: none;
   margin-bottom: 2.5rem;
   object-fit: contain;
-  opacity: 0.62;
 }
 
 @media (max-height: 660px) {
