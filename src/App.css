@@ -202,6 +202,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  max-width: none;
   padding: 14px 24px;
 }
 .site-header__brand {
@@ -257,6 +258,18 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+.site-header__auth .btn {
+  border-radius: 6px;
+  border-width: 1px;
+  font-weight: 400;
+  font-size: 0.95rem;
+  min-height: 34px;
+  padding: 5px 30px;
+  min-width: 112px;
+}
+.site-header__auth .btn--light {
+  min-width: 140px;
 }
 .site-header__auth--mobile {
   display: none;
