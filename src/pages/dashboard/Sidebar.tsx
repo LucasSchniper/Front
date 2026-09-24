@@ -75,7 +75,9 @@ function Sidebar({ role, onLogout, open, onNavigate }: SidebarProps) {
         </button>
       </nav>
 
-      <img src={heartEcgMark} alt="" aria-hidden="true" className="sidebar__decor" />
+      <div className="sidebar__decor" aria-hidden="true">
+        <img src={heartEcgMark} alt="" className="sidebar__decor-img" />
+      </div>
     </aside>
   );
 }
