@@ -1,19 +1,22 @@
 :root {
-  --maroon: #7a1626;
-  --maroon-dark: #5c101d;
-  --red: #a5293a;
-  --red-strong: #c0392b;
-  --pink-header-1: #e28993;
-  --pink-header-2: #d97783;
-  --pink-bg: #fdeef0;
-  --pink-bg-2: #fbe0e4;
-  --pink-card: #f6c8cd;
-  --pink-card-strong: #f2b3ba;
-  --pink-input: #fbdde2;
-  --pink-circle: #f8d7dc;
-  --text-dark: #4a1420;
-  --text-muted: #8a5560;
+  --maroon: #ba2323;
+  --maroon-dark: #872a22;
+  --red: #b1463c;
+  --red-strong: #ba2323;
+  --pink-header-1: #dfa19e;
+  --pink-header-2: #dfa19e;
+  --pink-bg: #fdf8f8;
+  --pink-bg-2: #fbeeed;
+  --pink-card: #f3d8d6;
+  --pink-card-strong: #e9bfbc;
+  --pink-input: #f9e7e5;
+  --pink-circle: #dfa19e;
+  --text-dark: #1a1919;
+  --text-muted: #6f5350;
   --white: #ffffff;
+
+  --beat-duration: 1.6s;
+  --divider-h: 20px;
 
   --eyebrow-beat: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 12"><path d="M0 6h7l2.5-5 3 10 2.5-8 2 3H30" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>');
 
@@ -36,7 +39,9 @@ body {
   font-family: var(--font-body);
   background: var(--pink-bg);
   color: var(--text-dark);
-  overflow-x: hidden;
+  /* clip en vez de hidden: recorta igual pero no convierte al body en scroll
+     container, que desactivaria los view-timeline del scroll. */
+  overflow-x: clip;
 }
 
 h1, h2, h3, h4 {

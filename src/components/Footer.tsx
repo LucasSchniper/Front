@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import EcgLine from "./EcgLine";
 import Logo from "./Logo";
 
 const NAVEGACION = [
@@ -14,8 +13,6 @@ function Footer() {
 
   return (
     <footer className="site-footer">
-      <EcgLine color="#fff" height={40} className="site-footer__ecg" />
-
       <div className="container site-footer__inner">
         <div className="site-footer__brand">
           <Logo className="logo--on-dark" />

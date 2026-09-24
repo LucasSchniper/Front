@@ -26,6 +26,11 @@ function Header() {
       <div className="container site-header__row">
         <a href="#inicio" className="site-header__brand" onClick={() => setOpen(false)}>
           <Logo pulse />
+          <span className="site-header__tagline">
+            Deteccion de la enfermedad de
+            <br />
+            Chagas automatizado
+          </span>
         </a>
 
         <nav className={`site-header__nav ${open ? "site-header__nav--open" : ""}`}>

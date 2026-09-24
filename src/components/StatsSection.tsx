@@ -12,7 +12,6 @@ const STATS = [
 function StatsSection() {
   return (
     <section id="datos" className="stats">
-      <EcgLine color="#fff" height={60} className="stats__ecg" />
       <div className="container">
         <Reveal as="div" className="section-heading section-heading--light">
           <p className="eyebrow">Datos clave</p>
@@ -35,6 +34,8 @@ function StatsSection() {
           enfermedad de Chagas.
         </p>
       </div>
+
+      <EcgLine color="var(--maroon)" height={70} opacity={0.5} className="stats__ecg" />
     </section>
   );
 }

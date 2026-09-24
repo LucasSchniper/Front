@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import EcgLine from "./EcgLine";
 import HeroHeartEcg from "./HeroHeartEcg";
 import Reveal from "./Reveal";
 import { IconClock, IconHeartCheck, IconShield } from "./icons/Icons";
@@ -16,9 +15,6 @@ const PROMESAS = [
 function Hero() {
   return (
     <section id="inicio" className="hero">
-      <div className="hero__circle hero__circle--a" />
-      <div className="hero__circle hero__circle--b" />
-
       <div className="container hero__grid">
         <Reveal className="hero__text">
           <h1>
@@ -61,10 +57,6 @@ function Hero() {
         <Reveal delay={120} className="hero__visual">
           <HeroHeartEcg />
         </Reveal>
-      </div>
-
-      <div className="hero__ecg">
-        <EcgLine height={90} />
       </div>
     </section>
   );

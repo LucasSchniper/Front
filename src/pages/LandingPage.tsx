@@ -11,9 +11,11 @@ function LandingPage() {
       <Header />
       <main>
         <Hero />
+        <div className="section-divider" role="presentation" />
         <HowItWorks />
         <ChagasInfo />
         <StatsSection />
+        <div className="section-divider" role="presentation" />
       </main>
       <Footer />
     </>
