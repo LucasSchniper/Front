@@ -39,6 +39,13 @@
 html {
   scroll-behavior: smooth;
 }
+/* En monitores grandes escalamos la base para que las proporciones se
+   mantengan (todo lo que está en rem crece con la pantalla). */
+@media (min-width: 1600px) {
+  html {
+    font-size: clamp(16px, 1.04vw, 24px);
+  }
+}
 
 body {
   margin: 0;

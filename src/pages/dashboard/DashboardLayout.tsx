@@ -10,11 +10,11 @@ function DashboardLayout() {
   const { logout, solicitudesPendientes } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const contentRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    contentRef.current?.scrollTo({ top: 0 });
+    mainRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 
   const pendientes =
@@ -62,8 +62,8 @@ function DashboardLayout() {
 
         {sidebarOpen && <div className="dashboard__scrim" onClick={() => setSidebarOpen(false)} />}
 
-        <main className="dashboard__main">
-          <div className="dashboard__content" ref={contentRef}>
+        <main className="dashboard__main" ref={mainRef}>
+          <div className="dashboard__content">
             <Outlet />
           </div>
         </main>
