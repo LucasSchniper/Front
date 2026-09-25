@@ -1021,10 +1021,6 @@ html {
   top: -210px;
   right: -60px;
 }
-.auth-page__bottom {
-  height: 28px;
-  background: #ba3232;
-}
 .auth-page__row {
   position: relative;
   z-index: 1;

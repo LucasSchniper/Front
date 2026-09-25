@@ -35,7 +35,7 @@ function AuthShell({ title, subtitle, children }: AuthShellProps) {
         </div>
       </main>
 
-      <div className="auth-page__bottom" aria-hidden="true" />
+      <div className="section-divider" role="presentation" />
     </div>
   );
 }
