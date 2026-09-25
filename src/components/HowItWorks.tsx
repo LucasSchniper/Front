@@ -6,17 +6,17 @@ const PASOS = [
   {
     icon: IconUpload,
     title: "Se carga el electrocardiograma",
-    body: "El médico sube el ECG del paciente desde su panel. No hace falta ningún equipo extra: sirve el estudio que ya se hace en el centro de salud.",
+    body: "Tu médico sube el ECG del paciente desde su panel. No hace falta ningún equipo extra: sirve el estudio que ya se hace en el centro de salud.",
   },
   {
     icon: IconPulse,
-    title: "El modelo lee el trazado",
+    title: "DECA lee el trazado",
     body: "DECA busca en el ritmo los patrones asociados a la cardiopatía chagásica y devuelve una probabilidad, no un diagnóstico cerrado.",
   },
   {
     icon: IconHeartCheck,
-    title: "El profesional confirma",
-    body: "El médico revisa el resultado, lo cruza con la serología y define la conducta. La última palabra siempre es de una persona.",
+    title: "Tu profesional confirma",
+    body: "Tu médico revisa el resultado, lo cruza con la serología y define la conducta. La última palabra siempre es de una persona.",
   },
 ];
 

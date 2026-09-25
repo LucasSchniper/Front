@@ -32,7 +32,7 @@ function Hero() {
             </span>
           </h1>
           <p className="hero__lead">
-            Analizamos tu electrocardiograma con DECA para detectar la posible
+            DECA analiza tu electrocardiograma para detectar la posible
             presencia de Chagas, de forma rápida y confiable.
           </p>
           <div className="hero__cta">
