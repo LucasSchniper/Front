@@ -538,7 +538,47 @@
 
 .how {
   padding: 96px 0 90px;
-  background: linear-gradient(180deg, var(--pink-bg) 0%, #ffffff 70%);
+}
+/* Mismo fondo que el login: degradé rosa con dos círculos claros en las esquinas */
+.how,
+.chagas {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--pink-bg) 0%, var(--pink-bg-2) 45%, var(--pink-header-1) 100%);
+}
+/* Invertido: arranca oscuro y termina claro para empalmar con el inicio de .chagas */
+.how {
+  background: linear-gradient(0deg, var(--pink-bg) 0%, var(--pink-bg-2) 45%, var(--pink-header-1) 100%);
+}
+.how::before,
+.how::after,
+.chagas::before,
+.chagas::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: var(--pink-bg);
+  z-index: 0;
+  pointer-events: none;
+}
+.how::before,
+.chagas::before {
+  width: 420px;
+  height: 420px;
+  bottom: -210px;
+  left: -130px;
+}
+.how::after,
+.chagas::after {
+  width: 380px;
+  height: 380px;
+  top: -210px;
+  right: -60px;
+}
+.how > .container,
+.chagas > .container {
+  position: relative;
+  z-index: 1;
 }
 .how .section-heading {
   max-width: 760px;
@@ -628,7 +668,6 @@
 
 .chagas {
   padding: 100px 0;
-  background: #fff;
 }
 .accordion {
   max-width: 760px;
