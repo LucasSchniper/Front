@@ -2,6 +2,11 @@ import type { SignupErrors, SignupField, SignupForm, SignupValidation } from "..
 
 export const BASE_FIELDS: SignupField[] = ["fechaNacimiento", "role"];
 
+/** Lo que pide el registro manual además del perfil (con Google ya vienen nombre y mail). */
+export const CREDENTIAL_FIELDS: SignupField[] = ["nombreCompleto", "mail", "contrasena"];
+
+export const MIN_PASSWORD = 8;
+
 export const FIELDS_BY_ROLE: Record<string, SignupField[]> = {
   paciente: ["dni", "obraSocial"],
   medico: ["dni", "matricula"],
@@ -12,6 +17,9 @@ export const SIN_OBRA_SOCIAL = "Particular / sin obra social";
 export const OTRA_OBRA_SOCIAL = "Otra";
 
 export const FIELD_LABEL: Record<SignupField, string> = {
+  nombreCompleto: "Nombre y apellido",
+  mail: "Mail",
+  contrasena: "Contraseña",
   fechaNacimiento: "Fecha de nacimiento",
   role: "Médico o paciente",
   dni: "DNI",
@@ -27,9 +35,9 @@ export function pideCredencial(form: SignupForm): boolean {
   );
 }
 
-export function requiredFields(form: SignupForm): SignupField[] {
+export function requiredFields(form: SignupForm, extraFields: SignupField[] = []): SignupField[] {
   const extra = FIELDS_BY_ROLE[form.role] || [];
-  const fields = [...BASE_FIELDS, ...extra];
+  const fields = [...extraFields, ...BASE_FIELDS, ...extra];
   if (form.obraSocial === OTRA_OBRA_SOCIAL) fields.push("obraSocialOtra");
   if (pideCredencial(form)) fields.push("credencial");
   return fields;
@@ -39,6 +47,8 @@ const trim = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
 const soloDigitos = (v: unknown): string => trim(v).replace(/\D/g, "");
 
 export const MAX_LENGTH = {
+  nombreCompleto: 80,
+  mail: 120,
   dni: 8,
   credencial: 20,
   obraSocialOtra: 40,
@@ -69,15 +79,48 @@ export function sanitizeField(field: SignupField, value: unknown): string {
   return out;
 }
 
-export function validateSignup(form: SignupForm): SignupValidation {
+/** Separa "Nombre y apellido": la primera palabra es el nombre y el resto el apellido. */
+export function splitNombreCompleto(value: string): { nombre: string; apellido: string } {
+  const [nombre = "", ...resto] = trim(value).split(/\s+/);
+  return { nombre, apellido: resto.join(" ") };
+}
+
+const MAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * `extraFields` suma campos que no todas las pantallas piden: el registro manual
+ * pasa CREDENTIAL_FIELDS y el perfil que viene de Google sólo la contraseña.
+ */
+export function validateSignup(
+  form: SignupForm,
+  extraFields: SignupField[] = []
+): SignupValidation {
   const errors: SignupErrors = {};
   const missing: string[] = [];
 
-  for (const field of requiredFields(form)) {
+  for (const field of requiredFields(form, extraFields)) {
     if (!trim(form[field])) {
       errors[field] = "Este dato es obligatorio.";
       missing.push(FIELD_LABEL[field]);
     }
+  }
+
+  if (extraFields.includes("nombreCompleto") && !errors.nombreCompleto) {
+    if (!splitNombreCompleto(form.nombreCompleto).apellido) {
+      errors.nombreCompleto = "Escribí tu nombre y tu apellido.";
+    }
+  }
+
+  if (extraFields.includes("mail") && !errors.mail && !MAIL_VALIDO.test(trim(form.mail))) {
+    errors.mail = "Revisá el mail, no parece válido.";
+  }
+
+  if (
+    extraFields.includes("contrasena") &&
+    !errors.contrasena &&
+    form.contrasena.length < MIN_PASSWORD
+  ) {
+    errors.contrasena = `La contraseña tiene que tener al menos ${MIN_PASSWORD} caracteres.`;
   }
 
   if (!errors.fechaNacimiento) {

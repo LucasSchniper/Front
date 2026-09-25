@@ -1,117 +1,45 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useState, type FormEvent } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import AuthShell from "../components/auth/AuthShell";
 import FormField from "../components/auth/FormField";
+import RoleFields from "../components/auth/RoleFields";
+import SolicitudEnviada from "../components/auth/SolicitudEnviada";
+import { useSignupForm } from "../components/auth/useSignupForm";
 import { useAuth } from "../context/AuthContext";
-import { OBRAS_SOCIALES } from "../data/mockData";
-import { IconCheck, IconShield } from "../components/icons/Icons";
-import {
-  MAX_LENGTH,
-  OTRA_OBRA_SOCIAL,
-  SIN_OBRA_SOCIAL,
-  pideCredencial,
-  sanitizeField,
-  summarizeErrors,
-  validateSignup,
-} from "../utils/signupValidation";
-import type { PerfilOAuth, Provider, SignupErrors, SignupField, SignupForm } from "../types";
+import { MIN_PASSWORD, normalizeSignup } from "../utils/signupValidation";
+import type { PerfilOAuth, Provider } from "../types";
 
-/** Lo que LoginPage deja en el state de la navegación al venir del OAuth. */
+/** Lo que el botón de Google deja en el state de la navegación. */
 interface CompleteProfileState {
   regToken?: string;
   perfil?: PerfilOAuth;
   provider?: Provider;
 }
 
-const EMPTY: SignupForm = {
-  fechaNacimiento: "",
-  role: "",
-  dni: "",
-  obraSocial: "",
-  obraSocialOtra: "",
-  credencial: "",
-  matricula: "",
-};
-
-const ROLE_DEPENDENT_ERRORS: SignupField[] = [
-  "role",
-  "dni",
-  "obraSocial",
-  "obraSocialOtra",
-  "credencial",
-  "matricula",
-];
-
-const OBRA_SOCIAL_DEPENDENT_ERRORS: SignupField[] = ["obraSocial", "obraSocialOtra", "credencial"];
-
-const sinErroresDe = (errores: SignupErrors, campos: SignupField[]): SignupErrors =>
-  Object.fromEntries(
-    Object.entries(errores).filter(([campo]) => !campos.includes(campo as SignupField))
-  );
-
 function CompleteProfilePage() {
   const { completeOAuthSignup } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { regToken, perfil, provider } = (location.state as CompleteProfileState | null) || {};
+  const { regToken, perfil } = (location.state as CompleteProfileState | null) || {};
 
-  const [form, setForm] = useState(EMPTY);
-  const [errors, setErrors] = useState<SignupErrors>({});
+  const { form, errors, update, validate } = useSignupForm();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [solicitudEnviada, setSolicitudEnviada] = useState(false);
 
   if (!regToken || !perfil) return <Navigate to="/login" replace />;
 
-  const update = (field: SignupField) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const value = sanitizeField(field, e.target.value);
-    setForm((f) => ({ ...f, [field]: value }));
-
-    if (field === "role") {
-      setErrors((prev) => sinErroresDe(prev, ROLE_DEPENDENT_ERRORS));
-      setError("");
-      return;
-    }
-
-    if (field === "obraSocial") {
-      if (value === SIN_OBRA_SOCIAL) setForm((f) => ({ ...f, credencial: "" }));
-      setErrors((prev) => sinErroresDe(prev, OBRA_SOCIAL_DEPENDENT_ERRORS));
-      setError("");
-      return;
-    }
-
-    setErrors((prev) => {
-      if (!prev[field]) return prev;
-      const { [field]: _omit, ...rest } = prev;
-      return rest;
-    });
-  };
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-
-    const validation = validateSignup(form);
-    if (!validation.ok) {
-      setErrors(validation.errors);
-      setError(summarizeErrors(validation));
-      return;
-    }
-    setErrors({});
+    const resumen = validate(["contrasena"]);
+    setError(resumen);
+    if (resumen) return;
 
     setLoading(true);
     const result = await completeOAuthSignup({
       regToken,
-      role: form.role,
-      dni: form.dni,
-      fechaNacimiento: form.fechaNacimiento,
-      obraSocial:
-        form.role === "paciente"
-          ? form.obraSocial === OTRA_OBRA_SOCIAL
-            ? form.obraSocialOtra
-            : form.obraSocial
-          : undefined,
-      matricula: form.role === "medico" ? form.matricula : undefined,
+      contrasena: form.contrasena,
+      ...normalizeSignup(form),
     });
     setLoading(false);
 
@@ -127,32 +55,13 @@ function CompleteProfilePage() {
   };
 
   if (solicitudEnviada) {
-    return (
-      <AuthShell title="Solicitud enviada" subtitle="Falta un último paso: la validación.">
-        <div className="auth-card__form">
-          <p className="auth-card__feedback auth-card__feedback--success">
-            <IconCheck size={16} /> Recibimos tu registro como médico.
-          </p>
-          <p className="auth-card__notice">
-            <IconShield size={18} />
-            <span>
-              El administrador de DECA va a revisar tu matrícula <strong>{form.matricula}</strong>{" "}
-              para confirmar que sos profesional médico. Cuando la apruebe te avisamos a{" "}
-              <strong>{perfil.email}</strong> y vas a poder iniciar sesión.
-            </span>
-          </p>
-          <Link to="/login" className="btn btn--primary auth-card__submit">
-            Volver al inicio de sesión
-          </Link>
-        </div>
-      </AuthShell>
-    );
+    return <SolicitudEnviada matricula={form.matricula} email={perfil.email} />;
   }
 
   return (
     <AuthShell
       title="Completá tu perfil"
-      subtitle={`Iniciaste sesión con ${provider === "microsoft" ? "Microsoft" : "Google"} como ${perfil.nombre} (${perfil.email}). Nos faltan algunos datos.`}
+      subtitle={`Entraste con Google como ${perfil.nombre} (${perfil.email}). Nos faltan algunos datos.`}
     >
       <form className="auth-card__form" onSubmit={handleSubmit} noValidate>
         <FormField label="Fecha de nacimiento" id="signup-fecha" error={errors.fechaNacimiento}>
@@ -165,122 +74,22 @@ function CompleteProfilePage() {
           />
         </FormField>
 
-        <fieldset className="role-picker">
-          <legend>Sos...</legend>
-          <label className={`role-picker__option ${form.role === "medico" ? "is-selected" : ""}`}>
-            <input
-              type="radio"
-              name="role"
-              value="medico"
-              checked={form.role === "medico"}
-              onChange={update("role")}
-            />
-            Médico
-          </label>
-          <label className={`role-picker__option ${form.role === "paciente" ? "is-selected" : ""}`}>
-            <input
-              type="radio"
-              name="role"
-              value="paciente"
-              checked={form.role === "paciente"}
-              onChange={update("role")}
-            />
-            Paciente
-          </label>
-        </fieldset>
-        {errors.role && <span className="form-field__error">{errors.role}</span>}
+        <FormField label="Contraseña para DECA" id="signup-password" error={errors.contrasena}>
+          <input
+            id="signup-password"
+            type="password"
+            autoComplete="new-password"
+            required
+            placeholder={`Mínimo ${MIN_PASSWORD} caracteres`}
+            value={form.contrasena}
+            onChange={update("contrasena")}
+          />
+          <span className="form-field__hint">
+            Con tu mail y esta contraseña también vas a poder entrar sin Google.
+          </span>
+        </FormField>
 
-        {form.role && (
-          <FormField label="DNI" id="signup-dni" error={errors.dni}>
-            <input
-              id="signup-dni"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              required
-              maxLength={MAX_LENGTH.dni}
-              placeholder="00000000"
-              value={form.dni}
-              onChange={update("dni")}
-            />
-            <span className="form-field__hint">Sólo números, 7 u 8 dígitos.</span>
-          </FormField>
-        )}
-
-        {form.role === "paciente" && (
-          <>
-            <FormField label="Obra social" id="signup-obra" error={errors.obraSocial}>
-              <select id="signup-obra" required value={form.obraSocial} onChange={update("obraSocial")}>
-                <option value="">Elegí tu obra social</option>
-                {OBRAS_SOCIALES.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-
-            {form.obraSocial === OTRA_OBRA_SOCIAL && (
-              <FormField
-                label="¿Cuál?"
-                id="signup-obra-otra"
-                error={errors.obraSocialOtra}
-              >
-                <input
-                  id="signup-obra-otra"
-                  required
-                  maxLength={MAX_LENGTH.obraSocialOtra}
-                  placeholder="Nombre de tu obra social o prepaga"
-                  value={form.obraSocialOtra}
-                  onChange={update("obraSocialOtra")}
-                />
-              </FormField>
-            )}
-
-            {pideCredencial(form) && (
-              <FormField
-                label="Número de credencial"
-                id="signup-credencial"
-                error={errors.credencial}
-              >
-                <input
-                  id="signup-credencial"
-                  inputMode="numeric"
-                  required
-                  maxLength={MAX_LENGTH.credencial}
-                  placeholder="000000000000"
-                  value={form.credencial}
-                  onChange={update("credencial")}
-                />
-                <span className="form-field__hint">
-                  El número que figura en tu credencial del plan.
-                </span>
-              </FormField>
-            )}
-          </>
-        )}
-
-        {form.role === "medico" && (
-          <>
-            <FormField label="Matrícula" id="signup-matricula" error={errors.matricula}>
-              <input
-                id="signup-matricula"
-                required
-                maxLength={MAX_LENGTH.matricula}
-                placeholder="MP-10234"
-                value={form.matricula}
-                onChange={update("matricula")}
-              />
-            </FormField>
-
-            <p className="auth-card__notice">
-              <IconShield size={18} />
-              <span>
-                Las cuentas de médico las valida el administrador de DECA. Al crearla le llega tu
-                solicitud y vas a poder ingresar en cuanto la apruebe.
-              </span>
-            </p>
-          </>
-        )}
+        <RoleFields form={form} errors={errors} update={update} />
 
         {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
 

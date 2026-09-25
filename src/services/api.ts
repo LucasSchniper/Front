@@ -93,13 +93,32 @@ async function request<T extends RespuestaOk>(
 
 type Id = number | string;
 
-export interface CompletarRegistroPayload {
-  regToken: string;
+/** Datos de perfil que piden tanto el registro manual como el que viene de Google. */
+interface DatosPerfilPayload {
   role: string;
   dni?: string;
   fechaNacimiento?: string;
   obraSocial?: string;
+  credencial?: string;
   matricula?: string;
+}
+
+export interface CompletarRegistroPayload extends DatosPerfilPayload {
+  regToken: string;
+  /** Contraseña para poder entrar después desde la web sin Google. */
+  contrasena: string;
+}
+
+export interface RegistroPayload extends DatosPerfilPayload {
+  nombre: string;
+  apellido: string;
+  mail: string;
+  contrasena: string;
+}
+
+export interface LoginPayload {
+  mail: string;
+  contrasena: string;
 }
 
 export interface EnviarMensajePayload {
@@ -115,6 +134,10 @@ export interface RealizarAnalisisPayload {
 
 export const api = {
   auth: {
+    login: (payload: LoginPayload): Promise<RespuestaAuth> =>
+      request("/auth/login", { method: "POST", body: payload, auth: false }),
+    registro: (payload: RegistroPayload): Promise<RespuestaAuth> =>
+      request("/auth/registro", { method: "POST", body: payload, auth: false }),
     iniciar: (provider: Provider, credential: string | undefined): Promise<RespuestaAuth> =>
       request(`/auth/${provider}`, { method: "POST", body: { credential }, auth: false }),
     completarRegistro: (payload: CompletarRegistroPayload): Promise<RespuestaAuth> =>

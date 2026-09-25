@@ -971,54 +971,71 @@ html {
 }
 
 .auth-page {
-  position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   background: var(--pink-bg);
-  padding: 96px 24px 60px;
+}
+.auth-page__top {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
+  padding: 14px 24px;
+  background: var(--pink-header-1);
+}
+@media (max-width: 480px) {
+  .auth-page__top {
+    padding: 14px 16px;
+  }
+}
+.auth-page__brand {
+  display: flex;
+  align-items: center;
+}
+.auth-page__body {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 48px 16px;
+  background: linear-gradient(180deg, var(--pink-bg) 0%, var(--pink-bg-2) 45%, var(--pink-header-1) 100%);
 }
 .auth-page__circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(223, 161, 158, 0.32);
+  background: var(--pink-bg);
   z-index: 0;
 }
 .auth-page__circle--a {
-  width: 320px;
-  height: 320px;
-  top: -140px;
-  left: -110px;
+  width: 420px;
+  height: 420px;
+  bottom: -210px;
+  left: -130px;
 }
 .auth-page__circle--b {
   width: 380px;
   height: 380px;
-  bottom: -190px;
-  right: -140px;
+  top: -210px;
+  right: -60px;
 }
-.auth-page__brand {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
+.auth-page__bottom {
+  height: 28px;
+  background: #ba3232;
 }
 .auth-page__row {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1040px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
 }
 .auth-page__ecg {
   flex: 1;
-  max-width: 220px;
+  min-width: 0;
 }
 @media (max-width: 900px) {
   .auth-page__ecg {
@@ -1028,29 +1045,78 @@ html {
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
-  background: var(--pink-card);
+  max-width: 400px;
+  flex-shrink: 0;
+  background: var(--pink-header-1);
+  border: 2px solid var(--maroon-dark);
   border-radius: 28px;
-  padding: 34px 32px;
-  box-shadow: 0 24px 50px -20px rgba(122, 22, 38, 0.45);
+  padding: 26px 24px 28px;
+  box-shadow: 0 24px 50px -24px rgba(122, 22, 38, 0.45);
 }
 .auth-card__title {
+  font-family: var(--font-heading);
   font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: var(--maroon-dark);
   text-align: center;
+  margin-bottom: 18px;
 }
 .auth-card__subtitle {
-  margin-top: 8px;
-  margin-bottom: 24px;
+  margin-top: -8px;
+  margin-bottom: 20px;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--maroon-dark);
   font-size: 0.92rem;
   line-height: 1.5;
 }
 .auth-card__form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
+}
+.auth-card .form-field input,
+.auth-card .form-field select {
+  background: var(--pink-bg);
+  border-radius: 10px;
+  color: var(--maroon-dark);
+  font-weight: 600;
+}
+.auth-card .form-field input::placeholder,
+.auth-card .form-field select.is-placeholder {
+  color: var(--maroon-dark);
+  opacity: 1;
+  font-weight: 500;
+}
+.auth-card .form-field select option {
+  color: var(--text-dark);
+}
+.auth-card .form-field label {
+  color: var(--maroon-dark);
+}
+.auth-card .form-field__hint {
+  color: var(--maroon-dark);
+}
+.auth-card__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--maroon-dark);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.auth-card__divider::before,
+.auth-card__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(135, 42, 34, 0.35);
+}
+.auth-card__google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
 }
 .auth-card__submit {
   margin-top: 6px;
@@ -1082,7 +1148,7 @@ html {
 .auth-card__switch {
   text-align: center;
   font-size: 0.88rem;
-  color: var(--text-muted);
+  color: var(--maroon-dark);
   margin-top: 4px;
 }
 .auth-card__switch a {
@@ -1107,6 +1173,11 @@ html {
   font-size: 0.83rem;
   line-height: 1.5;
   color: var(--maroon-dark);
+}
+.auth-card__notice--stack {
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
 }
 .auth-card__notice svg {
   flex-shrink: 0;

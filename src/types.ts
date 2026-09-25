@@ -68,7 +68,7 @@ export interface PerfilOAuth {
   email: string;
 }
 
-export type Provider = "google" | "microsoft";
+export type Provider = "google";
 
 /** Sesión que guardamos en localStorage y expone el AuthContext. */
 export interface Session {
@@ -125,6 +125,9 @@ export type RespuestaNotificaciones = RespuestaOk & { notificaciones: Notificaci
 /* ------------------------------------------------------- Formularios ---- */
 
 export type SignupField =
+  | "nombreCompleto"
+  | "mail"
+  | "contrasena"
   | "fechaNacimiento"
   | "role"
   | "dni"

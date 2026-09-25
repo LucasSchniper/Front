@@ -1,5 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { api, setToken, type CompletarRegistroPayload } from "../services/api";
+import {
+  ApiError,
+  api,
+  setToken,
+  type CompletarRegistroPayload,
+  type LoginPayload,
+  type RegistroPayload,
+} from "../services/api";
 import { mensajeDeError } from "../utils/errors";
 import type {
   Admin,
@@ -72,10 +79,19 @@ export type AuthResultado =
       pendingApproval?: boolean;
       role?: Rol;
     }
-  | { ok: false; error: string };
+  | {
+      ok: false;
+      error: string;
+      /** El back no conoce ese mail: la pantalla ofrece registrarlo. */
+      cuentaInexistente?: boolean;
+      /** Ya hay una cuenta con contraseña para ese mail. */
+      mailEnUso?: boolean;
+    };
 
 export interface AuthContextValue {
   currentUser: Session | null;
+  loginWithPassword: (payload: LoginPayload) => Promise<AuthResultado>;
+  signupWithPassword: (payload: RegistroPayload) => Promise<AuthResultado>;
   loginWithOAuth: (provider: Provider, credential: string | undefined) => Promise<AuthResultado>;
   completeOAuthSignup: (payload: CompletarRegistroPayload) => Promise<AuthResultado>;
   logout: () => void;
@@ -142,6 +158,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (currentUser?.role === "administrador") cargarSolicitudesPendientes();
   }, [currentUser?.role]);
 
+  /** Guarda token y sesión a partir de la respuesta del back (sirve para mail y para Google). */
+  const iniciarSesion = (data: RespuestaAuth): AuthResultado => {
+    if (data.pendingApproval) return { ok: true, pendingApproval: true };
+
+    const session = sesionDesde(data.rol, data);
+    if (!session) throw new Error("El servidor devolvió una sesión que no pudimos interpretar.");
+
+    saveToken(data.token ?? null);
+    setCurrentUser(session);
+    return { ok: true, role: session.role };
+  };
+
+  const loginWithPassword = async ({ mail, contrasena }: LoginPayload): Promise<AuthResultado> => {
+    try {
+      return iniciarSesion(await api.auth.login({ mail: mail.trim(), contrasena }));
+    } catch (err) {
+      return {
+        ok: false,
+        error: mensajeDeError(err),
+        cuentaInexistente: err instanceof ApiError && err.status === 404,
+      };
+    }
+  };
+
+  /**
+   * Si el mail ya existe porque la cuenta se creó con Google, el back le agrega
+   * la contraseña a esa misma cuenta en vez de crear otra.
+   */
+  const signupWithPassword = async (payload: RegistroPayload): Promise<AuthResultado> => {
+    try {
+      return iniciarSesion(await api.auth.registro({ ...payload, mail: payload.mail.trim() }));
+    } catch (err) {
+      return {
+        ok: false,
+        error: mensajeDeError(err),
+        mailEnUso: err instanceof ApiError && err.status === 409,
+      };
+    }
+  };
+
   const loginWithOAuth = async (
     provider: Provider,
     credential: string | undefined
@@ -153,12 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: true, isNew: true, regToken: data.regToken, perfil: data.perfil, provider };
       }
 
-      const session = sesionDesde(data.rol, data);
-      if (!session) throw new Error("El servidor devolvió una sesión que no pudimos interpretar.");
-
-      saveToken(data.token ?? null);
-      setCurrentUser(session);
-      return { ok: true, role: session.role };
+      return iniciarSesion(data);
     } catch (err) {
       return { ok: false, error: mensajeDeError(err) };
     }
@@ -208,6 +259,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({
       currentUser,
+      loginWithPassword,
+      signupWithPassword,
       loginWithOAuth,
       completeOAuthSignup,
       logout,
