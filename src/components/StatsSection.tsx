@@ -3,10 +3,10 @@ import EcgLine from "./EcgLine";
 import Reveal from "./Reveal";
 
 const STATS = [
-  { to: 6, suffix: " a 7 M", label: "personas infectadas en el mundo (est. OMS)" },
-  { to: 21, suffix: "", label: "países endémicos en América Latina" },
-  { to: 30, suffix: "%", label: "desarrolla compromiso cardíaco a largo plazo" },
-  { to: 10000, suffix: "+", label: "muertes estimadas por año" },
+  { to: 6, suffix: " a 7 M", label: "Personas infectadas en el mundo (est. OMS)" },
+  { to: 21, suffix: "", label: "Países endémicos en América Latina" },
+  { to: 30, suffix: "%", label: "Desarrolla compromiso cardíaco a largo plazo" },
+  { to: 10000, suffix: "+", label: "Muertes estimadas por año" },
 ];
 
 function StatsSection() {
