@@ -2,6 +2,7 @@ import type {
   Provider,
   RespuestaAnalisis,
   RespuestaAuth,
+  RespuestaConversacionesAdmin,
   RespuestaMedicos,
   RespuestaMensaje,
   RespuestaMensajes,
@@ -12,6 +13,7 @@ import type {
   RespuestaPerfilAdmin,
   RespuestaPerfilMedico,
   RespuestaPerfilPaciente,
+  TipoContraparte,
 } from "../types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:3000" : "");
@@ -127,6 +129,22 @@ export interface EnviarMensajePayload {
   medicoId?: Id;
 }
 
+export interface EnviarMensajeAdminPayload {
+  contenido: string;
+  contraparteTipo: TipoContraparte;
+  contraparteId: Id;
+}
+
+/** El mail no se puede cambiar: el back lo ignora aunque venga. */
+export interface ActualizarPerfilPayload {
+  nombre: string;
+  apellido: string;
+  dni?: string;
+  fechaNacimiento?: string;
+  obraSocial?: string;
+  matricula?: string;
+}
+
 export interface RealizarAnalisisPayload {
   pacienteId: number;
   porcentaje: number;
@@ -145,15 +163,21 @@ export const api = {
   },
   admins: {
     perfil: (): Promise<RespuestaPerfilAdmin> => request("/admins/perfil"),
+    actualizarPerfil: (payload: ActualizarPerfilPayload): Promise<RespuestaPerfilAdmin> =>
+      request("/admins/perfil", { method: "PUT", body: payload }),
   },
   usuarios: {
     perfil: (): Promise<RespuestaPerfilPaciente> => request("/usuarios/perfil"),
+    actualizarPerfil: (payload: ActualizarPerfilPayload): Promise<RespuestaPerfilPaciente> =>
+      request("/usuarios/perfil", { method: "PUT", body: payload }),
     listar: (): Promise<RespuestaPacientes> => request("/usuarios"),
     asignarMedico: (id: Id, medicoId: Id | null): Promise<RespuestaPaciente> =>
       request(`/usuarios/${id}/medico`, { method: "PUT", body: { medicoId } }),
   },
   medicos: {
     perfil: (): Promise<RespuestaPerfilMedico> => request("/medicos/perfil"),
+    actualizarPerfil: (payload: ActualizarPerfilPayload): Promise<RespuestaPerfilMedico> =>
+      request("/medicos/perfil", { method: "PUT", body: payload }),
     listar: (): Promise<RespuestaMedicos> => request("/medicos"),
     pendientes: (): Promise<RespuestaMedicos> => request("/medicos/pendientes"),
     aprobar: (id: Id): Promise<RespuestaOk> => request(`/medicos/${id}/aprobar`, { method: "PUT" }),
@@ -167,6 +191,19 @@ export const api = {
     editar: (id: Id, contenido: string): Promise<RespuestaMensaje> =>
       request(`/mensajes/${id}`, { method: "PUT", body: { contenido } }),
     eliminar: (id: Id): Promise<RespuestaOk> => request(`/mensajes/${id}`, { method: "DELETE" }),
+  },
+  /** Conversaciones entre un admin y un paciente o médico. Las inicia siempre el admin. */
+  mensajesAdmin: {
+    conversaciones: (): Promise<RespuestaConversacionesAdmin> =>
+      request("/mensajes-admin/conversaciones"),
+    conversacion: (contraparteTipo: TipoContraparte, contraparteId: Id): Promise<RespuestaMensajes> =>
+      request(`/mensajes-admin/${contraparteTipo}/${contraparteId}`),
+    enviar: (payload: EnviarMensajeAdminPayload): Promise<RespuestaMensaje> =>
+      request("/mensajes-admin", { method: "POST", body: payload }),
+    editar: (id: Id, contenido: string): Promise<RespuestaMensaje> =>
+      request(`/mensajes-admin/${id}`, { method: "PUT", body: { contenido } }),
+    eliminar: (id: Id): Promise<RespuestaOk> =>
+      request(`/mensajes-admin/${id}`, { method: "DELETE" }),
   },
   notificaciones: {
     listar: (): Promise<RespuestaNotificaciones> => request("/notificaciones"),

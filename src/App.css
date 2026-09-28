@@ -2197,6 +2197,12 @@ html {
 .data-table tr:last-child td {
   border-bottom: none;
 }
+.data-table__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
 .data-table__empty {
   text-align: center;
   color: var(--text-muted);

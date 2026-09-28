@@ -59,10 +59,6 @@ function Notificaciones() {
   const esAdmin = currentUser.role === "administrador";
 
   useEffect(() => {
-    if (esAdmin) {
-      setLoading(false);
-      return;
-    }
     let cancelado = false;
     api.notificaciones
       .listar()
@@ -78,7 +74,7 @@ function Notificaciones() {
     return () => {
       cancelado = true;
     };
-  }, [esAdmin]);
+  }, []);
 
   const marcarLeida = (id: Notificacion["id"]) => {
     setDelServidor((prev) => prev.map((n) => (n.id === id ? { ...n, leida: true } : n)));

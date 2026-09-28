@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
+import { IconChat } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
 import type { Medico, Paciente } from "../../types";
+import type { NuevoChatState } from "./Chats";
 
 const SIN_ASIGNAR = "";
 
 function AdminPacientes() {
+  const navigate = useNavigate();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +50,13 @@ function AdminPacientes() {
     }
   };
 
+  const handleEscribir = (p: Paciente) => {
+    const state: NuevoChatState = {
+      nuevoChat: { tipo: "paciente", id: p.id, nombre: `${p.nombre} ${p.apellido}` },
+    };
+    navigate("/administrador/chats", { state });
+  };
+
   return (
     <div>
       <div className="page-header">
@@ -72,6 +83,7 @@ function AdminPacientes() {
               <th>Nombre</th>
               <th>DNI</th>
               <th>Médico asignado</th>
+              <th aria-label="Acciones" />
             </tr>
           </thead>
           <tbody>
@@ -96,11 +108,16 @@ function AdminPacientes() {
                     ))}
                   </select>
                 </td>
+                <td>
+                  <button className="btn btn--ghost btn--sm" onClick={() => handleEscribir(p)}>
+                    <IconChat size={16} /> Escribir
+                  </button>
+                </td>
               </tr>
             ))}
             {!loading && pacientes.length === 0 && (
               <tr>
-                <td colSpan={3} className="data-table__empty">
+                <td colSpan={4} className="data-table__empty">
                   Todavía no hay pacientes registrados.
                 </td>
               </tr>
