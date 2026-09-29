@@ -77,11 +77,6 @@ function Perfil() {
               </div>
             )}
           </div>
-
-          <p className="auth-card__hint">
-            La edición de perfil todavía no está disponible: al backend le falta el endpoint para
-            actualizar estos datos.
-          </p>
         </div>
       )}
     </div>
