@@ -43,6 +43,8 @@ export interface Admin {
 export interface Analisis {
   id: number | string;
   porcentaje: number | string;
+  banda?: "alta" | "media" | "baja" | null;
+  archivo_nombre?: string | null;
   fecha_hora_entrega: string;
   paciente_id?: number | string;
 }
@@ -134,6 +136,10 @@ export type RespuestaPacientes = RespuestaOk & { pacientes: Paciente[] };
 export type RespuestaPaciente = RespuestaOk & { paciente: Paciente };
 export type RespuestaMedicos = RespuestaOk & { medicos: Medico[] };
 export type RespuestaAnalisis = RespuestaOk & { analisis: Analisis[] };
+export type RespuestaNuevoAnalisis = RespuestaOk & {
+  analisis: Analisis;
+  interpretacion?: { texto?: string } | null;
+};
 export type RespuestaMensajes = RespuestaOk & { mensajes: Mensaje[] };
 export type RespuestaMensaje = RespuestaOk & { mensaje: Mensaje };
 export type RespuestaConversacionesAdmin = RespuestaOk & { conversaciones: ConversacionAdmin[] };

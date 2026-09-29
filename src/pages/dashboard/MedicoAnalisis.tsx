@@ -2,22 +2,14 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../services/api";
 import { IconEcgUpload, IconCheck } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
-import type { Paciente } from "../../types";
+import type { Analisis, Paciente } from "../../types";
+
+/** Vercel corta los requests de más de 4.5 MB: avisamos antes de subirlo. */
+const TAMANO_MAXIMO = 4 * 1024 * 1024;
 
 /**
- * Carga de un analisis de ECG.
- *
- * Limitacion del backend actual: `POST /analisis` solo acepta
- * `{ pacienteId, porcentaje }` y la tabla `analisis` no tiene columna de
- * archivo ni de medico. Es decir, el ECG en si todavia no se puede guardar y
- * el porcentaje lo tiene que informar el medico a mano.
- *
- * Guardamos igual el objeto File en estado (no solo el nombre) para que, en
- * cuanto el back tenga storage, sea solo cambiar el body por un FormData:
- *   const fd = new FormData();
- *   fd.append("ecg", archivo);
- *   fd.append("pacienteId", pacienteId);
- *   await api.analisis.realizar(fd);   // request() ya soporta FormData
+ * Carga de un analisis de ECG. El back guarda el archivo y calcula el
+ * porcentaje (por ahora al azar, hasta que esté la IA).
  */
 function MedicoAnalisis() {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
@@ -26,12 +18,11 @@ function MedicoAnalisis() {
 
   const [pacienteId, setPacienteId] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
-  const [porcentaje, setPorcentaje] = useState("");
   const [notas, setNotas] = useState("");
 
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
+  const [resultado, setResultado] = useState<Analisis | null>(null);
 
   useEffect(() => {
     let cancelado = false;
@@ -56,24 +47,21 @@ function MedicoAnalisis() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setDone(false);
+    setResultado(null);
 
     if (!pacienteId) return setError("Elegí un paciente.");
     if (!archivo) return setError("Subí el archivo del ECG.");
+    if (archivo.size > TAMANO_MAXIMO) return setError("El archivo no puede superar los 4 MB.");
 
-    // El back valida `typeof porcentaje === 'number'`, asi que hay que
-    // mandarlo casteado: un string devuelve 400.
-    const valor = Number(porcentaje);
-    if (porcentaje === "" || !Number.isFinite(valor) || valor < 0 || valor > 100) {
-      return setError("El porcentaje debe ser un número entre 0 y 100.");
-    }
+    const datos = new FormData();
+    datos.append("archivo", archivo);
+    datos.append("pacienteId", pacienteId);
 
     setEnviando(true);
     try {
-      await api.analisis.realizar({ pacienteId: Number(pacienteId), porcentaje: valor });
-      setDone(true);
+      const { analisis } = await api.analisis.realizar(datos);
+      setResultado(analisis);
       setArchivo(null);
-      setPorcentaje("");
       setNotas("");
     } catch (err) {
       setError(mensajeDeError(err));
@@ -112,7 +100,7 @@ function MedicoAnalisis() {
   return (
     <div>
       <h1 className="page-title">Realizar análisis</h1>
-      <p className="page-subtitle">Cargá un electrocardiograma y su resultado.</p>
+      <p className="page-subtitle">Subí un electrocardiograma y el sistema calcula el resultado.</p>
 
       <form className="panel-form" onSubmit={handleSubmit}>
         <div className="form-field">
@@ -146,24 +134,6 @@ function MedicoAnalisis() {
         </div>
 
         <div className="form-field">
-          <label htmlFor="analisis-porcentaje">Posibilidad de Chagas (%)</label>
-          <input
-            id="analisis-porcentaje"
-            type="number"
-            min="0"
-            max="100"
-            step="0.01"
-            value={porcentaje}
-            onChange={(e) => setPorcentaje(e.target.value)}
-            required
-          />
-          <small className="form-field__hint">
-            Provisorio: hasta que el análisis por IA esté en el servidor, el resultado se carga a
-            mano. El archivo todavía no se almacena.
-          </small>
-        </div>
-
-        <div className="form-field">
           <label htmlFor="analisis-notas">Notas (opcional)</label>
           <textarea
             id="analisis-notas"
@@ -174,13 +144,14 @@ function MedicoAnalisis() {
         </div>
 
         <button type="submit" className="btn btn--primary" disabled={enviando}>
-          {enviando ? "Guardando…" : "Guardar análisis"}
+          {enviando ? "Analizando…" : "Analizar y guardar"}
         </button>
 
         {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
-        {done && (
+        {resultado && (
           <p className="auth-card__feedback auth-card__feedback--success">
-            <IconCheck size={16} /> Análisis guardado en la historia clínica del paciente.
+            <IconCheck size={16} /> Análisis guardado: posibilidad de Chagas{" "}
+            {Number(resultado.porcentaje).toFixed(2)}%.
           </p>
         )}
       </form>
