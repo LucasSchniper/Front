@@ -52,7 +52,8 @@ async function cargarContactos(esAdmin: boolean, esMedico: boolean): Promise<Con
   const pedido: Promise<{ pacientes?: Paciente[]; medicos?: Medico[] }> = esMedico
     ? api.usuarios.listar()
     : api.medicos.listar();
-  const [data, admins] = await Promise.all([pedido, conversacionesAdmin]);
+  // Si fallan las conversaciones con admins, igual mostramos los chats médico-paciente.
+  const [data, admins] = await Promise.all([pedido, conversacionesAdmin.catch(() => [])]);
   // El backend ya devuelve solo los contactos asignados entre si.
   const propios: Contacto[] = (data.pacientes || data.medicos || []).map((c) => ({
     tipo: esMedico ? "paciente" : "medico",
