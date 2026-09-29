@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
-import { IconCheck, IconClose, IconShield, IconTrash } from "../../components/icons/Icons";
+import { IconChat, IconCheck, IconClose, IconShield, IconTrash } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
 import type { Medico } from "../../types";
+import type { NuevoChatState } from "./Chats";
 
 function AdminMedicos() {
   const { solicitudesPendientes, aprobarMedico, rechazarMedico } = useAuth();
+  const navigate = useNavigate();
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -51,6 +54,13 @@ function AdminMedicos() {
     } catch (err) {
       setError(mensajeDeError(err));
     }
+  };
+
+  const handleEscribir = (m: Medico) => {
+    const state: NuevoChatState = {
+      nuevoChat: { tipo: "medico", id: m.id, nombre: `${m.nombre} ${m.apellido}` },
+    };
+    navigate("/administrador/chats", { state });
   };
 
   return (
@@ -120,7 +130,10 @@ function AdminMedicos() {
                 </td>
                 <td>{m.mail}</td>
                 <td>{m.matricula || "—"}</td>
-                <td>
+                <td className="data-table__actions">
+                  <button className="btn btn--ghost btn--sm" onClick={() => handleEscribir(m)}>
+                    <IconChat size={16} /> Escribir
+                  </button>
                   <button
                     className="icon-btn icon-btn--danger"
                     aria-label={`Eliminar a ${m.nombre}`}

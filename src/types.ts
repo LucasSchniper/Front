@@ -17,6 +17,7 @@ export interface Paciente {
   apellido: string;
   mail: string;
   dni?: string;
+  fecha_nacimiento?: string;
   obra_social?: string | null;
   medico_id?: number | string | null;
   created_at?: string;
@@ -52,6 +53,21 @@ export interface Mensaje {
   contenido: string | null;
   eliminado?: boolean;
   fecha_hora_entrega: string;
+}
+
+/** Con quién puede chatear el admin, y quién le puede responder. */
+export type TipoContraparte = "paciente" | "medico" | "admin";
+
+/** Resumen de una conversación con un admin, tal como la lista el backend. */
+export interface ConversacionAdmin {
+  /** Presentes cuando quien pide es el admin. */
+  usuario_tipo?: "paciente" | "medico";
+  usuario_id?: number | string;
+  /** Presente cuando quien pide es un paciente o un médico. */
+  admin_id?: number | string;
+  nombre: string;
+  apellido: string;
+  ultimo_mensaje_en: string;
 }
 
 export interface Notificacion {
@@ -120,6 +136,7 @@ export type RespuestaMedicos = RespuestaOk & { medicos: Medico[] };
 export type RespuestaAnalisis = RespuestaOk & { analisis: Analisis[] };
 export type RespuestaMensajes = RespuestaOk & { mensajes: Mensaje[] };
 export type RespuestaMensaje = RespuestaOk & { mensaje: Mensaje };
+export type RespuestaConversacionesAdmin = RespuestaOk & { conversaciones: ConversacionAdmin[] };
 export type RespuestaNotificaciones = RespuestaOk & { notificaciones: Notificacion[] };
 
 /* ------------------------------------------------------- Formularios ---- */

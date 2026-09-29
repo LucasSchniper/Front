@@ -95,6 +95,8 @@ export interface AuthContextValue {
   loginWithOAuth: (provider: Provider, credential: string | undefined) => Promise<AuthResultado>;
   completeOAuthSignup: (payload: CompletarRegistroPayload) => Promise<AuthResultado>;
   logout: () => void;
+  /** Refleja en la sesión los datos que el usuario acaba de editar en su perfil. */
+  actualizarSesion: (datos: Pick<Session, "nombre" | "apellido">) => void;
   solicitudesPendientes: SolicitudMedico[];
   aprobarMedico: (id: Medico["id"]) => Promise<void>;
   rechazarMedico: (id: Medico["id"]) => Promise<void>;
@@ -246,6 +248,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCurrentUser(null);
   };
 
+  const actualizarSesion = (datos: Pick<Session, "nombre" | "apellido">): void => {
+    setCurrentUser((prev) => (prev ? { ...prev, ...datos } : prev));
+  };
+
   const aprobarMedico = async (id: Medico["id"]): Promise<void> => {
     await api.medicos.aprobar(id);
     setSolicitudesMedicos((prev) => prev.filter((s) => s.id !== id));
@@ -264,6 +270,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginWithOAuth,
       completeOAuthSignup,
       logout,
+      actualizarSesion,
       solicitudesPendientes: solicitudesMedicos,
       aprobarMedico,
       rechazarMedico,
