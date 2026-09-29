@@ -16,21 +16,28 @@ import {
   IconSummary,
   IconUserCircle,
 } from "../../components/icons/Icons";
-import type { AnalisisMock, ContactoMock, ProximoAnalisisMock } from "../../data/mockData";
-import type { Medico } from "../../types";
+import type { ContactoMock, EstadoAnalisis, ProximoAnalisisMock } from "../../data/mockData";
+import type { Analisis, Medico } from "../../types";
 
 const fechaCorta = (iso: string) => {
-  const [y, m, d] = iso.split("-");
+  const [y, m, d] = iso.slice(0, 10).split("-");
   return `${Number(d)}/${Number(m)}/${y}`;
+};
+
+const ESTADO_POR_BANDA: Record<string, EstadoAnalisis> = {
+  baja: "negativo",
+  media: "seguimiento",
+  alta: "positivo",
 };
 
 function PacienteHome() {
   const currentUser = useSesion();
-  // TODO(back): traer los analisis, el proximo turno y los contactos del paciente.
-  const misAnalisis: AnalisisMock[] = [];
+  // TODO(back): traer el proximo turno y los contactos del paciente.
+  const [misAnalisis, setMisAnalisis] = useState<Analisis[]>([]);
   const ultimo = misAnalisis[0];
-  const normales = misAnalisis.filter((a) => a.estado === "negativo").length;
-  const altos = misAnalisis.length - normales;
+  const estadoUltimo = ESTADO_POR_BANDA[ultimo?.banda ?? ""] ?? "seguimiento";
+  const normales = misAnalisis.filter((a) => a.banda === "baja").length;
+  const altos = misAnalisis.filter((a) => a.banda === "alta").length;
 
   const proximo = null as ProximoAnalisisMock | null;
   const chats: ContactoMock[] = [];
@@ -48,6 +55,12 @@ function PacienteHome() {
       .catch(() => {
         // Sin conexion mostramos la tarjeta vacia en vez de romper el home.
       });
+    api.analisis
+      .listarPropios()
+      .then((data) => {
+        if (!cancelado) setMisAnalisis(data.analisis);
+      })
+      .catch(() => {});
     return () => {
       cancelado = true;
     };
@@ -97,15 +110,15 @@ function PacienteHome() {
             <>
               <div className="metric">
                 <p className="metric__label">Posibilidad de Chagas</p>
-                <p className="metric__value">{ultimo.resultado}%</p>
+                <p className="metric__value">{Number(ultimo.porcentaje).toFixed(2)}%</p>
                 <div className="meter">
                   <span
-                    className={`meter__fill meter__fill--${ultimo.estado}`}
-                    style={{ width: `${ultimo.resultado}%` }}
+                    className={`meter__fill meter__fill--${estadoUltimo}`}
+                    style={{ width: `${Number(ultimo.porcentaje)}%` }}
                   />
                 </div>
                 <p className="metric__meta">
-                  {fechaCorta(ultimo.fecha)} · {ultimo.hora}hs
+                  {fechaCorta(ultimo.fecha_hora_entrega)} · {ultimo.fecha_hora_entrega.slice(11, 16)}hs
                 </p>
               </div>
               <Link to="/paciente/analisis" className="btn btn--primary btn--sm dash-card__cta">

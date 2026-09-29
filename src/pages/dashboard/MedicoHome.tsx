@@ -1,41 +1,84 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSesion } from "../../context/AuthContext";
-import type { AnalisisMock } from "../../data/mockData";
-import type { Paciente } from "../../types";
+import { api } from "../../services/api";
+import { mensajeDeError } from "../../utils/errors";
+import type { Analisis, Paciente } from "../../types";
 import { IconUserCircle, IconSearch, IconUpload, IconCheck } from "../../components/icons/Icons";
+
+/** Vercel corta los requests de más de 4.5 MB: avisamos antes de subirlo. */
+const TAMANO_MAXIMO = 4 * 1024 * 1024;
+
+function fechaCorta(iso: string) {
+  const [y, m, d] = iso.slice(0, 10).split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function horaCorta(iso: string) {
+  return iso.slice(11, 16);
+}
 
 function MedicoHome() {
   const currentUser = useSesion();
-  // TODO(back): traer los pacientes asignados y los analisis del medico logueado.
-  const misPacientes: Paciente[] = [];
-  const misAnalisis: AnalisisMock[] = [];
+  const [misPacientes, setMisPacientes] = useState<Paciente[]>([]);
+  const [misAnalisis, setMisAnalisis] = useState<Analisis[]>([]);
+  const [errorCarga, setErrorCarga] = useState("");
 
   const [query, setQuery] = useState("");
   const pacientesFiltrados = misPacientes.filter((p) =>
-    p.nombre.toLowerCase().includes(query.trim().toLowerCase())
+    `${p.nombre} ${p.apellido}`.toLowerCase().includes(query.trim().toLowerCase())
   );
 
-  const [fileName, setFileName] = useState("");
+  const [pacienteId, setPacienteId] = useState("");
+  const [archivo, setArchivo] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+  const [resultado, setResultado] = useState<Analisis | null>(null);
 
-  const nombrePaciente = (id: Paciente["id"]) =>
-    misPacientes.find((p) => p.id === id)?.nombre || "—";
-  const fechaCorta = (iso: string) => {
-    const [y, m, d] = iso.split("-");
-    return `${d}/${m}/${y}`;
+  useEffect(() => {
+    let cancelado = false;
+    Promise.all([api.usuarios.listar(), api.analisis.listarPropios()])
+      .then(([pacientes, analisis]) => {
+        if (cancelado) return;
+        setMisPacientes(pacientes.pacientes);
+        setPacienteId((actual) => actual || String(pacientes.pacientes[0]?.id ?? ""));
+        setMisAnalisis(analisis.analisis);
+      })
+      .catch((err) => {
+        if (!cancelado) setErrorCarga(mensajeDeError(err));
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
+  const nombrePaciente = (id: Analisis["paciente_id"]) => {
+    const p = misPacientes.find((x) => String(x.id) === String(id));
+    return p ? `${p.nombre} ${p.apellido}` : "—";
   };
 
-  const handleAnalizar = () => {
-    if (!fileName) return;
+  const handleAnalizar = async () => {
+    setError("");
+    setResultado(null);
+    if (!pacienteId) return setError("Elegí un paciente.");
+    if (!archivo) return setError("Elegí el archivo del ECG.");
+    if (archivo.size > TAMANO_MAXIMO) return setError("El archivo no puede superar los 4 MB.");
+
+    const datos = new FormData();
+    datos.append("archivo", archivo);
+    datos.append("pacienteId", pacienteId);
+
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const { analisis } = await api.analisis.realizar(datos);
+      setResultado(analisis);
+      setMisAnalisis((prev) => [analisis, ...prev]);
+      setArchivo(null);
+    } catch (err) {
+      setError(mensajeDeError(err));
+    } finally {
       setLoading(false);
-      setDone(true);
-      setFileName("");
-      setTimeout(() => setDone(false), 3000);
-    }, 1200);
+    }
   };
 
   const nombreDoctor = currentUser.nombre
@@ -46,6 +89,7 @@ function MedicoHome() {
     <div>
       <h1 className="page-title">¡Bienvenido, Dr./Dra. {nombreDoctor}!</h1>
       <p className="page-subtitle">Gestioná tus pacientes y análisis de ECG.</p>
+      {errorCarga && <p className="auth-card__feedback auth-card__feedback--error">{errorCarga}</p>}
 
       <div className="medico-home__grid">
         <div className="dash-card">
@@ -66,13 +110,17 @@ function MedicoHome() {
 
           <ul className="dash-patient-list">
             {pacientesFiltrados.length === 0 && (
-              <li className="empty-state">Sin pacientes que coincidan.</li>
+              <li className="empty-state">
+                {misPacientes.length === 0 ? "Todavía no tenés pacientes asignados." : "Sin pacientes que coincidan."}
+              </li>
             )}
             {pacientesFiltrados.map((p) => (
               <li key={p.id}>
                 <Link to="/medico/pacientes" className="dash-patient-row">
                   <IconUserCircle size={26} />
-                  <span>{p.nombre}</span>
+                  <span>
+                    {p.nombre} {p.apellido}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -85,31 +133,50 @@ function MedicoHome() {
             <h2>Realizar nuevo análisis</h2>
           </div>
 
+          <div className="form-field">
+            <label htmlFor="home-paciente" className="visually-hidden">
+              Paciente
+            </label>
+            <select
+              id="home-paciente"
+              value={pacienteId}
+              onChange={(e) => setPacienteId(e.target.value)}
+              disabled={misPacientes.length === 0}
+            >
+              {misPacientes.length === 0 && <option value="">Sin pacientes asignados</option>}
+              {misPacientes.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre} {p.apellido}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <label className="dash-dropzone" htmlFor="home-ecg-file">
-            <span className="btn btn--ghost btn--sm">
-              {fileName || "Seleccionar archivo"}
-            </span>
+            <span className="btn btn--ghost btn--sm">{archivo?.name || "Seleccionar archivo"}</span>
           </label>
           <input
             id="home-ecg-file"
             type="file"
             accept=".pdf,.png,.jpg,.csv"
             className="visually-hidden"
-            onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
+            onChange={(e) => setArchivo(e.target.files?.[0] || null)}
           />
 
           <button
             type="button"
             className="btn btn--primary dash-card__cta"
-            disabled={!fileName || loading}
+            disabled={!archivo || !pacienteId || loading}
             onClick={handleAnalizar}
           >
             {loading ? "Analizando…" : "Analizar ECG"}
           </button>
 
-          {done && (
+          {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
+          {resultado && (
             <p className="auth-card__feedback auth-card__feedback--success">
-              <IconCheck size={16} /> Análisis guardado en la historia clínica.
+              <IconCheck size={16} /> Análisis guardado: posibilidad de Chagas{" "}
+              {Number(resultado.porcentaje).toFixed(2)}%.
             </p>
           )}
         </div>
@@ -127,11 +194,11 @@ function MedicoHome() {
           <div className="results-table__row" key={a.id}>
             <span className="results-table__patient">
               <IconUserCircle size={22} />
-              {nombrePaciente(a.pacienteId)}
+              {nombrePaciente(a.paciente_id)}
             </span>
-            <span>{a.resultado}%</span>
-            <span>{fechaCorta(a.fecha)}</span>
-            <span>{a.hora}hs</span>
+            <span>{Number(a.porcentaje).toFixed(2)}%</span>
+            <span>{fechaCorta(a.fecha_hora_entrega)}</span>
+            <span>{horaCorta(a.fecha_hora_entrega)}hs</span>
           </div>
         ))}
       </div>
