@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
+import { IconSearch } from "../../components/icons/Icons";
 
 type Estado = "positivo" | "seguimiento" | "negativo";
 
@@ -57,6 +58,11 @@ function MedicoPacientes() {
   // El backend ya devuelve solo los pacientes asignados a este médico.
   const pacientes = todos;
 
+  const [query, setQuery] = useState("");
+  const pacientesFiltrados = pacientes.filter((p) =>
+    `${p.nombre} ${p.apellido} ${p.dni ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())
+  );
+
   const toggle = (id: Paciente["id"]) => {
     const abrir = expanded !== id;
     setExpanded(abrir ? id : null);
@@ -83,8 +89,23 @@ function MedicoPacientes() {
         </p>
       )}
 
+      {pacientes.length > 0 && (
+        <label className="dash-search dash-search--page">
+          <IconSearch size={16} />
+          <input
+            type="search"
+            placeholder="Buscar pacientes"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </label>
+      )}
+      {pacientes.length > 0 && pacientesFiltrados.length === 0 && (
+        <p className="empty-state">Sin pacientes que coincidan.</p>
+      )}
+
       <div className="patient-list">
-        {pacientes.map((p) => {
+        {pacientesFiltrados.map((p) => {
           const isOpen = expanded === p.id;
           const analisis = analisisPorPaciente[p.id] || [];
           return (

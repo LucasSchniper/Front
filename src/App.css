@@ -1803,6 +1803,17 @@ html {
   border-radius: 999px;
   color: var(--text-muted);
 }
+.dash-search--page {
+  max-width: 360px;
+  margin-top: 20px;
+}
+.chat-contacts .dash-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  flex-shrink: 0;
+  margin: 0 0 4px;
+}
 .dash-search input {
   flex: 1;
   border: none;
