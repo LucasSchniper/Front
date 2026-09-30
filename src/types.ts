@@ -47,6 +47,8 @@ export interface Analisis {
   archivo_nombre?: string | null;
   fecha_hora_entrega: string;
   paciente_id?: number | string;
+  /** false mientras el médico no se lo mande al paciente. */
+  enviado?: boolean;
 }
 
 export interface Mensaje {
@@ -136,6 +138,7 @@ export type RespuestaPacientes = RespuestaOk & { pacientes: Paciente[] };
 export type RespuestaPaciente = RespuestaOk & { paciente: Paciente };
 export type RespuestaMedicos = RespuestaOk & { medicos: Medico[] };
 export type RespuestaAnalisis = RespuestaOk & { analisis: Analisis[] };
+export type RespuestaUnAnalisis = RespuestaOk & { analisis: Analisis };
 export type RespuestaNuevoAnalisis = RespuestaOk & {
   analisis: Analisis;
   interpretacion?: { texto?: string } | null;

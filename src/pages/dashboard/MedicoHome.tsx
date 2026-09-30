@@ -5,6 +5,7 @@ import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
 import { IconUserCircle, IconSearch, IconUpload, IconCheck } from "../../components/icons/Icons";
+import EnviarAnalisis from "../../components/EnviarAnalisis";
 
 /** Vercel corta los requests de más de 4.5 MB: avisamos antes de subirlo. */
 const TAMANO_MAXIMO = 4 * 1024 * 1024;
@@ -51,6 +52,11 @@ function MedicoHome() {
       cancelado = true;
     };
   }, []);
+
+  const actualizarAnalisis = (actualizado: Analisis) => {
+    setMisAnalisis((prev) => prev.map((a) => (a.id === actualizado.id ? actualizado : a)));
+    setResultado((actual) => (actual?.id === actualizado.id ? actualizado : actual));
+  };
 
   const nombrePaciente = (id: Analisis["paciente_id"]) => {
     const p = misPacientes.find((x) => String(x.id) === String(id));
@@ -174,24 +180,42 @@ function MedicoHome() {
 
           {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
           {resultado && (
-            <p className="auth-card__feedback auth-card__feedback--success">
-              <IconCheck size={16} /> Análisis guardado: posibilidad de Chagas{" "}
-              {Number(resultado.porcentaje).toFixed(2)}%.
-            </p>
+            <div className="auth-card__feedback auth-card__feedback--success analisis-resultado">
+              <p>
+                <IconCheck size={16} /> Análisis guardado para {nombrePaciente(resultado.paciente_id)}:
+                posibilidad de Chagas {Number(resultado.porcentaje).toFixed(2)}%.
+              </p>
+              {resultado.enviado === false ? (
+                <>
+                  <p className="analisis-resultado__nota">
+                    Todavía no se lo enviaste. ¿Querés mandárselo al paciente?
+                  </p>
+                  <div className="analisis-resultado__acciones">
+                    <EnviarAnalisis analisis={resultado} onEnviado={actualizarAnalisis} />
+                    <button type="button" className="btn btn--ghost btn--sm" onClick={() => setResultado(null)}>
+                      No enviar por ahora
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="analisis-resultado__nota">Se lo enviaste al paciente.</p>
+              )}
+            </div>
           )}
         </div>
       </div>
 
       <div className="results-table">
-        <div className="results-table__row results-table__row--head">
+        <div className="results-table__row results-table__row--envio results-table__row--head">
           <span>Paciente</span>
           <span>Resultado</span>
           <span>Fecha</span>
           <span>Hora</span>
+          <span>Paciente lo ve</span>
         </div>
         {misAnalisis.length === 0 && <p className="empty-state">Todavía no hay análisis cargados.</p>}
         {misAnalisis.map((a) => (
-          <div className="results-table__row" key={a.id}>
+          <div className="results-table__row results-table__row--envio" key={a.id}>
             <span className="results-table__patient">
               <IconUserCircle size={22} />
               {nombrePaciente(a.paciente_id)}
@@ -199,6 +223,9 @@ function MedicoHome() {
             <span>{Number(a.porcentaje).toFixed(2)}%</span>
             <span>{fechaCorta(a.fecha_hora_entrega)}</span>
             <span>{horaCorta(a.fecha_hora_entrega)}hs</span>
+            <span>
+              <EnviarAnalisis analisis={a} onEnviado={actualizarAnalisis} />
+            </span>
           </div>
         ))}
       </div>

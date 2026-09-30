@@ -1923,6 +1923,10 @@ html {
   }
 }
 
+.results-table__row--envio {
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.6fr;
+}
+
 .analysis-table__row {
   grid-template-columns: 1fr 1fr 2.2fr 56px;
   column-gap: 18px;
@@ -2719,5 +2723,59 @@ html {
   .mi-medico {
     align-items: flex-start;
     flex-wrap: wrap;
+  }
+}
+
+/* Envío de análisis al paciente */
+.envio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.envio-chip--enviado {
+  background: #dcf3e4;
+  color: #1f6b3a;
+}
+.envio-accion {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.envio-accion__error {
+  font-size: 0.76rem;
+  color: var(--red-strong);
+}
+.analysis-row__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.analisis-resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.analisis-resultado p {
+  margin: 0;
+}
+.analisis-resultado__nota {
+  font-weight: 400;
+}
+.analisis-resultado__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .results-table__row--envio {
+    grid-template-columns: 1.4fr 0.8fr 0.8fr 1.2fr;
   }
 }

@@ -8,6 +8,7 @@ import type {
   RespuestaMensajes,
   RespuestaNotificaciones,
   RespuestaNuevoAnalisis,
+  RespuestaUnAnalisis,
   RespuestaOk,
   RespuestaPaciente,
   RespuestaPacientes,
@@ -213,5 +214,8 @@ export const api = {
     listarPropios: (): Promise<RespuestaAnalisis> => request("/analisis"),
     listarDePaciente: (pacienteId: Id): Promise<RespuestaAnalisis> =>
       request(`/analisis/${pacienteId}`),
+    /** Recién acá el paciente lo puede ver y le llega la notificación. */
+    enviar: (id: Id): Promise<RespuestaUnAnalisis> =>
+      request(`/analisis/${id}/enviar`, { method: "PUT" }),
   },
 };

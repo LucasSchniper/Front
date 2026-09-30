@@ -3,6 +3,7 @@ import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
 import { IconSearch } from "../../components/icons/Icons";
+import EnviarAnalisis from "../../components/EnviarAnalisis";
 
 type Estado = "positivo" | "seguimiento" | "negativo";
 
@@ -62,6 +63,12 @@ function MedicoPacientes() {
   const pacientesFiltrados = pacientes.filter((p) =>
     `${p.nombre} ${p.apellido} ${p.dni ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())
   );
+
+  const actualizarAnalisis = (pacienteId: Paciente["id"], actualizado: Analisis) =>
+    setAnalisisPorPaciente((prev) => ({
+      ...prev,
+      [pacienteId]: (prev[pacienteId] || []).map((a) => (a.id === actualizado.id ? actualizado : a)),
+    }));
 
   const toggle = (id: Paciente["id"]) => {
     const abrir = expanded !== id;
@@ -140,7 +147,13 @@ function MedicoPacientes() {
                             {fecha} · {hora}
                           </p>
                         </div>
-                        <span className={`badge badge--${estado}`}>{ESTADO_LABEL[estado]}</span>
+                        <div className="analysis-row__acciones">
+                          <span className={`badge badge--${estado}`}>{ESTADO_LABEL[estado]}</span>
+                          <EnviarAnalisis
+                            analisis={a}
+                            onEnviado={(actualizado) => actualizarAnalisis(p.id, actualizado)}
+                          />
+                        </div>
                       </div>
                     );
                   })}

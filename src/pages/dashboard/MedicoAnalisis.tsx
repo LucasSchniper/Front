@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../services/api";
 import { IconEcgUpload, IconCheck } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
+import EnviarAnalisis from "../../components/EnviarAnalisis";
 import type { Analisis, Paciente } from "../../types";
 
 /** Vercel corta los requests de más de 4.5 MB: avisamos antes de subirlo. */
@@ -144,15 +145,32 @@ function MedicoAnalisis() {
         </div>
 
         <button type="submit" className="btn btn--primary" disabled={enviando}>
-          {enviando ? "Analizando…" : "Analizar y guardar"}
+          {enviando ? "Analizando…" : "Analizar"}
         </button>
 
         {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
         {resultado && (
-          <p className="auth-card__feedback auth-card__feedback--success">
-            <IconCheck size={16} /> Análisis guardado: posibilidad de Chagas{" "}
-            {Number(resultado.porcentaje).toFixed(2)}%.
-          </p>
+          <div className="auth-card__feedback auth-card__feedback--success analisis-resultado">
+            <p>
+              <IconCheck size={16} /> Análisis guardado: posibilidad de Chagas{" "}
+              {Number(resultado.porcentaje).toFixed(2)}%.
+            </p>
+            {resultado.enviado === false ? (
+              <>
+                <p className="analisis-resultado__nota">
+                  Todavía no se lo enviaste. ¿Querés mandárselo al paciente?
+                </p>
+                <div className="analisis-resultado__acciones">
+                  <EnviarAnalisis analisis={resultado} onEnviado={setResultado} />
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={() => setResultado(null)}>
+                    No enviar por ahora
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="analisis-resultado__nota">Se lo enviaste al paciente.</p>
+            )}
+          </div>
         )}
       </form>
     </div>
