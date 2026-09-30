@@ -6,6 +6,7 @@ import { IconBell, IconChat, IconEcgUpload, IconShield } from "../../components/
 import { mensajeDeError } from "../../utils/errors";
 import type { IconProps } from "../../components/icons/Icons";
 import type { Notificacion } from "../../types";
+import { EVENTO_NOTIFICACIONES } from "../../utils/eventos";
 
 type IconoNotif = (p: IconProps) => ReactElement;
 
@@ -78,7 +79,10 @@ function Notificaciones() {
 
   const marcarLeida = (id: Notificacion["id"]) => {
     setDelServidor((prev) => prev.map((n) => (n.id === id ? { ...n, leida: true } : n)));
-    api.notificaciones.marcarLeida(id).catch((err: unknown) => setError(mensajeDeError(err)));
+    api.notificaciones
+      .marcarLeida(id)
+      .then(() => window.dispatchEvent(new Event(EVENTO_NOTIFICACIONES)))
+      .catch((err: unknown) => setError(mensajeDeError(err)));
   };
 
   const solicitudNotifs: NotificacionUI[] = esAdmin

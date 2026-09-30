@@ -4,6 +4,11 @@ import Sidebar from "./Sidebar";
 import { useAuth, useSesion } from "../../context/AuthContext";
 import Logo from "../../components/Logo";
 import { IconMenu, IconClose, IconBell } from "../../components/icons/Icons";
+import { api } from "../../services/api";
+import { EVENTO_NOTIFICACIONES } from "../../utils/eventos";
+
+/** Cada cuánto preguntamos al back si llegaron notificaciones nuevas. */
+const INTERVALO_NOTIFICACIONES = 30_000;
 
 function DashboardLayout() {
   const currentUser = useSesion();
@@ -12,13 +17,34 @@ function DashboardLayout() {
   const { pathname } = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sinLeer, setSinLeer] = useState(0);
 
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 
+  // Se vuelve a consultar al cambiar de página, cada cierto tiempo y cuando se lee una.
+  useEffect(() => {
+    let cancelado = false;
+    const contar = () =>
+      api.notificaciones
+        .listar()
+        .then((data) => {
+          if (!cancelado) setSinLeer(data.notificaciones.filter((n) => !n.leida).length);
+        })
+        .catch(() => {});
+    contar();
+    const intervalo = window.setInterval(contar, INTERVALO_NOTIFICACIONES);
+    window.addEventListener(EVENTO_NOTIFICACIONES, contar);
+    return () => {
+      cancelado = true;
+      window.clearInterval(intervalo);
+      window.removeEventListener(EVENTO_NOTIFICACIONES, contar);
+    };
+  }, [pathname, currentUser.id]);
+
   const pendientes =
-    currentUser.role === "administrador" ? solicitudesPendientes.length : 0;
+    sinLeer + (currentUser.role === "administrador" ? solicitudesPendientes.length : 0);
 
   const handleLogout = () => {
     logout();
@@ -42,7 +68,7 @@ function DashboardLayout() {
 
         <Link
           to={`/${currentUser.role}/notificaciones`}
-          className="dashboard__notif-btn"
+          className={`dashboard__notif-btn ${pendientes > 0 ? "dashboard__notif-btn--nuevas" : ""}`}
           aria-label={
             pendientes > 0 ? `Notificaciones (${pendientes} sin leer)` : "Notificaciones"
           }

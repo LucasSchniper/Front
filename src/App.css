@@ -1360,6 +1360,13 @@ html {
   background: #fff;
   transform: translateY(-1px);
 }
+.dashboard__notif-btn--nuevas {
+  background: var(--red-strong);
+  color: #fff;
+}
+.dashboard__notif-btn--nuevas:hover {
+  background: var(--maroon-dark);
+}
 .dashboard__notif-dot {
   position: absolute;
   top: -2px;
