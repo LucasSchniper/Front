@@ -2747,6 +2747,26 @@ html {
   align-items: flex-start;
   gap: 4px;
 }
+.envio-chip--aprobado {
+  background: #e3ecfb;
+  color: #2a4f8f;
+}
+.envio-accion__pregunta {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.envio-accion__botones {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.btn--danger {
+  background: var(--red-strong);
+  color: #fff;
+}
+.btn--danger:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
 .envio-accion__error {
   font-size: 0.76rem;
   color: var(--red-strong);

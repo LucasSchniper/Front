@@ -47,6 +47,7 @@ export interface Analisis {
   archivo_nombre?: string | null;
   fecha_hora_entrega: string;
   paciente_id?: number | string;
+  aprobado?: boolean;
   /** false mientras el médico no se lo mande al paciente. */
   enviado?: boolean;
 }

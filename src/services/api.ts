@@ -214,6 +214,9 @@ export const api = {
     listarPropios: (): Promise<RespuestaAnalisis> => request("/analisis"),
     listarDePaciente: (pacienteId: Id): Promise<RespuestaAnalisis> =>
       request(`/analisis/${pacienteId}`),
+    aprobar: (id: Id): Promise<RespuestaUnAnalisis> =>
+      request(`/analisis/${id}/aprobar`, { method: "PUT" }),
+    rechazar: (id: Id): Promise<RespuestaOk> => request(`/analisis/${id}`, { method: "DELETE" }),
     /** Recién acá el paciente lo puede ver y le llega la notificación. */
     enviar: (id: Id): Promise<RespuestaUnAnalisis> =>
       request(`/analisis/${id}/enviar`, { method: "PUT" }),

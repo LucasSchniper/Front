@@ -5,7 +5,7 @@ import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
 import { IconUserCircle, IconSearch, IconUpload, IconCheck } from "../../components/icons/Icons";
-import EnviarAnalisis from "../../components/EnviarAnalisis";
+import RevisarAnalisis from "../../components/RevisarAnalisis";
 
 /** Vercel corta los requests de más de 4.5 MB: avisamos antes de subirlo. */
 const TAMANO_MAXIMO = 4 * 1024 * 1024;
@@ -35,6 +35,7 @@ function MedicoHome() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [resultado, setResultado] = useState<Analisis | null>(null);
+  const [aviso, setAviso] = useState("");
 
   useEffect(() => {
     let cancelado = false;
@@ -58,6 +59,12 @@ function MedicoHome() {
     setResultado((actual) => (actual?.id === actualizado.id ? actualizado : actual));
   };
 
+  const quitarAnalisis = (eliminado: Analisis) => {
+    setMisAnalisis((prev) => prev.filter((a) => a.id !== eliminado.id));
+    setResultado((actual) => (actual?.id === eliminado.id ? null : actual));
+    setAviso("Rechazaste el resultado: el análisis se eliminó.");
+  };
+
   const nombrePaciente = (id: Analisis["paciente_id"]) => {
     const p = misPacientes.find((x) => String(x.id) === String(id));
     return p ? `${p.nombre} ${p.apellido}` : "—";
@@ -65,6 +72,7 @@ function MedicoHome() {
 
   const handleAnalizar = async () => {
     setError("");
+    setAviso("");
     setResultado(null);
     if (!pacienteId) return setError("Elegí un paciente.");
     if (!archivo) return setError("Elegí el archivo del ECG.");
@@ -179,22 +187,27 @@ function MedicoHome() {
           </button>
 
           {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
+          {aviso && <p className="auth-card__feedback">{aviso}</p>}
           {resultado && (
             <div className="auth-card__feedback auth-card__feedback--success analisis-resultado">
               <p>
-                <IconCheck size={16} /> Análisis guardado para {nombrePaciente(resultado.paciente_id)}:
+                <IconCheck size={16} /> Resultado de la IA para {nombrePaciente(resultado.paciente_id)}:
                 posibilidad de Chagas {Number(resultado.porcentaje).toFixed(2)}%.
               </p>
               {resultado.enviado === false ? (
                 <>
                   <p className="analisis-resultado__nota">
-                    Todavía no se lo enviaste. ¿Querés mandárselo al paciente?
+                    {resultado.aprobado === false
+                      ? "Revisá el resultado antes de decidir si se lo enviás al paciente."
+                      : "Aprobaste el resultado. ¿Querés mandárselo al paciente?"}
                   </p>
                   <div className="analisis-resultado__acciones">
-                    <EnviarAnalisis analisis={resultado} onEnviado={actualizarAnalisis} />
-                    <button type="button" className="btn btn--ghost btn--sm" onClick={() => setResultado(null)}>
-                      No enviar por ahora
-                    </button>
+                    <RevisarAnalisis analisis={resultado} onActualizado={actualizarAnalisis} onEliminado={quitarAnalisis} />
+                    {resultado.aprobado !== false && (
+                      <button type="button" className="btn btn--ghost btn--sm" onClick={() => setResultado(null)}>
+                        No enviar por ahora
+                      </button>
+                    )}
                   </div>
                 </>
               ) : (
@@ -211,7 +224,7 @@ function MedicoHome() {
           <span>Resultado</span>
           <span>Fecha</span>
           <span>Hora</span>
-          <span>Paciente lo ve</span>
+          <span>Revisión</span>
         </div>
         {misAnalisis.length === 0 && <p className="empty-state">Todavía no hay análisis cargados.</p>}
         {misAnalisis.map((a) => (
@@ -224,7 +237,7 @@ function MedicoHome() {
             <span>{fechaCorta(a.fecha_hora_entrega)}</span>
             <span>{horaCorta(a.fecha_hora_entrega)}hs</span>
             <span>
-              <EnviarAnalisis analisis={a} onEnviado={actualizarAnalisis} />
+              <RevisarAnalisis analisis={a} onActualizado={actualizarAnalisis} onEliminado={quitarAnalisis} />
             </span>
           </div>
         ))}

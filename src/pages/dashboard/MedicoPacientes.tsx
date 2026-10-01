@@ -3,7 +3,7 @@ import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
 import { IconSearch } from "../../components/icons/Icons";
-import EnviarAnalisis from "../../components/EnviarAnalisis";
+import RevisarAnalisis from "../../components/RevisarAnalisis";
 
 type Estado = "positivo" | "seguimiento" | "negativo";
 
@@ -68,6 +68,12 @@ function MedicoPacientes() {
     setAnalisisPorPaciente((prev) => ({
       ...prev,
       [pacienteId]: (prev[pacienteId] || []).map((a) => (a.id === actualizado.id ? actualizado : a)),
+    }));
+
+  const quitarAnalisis = (pacienteId: Paciente["id"], eliminado: Analisis) =>
+    setAnalisisPorPaciente((prev) => ({
+      ...prev,
+      [pacienteId]: (prev[pacienteId] || []).filter((a) => a.id !== eliminado.id),
     }));
 
   const toggle = (id: Paciente["id"]) => {
@@ -149,9 +155,10 @@ function MedicoPacientes() {
                         </div>
                         <div className="analysis-row__acciones">
                           <span className={`badge badge--${estado}`}>{ESTADO_LABEL[estado]}</span>
-                          <EnviarAnalisis
+                          <RevisarAnalisis
                             analisis={a}
-                            onEnviado={(actualizado) => actualizarAnalisis(p.id, actualizado)}
+                            onActualizado={(actualizado) => actualizarAnalisis(p.id, actualizado)}
+                            onEliminado={(eliminado) => quitarAnalisis(p.id, eliminado)}
                           />
                         </div>
                       </div>

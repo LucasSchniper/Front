@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../services/api";
 import { IconEcgUpload, IconCheck } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
-import EnviarAnalisis from "../../components/EnviarAnalisis";
+import RevisarAnalisis from "../../components/RevisarAnalisis";
 import type { Analisis, Paciente } from "../../types";
 
 /** Vercel corta los requests de más de 4.5 MB: avisamos antes de subirlo. */
@@ -24,6 +24,7 @@ function MedicoAnalisis() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
   const [resultado, setResultado] = useState<Analisis | null>(null);
+  const [aviso, setAviso] = useState("");
 
   useEffect(() => {
     let cancelado = false;
@@ -48,6 +49,7 @@ function MedicoAnalisis() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setAviso("");
     setResultado(null);
 
     if (!pacienteId) return setError("Elegí un paciente.");
@@ -69,6 +71,11 @@ function MedicoAnalisis() {
     } finally {
       setEnviando(false);
     }
+  };
+
+  const handleRechazado = () => {
+    setResultado(null);
+    setAviso("Rechazaste el resultado: el análisis se eliminó.");
   };
 
   if (cargando) {
@@ -149,22 +156,27 @@ function MedicoAnalisis() {
         </button>
 
         {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
+        {aviso && <p className="auth-card__feedback">{aviso}</p>}
         {resultado && (
           <div className="auth-card__feedback auth-card__feedback--success analisis-resultado">
             <p>
-              <IconCheck size={16} /> Análisis guardado: posibilidad de Chagas{" "}
+              <IconCheck size={16} /> Resultado de la IA: posibilidad de Chagas{" "}
               {Number(resultado.porcentaje).toFixed(2)}%.
             </p>
             {resultado.enviado === false ? (
               <>
                 <p className="analisis-resultado__nota">
-                  Todavía no se lo enviaste. ¿Querés mandárselo al paciente?
+                  {resultado.aprobado === false
+                    ? "Revisá el resultado antes de decidir si se lo enviás al paciente."
+                    : "Aprobaste el resultado. ¿Querés mandárselo al paciente?"}
                 </p>
                 <div className="analisis-resultado__acciones">
-                  <EnviarAnalisis analisis={resultado} onEnviado={setResultado} />
-                  <button type="button" className="btn btn--ghost btn--sm" onClick={() => setResultado(null)}>
-                    No enviar por ahora
-                  </button>
+                  <RevisarAnalisis analisis={resultado} onActualizado={setResultado} onEliminado={handleRechazado} />
+                  {resultado.aprobado !== false && (
+                    <button type="button" className="btn btn--ghost btn--sm" onClick={() => setResultado(null)}>
+                      No enviar por ahora
+                    </button>
+                  )}
                 </div>
               </>
             ) : (
