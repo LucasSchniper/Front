@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useSesion } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
+import { ADVERTENCIA_TAMIZAJE, bandaDe, percentilDe } from "../../utils/banda";
 import type { Analisis, Paciente } from "../../types";
 import { IconUserCircle, IconSearch, IconUpload, IconCheck } from "../../components/icons/Icons";
 import RevisarAnalisis from "../../components/RevisarAnalisis";
@@ -32,6 +33,8 @@ function MedicoHome() {
 
   const [pacienteId, setPacienteId] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
+  // Obligatoria para CSV (el JSON y el WFDB la traen adentro); 500 Hz es lo más común.
+  const [frecuencia, setFrecuencia] = useState("500");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [resultado, setResultado] = useState<Analisis | null>(null);
@@ -81,6 +84,7 @@ function MedicoHome() {
     const datos = new FormData();
     datos.append("archivo", archivo);
     datos.append("pacienteId", pacienteId);
+    if (frecuencia) datos.append("frecuencia", frecuencia);
 
     setLoading(true);
     try {
@@ -172,10 +176,21 @@ function MedicoHome() {
           <input
             id="home-ecg-file"
             type="file"
-            accept=".pdf,.png,.jpg,.csv"
+            accept=".csv,.json,.zip"
             className="visually-hidden"
             onChange={(e) => setArchivo(e.target.files?.[0] || null)}
           />
+
+          <div className="form-field">
+            <label htmlFor="home-frecuencia">Frecuencia de muestreo (Hz, obligatoria para CSV)</label>
+            <input
+              id="home-frecuencia"
+              type="number"
+              min={1}
+              value={frecuencia}
+              onChange={(e) => setFrecuencia(e.target.value)}
+            />
+          </div>
 
           <button
             type="button"
@@ -191,9 +206,11 @@ function MedicoHome() {
           {resultado && (
             <div className="auth-card__feedback auth-card__feedback--success analisis-resultado">
               <p>
-                <IconCheck size={16} /> Resultado de la IA para {nombrePaciente(resultado.paciente_id)}:
-                posibilidad de Chagas {Number(resultado.porcentaje).toFixed(2)}%.
+                <IconCheck size={16} /> Resultado de la IA para {nombrePaciente(resultado.paciente_id)}:{" "}
+                {bandaDe(resultado).etiqueta} ({percentilDe(resultado)}).
               </p>
+              {resultado.texto_banda && <p className="analisis-resultado__nota">{resultado.texto_banda}</p>}
+              <p className="analisis-banda__texto">{ADVERTENCIA_TAMIZAJE}</p>
               {resultado.enviado === false ? (
                 <>
                   <p className="analisis-resultado__nota">
@@ -233,7 +250,9 @@ function MedicoHome() {
               <IconUserCircle size={22} />
               {nombrePaciente(a.paciente_id)}
             </span>
-            <span>{Number(a.porcentaje).toFixed(2)}%</span>
+            <span title={a.texto_banda ?? undefined}>
+              <span className={`badge badge--${bandaDe(a).clase}`}>{bandaDe(a).etiqueta}</span> {percentilDe(a)}
+            </span>
             <span>{fechaCorta(a.fecha_hora_entrega)}</span>
             <span>{horaCorta(a.fecha_hora_entrega)}hs</span>
             <span>

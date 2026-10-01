@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../services/api";
 import { IconEcgUpload, IconCheck } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
+import { ADVERTENCIA_TAMIZAJE, bandaDe, percentilDe } from "../../utils/banda";
 import RevisarAnalisis from "../../components/RevisarAnalisis";
 import type { Analisis, Paciente } from "../../types";
 
@@ -9,8 +10,8 @@ import type { Analisis, Paciente } from "../../types";
 const TAMANO_MAXIMO = 4 * 1024 * 1024;
 
 /**
- * Carga de un analisis de ECG. El back guarda el archivo y calcula el
- * porcentaje (por ahora al azar, hasta que esté la IA).
+ * Carga de un analisis de ECG. El back guarda el archivo y se lo manda al
+ * modelo, que devuelve la banda y el percentil de riesgo.
  */
 function MedicoAnalisis() {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
@@ -19,6 +20,8 @@ function MedicoAnalisis() {
 
   const [pacienteId, setPacienteId] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
+  // Obligatoria para CSV (el JSON y el WFDB la traen adentro); 500 Hz es lo más común.
+  const [frecuencia, setFrecuencia] = useState("500");
   const [notas, setNotas] = useState("");
 
   const [enviando, setEnviando] = useState(false);
@@ -59,6 +62,7 @@ function MedicoAnalisis() {
     const datos = new FormData();
     datos.append("archivo", archivo);
     datos.append("pacienteId", pacienteId);
+    if (frecuencia) datos.append("frecuencia", frecuencia);
 
     setEnviando(true);
     try {
@@ -130,14 +134,25 @@ function MedicoAnalisis() {
           <label htmlFor="analisis-ecg">Archivo de ECG</label>
           <label className="file-drop" htmlFor="analisis-ecg">
             <IconEcgUpload size={22} />
-            <span>{archivo?.name || "Elegir archivo (.pdf, .png, .csv)"}</span>
+            <span>{archivo?.name || "Elegir archivo (.csv, .json o .zip WFDB)"}</span>
           </label>
           <input
             id="analisis-ecg"
             type="file"
-            accept=".pdf,.png,.jpg,.csv"
+            accept=".csv,.json,.zip"
             className="visually-hidden"
             onChange={(e) => setArchivo(e.target.files?.[0] || null)}
+          />
+        </div>
+
+        <div className="form-field">
+          <label htmlFor="analisis-frecuencia">Frecuencia de muestreo (Hz, obligatoria para CSV)</label>
+          <input
+            id="analisis-frecuencia"
+            type="number"
+            min={1}
+            value={frecuencia}
+            onChange={(e) => setFrecuencia(e.target.value)}
           />
         </div>
 
@@ -160,9 +175,10 @@ function MedicoAnalisis() {
         {resultado && (
           <div className="auth-card__feedback auth-card__feedback--success analisis-resultado">
             <p>
-              <IconCheck size={16} /> Resultado de la IA: posibilidad de Chagas{" "}
-              {Number(resultado.porcentaje).toFixed(2)}%.
+              <IconCheck size={16} /> Resultado de la IA: {bandaDe(resultado).etiqueta} ({percentilDe(resultado)}).
             </p>
+            {resultado.texto_banda && <p className="analisis-resultado__nota">{resultado.texto_banda}</p>}
+            <p className="analisis-banda__texto">{ADVERTENCIA_TAMIZAJE}</p>
             {resultado.enviado === false ? (
               <>
                 <p className="analisis-resultado__nota">

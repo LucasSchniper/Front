@@ -4,20 +4,7 @@ import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
 import { IconSearch } from "../../components/icons/Icons";
 import RevisarAnalisis from "../../components/RevisarAnalisis";
-
-type Estado = "positivo" | "seguimiento" | "negativo";
-
-function estadoDe(resultado: number): Estado {
-  if (resultado >= 70) return "positivo";
-  if (resultado >= 30) return "seguimiento";
-  return "negativo";
-}
-
-const ESTADO_LABEL: Record<Estado, string> = {
-  negativo: "Sin hallazgos",
-  positivo: "Sugestivo",
-  seguimiento: "En seguimiento",
-};
+import { bandaDe, percentilDe } from "../../utils/banda";
 
 function fechaHora(iso: string) {
   const d = new Date(iso);
@@ -142,19 +129,21 @@ function MedicoPacientes() {
                     <p className="empty-state">Sin análisis todavía.</p>
                   )}
                   {analisis.map((a) => {
-                    const resultado = Number(a.porcentaje);
-                    const estado = estadoDe(resultado);
+                    const banda = bandaDe(a);
                     const { fecha, hora } = fechaHora(a.fecha_hora_entrega);
                     return (
                       <div className="analysis-row" key={a.id}>
                         <div>
-                          <p className="analysis-row__summary">{resultado}% de posibilidad</p>
+                          <p className="analysis-row__summary">
+                            {banda.etiqueta} · {percentilDe(a)}
+                          </p>
+                          {a.texto_banda && <p className="analisis-banda__texto">{a.texto_banda}</p>}
                           <p className="analysis-row__meta">
                             {fecha} · {hora}
                           </p>
                         </div>
                         <div className="analysis-row__acciones">
-                          <span className={`badge badge--${estado}`}>{ESTADO_LABEL[estado]}</span>
+                          <span className={`badge badge--${banda.clase}`}>{banda.etiqueta}</span>
                           <RevisarAnalisis
                             analisis={a}
                             onActualizado={(actualizado) => actualizarAnalisis(p.id, actualizado)}

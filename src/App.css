@@ -2799,3 +2799,14 @@ html {
     grid-template-columns: 1.4fr 0.8fr 0.8fr 1.2fr;
   }
 }
+
+.badge--neutro {
+  background: #e8eaf0;
+  color: #3d4457;
+}
+.analisis-banda__texto {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}

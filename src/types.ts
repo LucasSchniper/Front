@@ -43,7 +43,10 @@ export interface Admin {
 export interface Analisis {
   id: number | string;
   porcentaje: number | string;
-  banda?: "alta" | "media" | "baja" | null;
+  /** Lo más importante del resultado: `alta` es la que manda a serología. */
+  banda?: "alta" | "no_alta" | null;
+  /** Explicación de la banda; para `no_alta` aclara que no descarta Chagas. */
+  texto_banda?: string | null;
   archivo_nombre?: string | null;
   fecha_hora_entrega: string;
   paciente_id?: number | string;
@@ -142,7 +145,7 @@ export type RespuestaAnalisis = RespuestaOk & { analisis: Analisis[] };
 export type RespuestaUnAnalisis = RespuestaOk & { analisis: Analisis };
 export type RespuestaNuevoAnalisis = RespuestaOk & {
   analisis: Analisis;
-  interpretacion?: { texto?: string } | null;
+  interpretacion?: { texto?: string; advertencia?: string } | null;
 };
 export type RespuestaMensajes = RespuestaOk & { mensajes: Mensaje[] };
 export type RespuestaMensaje = RespuestaOk & { mensaje: Mensaje };
