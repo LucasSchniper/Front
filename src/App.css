@@ -2569,6 +2569,13 @@ html {
 .notif-item--action {
   border-color: var(--maroon);
 }
+.notif-item--link {
+  cursor: pointer;
+}
+.notif-item--link:hover,
+.notif-item--link:focus-visible {
+  border-color: var(--maroon);
+}
 .notif-item__action {
   display: inline-block;
   margin-top: 8px;

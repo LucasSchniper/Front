@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactElement } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 import { useAuth, useSesion } from "../../context/AuthContext";
 import { IconBell, IconChat, IconEcgUpload, IconShield } from "../../components/icons/Icons";
@@ -30,8 +30,17 @@ const ICON_BY_TYPE: Record<string, IconoNotif> = {
 
 const ICON_BY_TEXTO: [RegExp, IconoNotif][] = [
   [/mensaje/i, IconChat],
-  [/análisis/i, IconEcgUpload],
+  [/an[aá]lisis/i, IconEcgUpload],
 ];
+
+/** El back no manda el tipo, así que el destino sale del texto. Admin no tiene pantalla de análisis. */
+function destinoPara(texto: string, role: string): string | undefined {
+  if (/mensaje|chat/i.test(texto)) return `/${role}/chats`;
+  if (/an[aá]lisis|resultado|electrocardiograma|ecg/i.test(texto) && role !== "administrador") {
+    return `/${role}/analisis`;
+  }
+  return undefined;
+}
 
 function iconoPara(n: NotificacionUI): IconoNotif {
   if (n.tipo && ICON_BY_TYPE[n.tipo]) return ICON_BY_TYPE[n.tipo];
@@ -53,6 +62,7 @@ function fechaCorta(iso: string) {
 function Notificaciones() {
   const currentUser = useSesion();
   const { solicitudesPendientes } = useAuth();
+  const navigate = useNavigate();
   const [delServidor, setDelServidor] = useState<Notificacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -122,12 +132,32 @@ function Notificaciones() {
       <div className="notif-list">
         {notificaciones.map((n) => {
           const Icon = iconoPara(n);
+          const destino = n.delServidor ? destinoPara(n.texto, currentUser.role) : undefined;
+          const pendiente = n.delServidor && !n.leida;
+          const alTocar =
+            destino || pendiente
+              ? () => {
+                  if (pendiente) marcarLeida(n.id);
+                  if (destino) navigate(destino);
+                }
+              : undefined;
           return (
             <div
-              className={`notif-item ${n.accion ? "notif-item--action" : ""}`}
+              className={`notif-item ${n.accion ? "notif-item--action" : ""} ${
+                destino ? "notif-item--link" : ""
+              }`}
               key={n.id}
               style={n.delServidor && n.leida ? { opacity: 0.6 } : undefined}
-              onClick={n.delServidor && !n.leida ? () => marcarLeida(n.id) : undefined}
+              onClick={alTocar}
+              role={destino ? "link" : undefined}
+              tabIndex={destino ? 0 : undefined}
+              onKeyDown={
+                destino
+                  ? (e) => {
+                      if (e.key === "Enter") alTocar?.();
+                    }
+                  : undefined
+              }
             >
               <span className="notif-item__icon">
                 <Icon size={18} />
