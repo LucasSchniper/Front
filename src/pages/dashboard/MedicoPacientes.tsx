@@ -43,7 +43,6 @@ function MedicoPacientes() {
     };
   }, []);
 
-  // El backend ya devuelve solo los pacientes asignados a este médico.
   const pacientes = todos;
 
   const [query, setQuery] = useState("");

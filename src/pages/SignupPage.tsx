@@ -125,8 +125,11 @@ function SignupPage() {
         {mailEnUso ? (
           <div className="auth-card__notice auth-card__notice--stack">
             <span>
-              Ya hay una cuenta con <strong>{form.mail.trim()}</strong>. Iniciá sesión con tu
-              contraseña o con Google.
+              {error || (
+                <>
+                  Ya hay una cuenta con <strong>{form.mail.trim()}</strong>.
+                </>
+              )}
             </span>
             <Link
               to="/login"

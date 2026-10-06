@@ -52,9 +52,7 @@ async function cargarContactos(esAdmin: boolean, esMedico: boolean): Promise<Con
   const pedido: Promise<{ pacientes?: Paciente[]; medicos?: Medico[] }> = esMedico
     ? api.usuarios.listar()
     : api.medicos.listar();
-  // Si fallan las conversaciones con admins, igual mostramos los chats médico-paciente.
   const [data, admins] = await Promise.all([pedido, conversacionesAdmin.catch(() => [])]);
-  // El backend ya devuelve solo los contactos asignados entre si.
   const propios: Contacto[] = (data.pacientes || data.medicos || []).map((c) => ({
     tipo: esMedico ? "paciente" : "medico",
     id: c.id,
@@ -98,8 +96,6 @@ function Chats() {
     };
   }, [esMedico, esAdmin, currentUser.id]);
 
-  // La conversación que abrió el admin desde una lista todavía no existe en el
-  // back: la mostramos como borrador hasta que mande el primer mensaje.
   const borrador =
     nuevoChat && !contacts.some((c) => claveDe(c) === claveDe(nuevoChat)) ? nuevoChat : null;
   const visibles = borrador ? [borrador, ...contacts] : contacts;
@@ -110,8 +106,6 @@ function Chats() {
   const activeTipo = active?.tipo;
   const activeId = active?.id;
 
-  // Recarga al cambiar de conversación y cuando un borrador resulta ser una
-  // conversación que ya existía.
   useEffect(() => {
     if (!activeTipo || activeId === undefined) return;
     if (esBorrador) {
@@ -159,7 +153,6 @@ function Chats() {
       }
       setMessages((prev) => [...prev, mensaje]);
 
-      // Con el primer mensaje, el borrador pasa a ser una conversación real.
       if (esBorrador) setContacts(await cargarContactos(esAdmin, esMedico));
     } catch (err) {
       setError(mensajeDeError(err));

@@ -27,7 +27,6 @@ const fechaCorta = (iso: string) => {
 
 function PacienteHome() {
   const currentUser = useSesion();
-  // TODO(back): traer el proximo turno y los contactos del paciente.
   const [misAnalisis, setMisAnalisis] = useState<Analisis[]>([]);
   const ultimo = misAnalisis[0];
   const sinPrioridad = misAnalisis.filter((a) => a.banda === "no_alta").length;
@@ -36,7 +35,6 @@ function PacienteHome() {
   const proximo = null as ProximoAnalisisMock | null;
   const chats: ContactoMock[] = [];
 
-  // Quien me sigue: el backend ya devuelve solo el médico asignado (o ninguno).
   const [miMedico, setMiMedico] = useState<Medico | null>(null);
 
   useEffect(() => {
@@ -47,7 +45,6 @@ function PacienteHome() {
         if (!cancelado) setMiMedico((data.medicos || [])[0] || null);
       })
       .catch(() => {
-        // Sin conexion mostramos la tarjeta vacia en vez de romper el home.
       });
     api.analisis
       .listarPropios()

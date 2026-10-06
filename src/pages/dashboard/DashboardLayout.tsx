@@ -23,7 +23,6 @@ function DashboardLayout() {
     mainRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 
-  // Se vuelve a consultar al cambiar de página, cada cierto tiempo y cuando se lee una.
   useEffect(() => {
     let cancelado = false;
     const contar = () =>

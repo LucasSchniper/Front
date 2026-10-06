@@ -43,7 +43,6 @@ function formularioDesde(datos: Datos): Formulario {
     nombre: datos.nombre ?? "",
     apellido: datos.apellido ?? "",
     dni: ("dni" in datos && datos.dni) || "",
-    // La base guarda DATE; el input necesita YYYY-MM-DD.
     fechaNacimiento: ("fecha_nacimiento" in datos && datos.fecha_nacimiento?.slice(0, 10)) || "",
     obraSocial: ("obra_social" in datos && datos.obra_social) || "",
     matricula: ("matricula" in datos && datos.matricula) || "",

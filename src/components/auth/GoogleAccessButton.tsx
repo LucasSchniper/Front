@@ -9,9 +9,9 @@ interface GoogleAccessButtonProps {
 }
 
 /**
- * Acceso con Google. Si el mail ya tiene cuenta en DECA (aunque se haya creado
- * a mano) el back devuelve esa misma cuenta; si no existe, pasa a completar el
- * perfil, donde además se le pide una contraseña para entrar sin Google.
+ * Acceso con Google. Sólo entra a cuentas creadas con Google: si el mail ya
+ * está registrado con contraseña el back lo rechaza. Si no existe, pasa a
+ * completar el perfil.
  */
 function GoogleAccessButton({ text, onError, onPendingApproval }: GoogleAccessButtonProps) {
   const { loginWithOAuth } = useAuth();
