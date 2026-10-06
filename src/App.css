@@ -547,6 +547,10 @@
   position: relative;
   z-index: 1;
 }
+.how .section-heading h2,
+.chagas .section-heading h2 {
+  color: #ba3232;
+}
 .how .section-heading {
   max-width: 760px;
 }
