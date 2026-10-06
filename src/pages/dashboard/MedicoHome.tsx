@@ -33,7 +33,6 @@ function MedicoHome() {
 
   const [pacienteId, setPacienteId] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
-  // Obligatoria para CSV (el JSON y el WFDB la traen adentro); 500 Hz es lo más común.
   const [frecuencia, setFrecuencia] = useState("500");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

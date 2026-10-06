@@ -6,7 +6,7 @@ import RoleFields from "../components/auth/RoleFields";
 import SolicitudEnviada from "../components/auth/SolicitudEnviada";
 import { useSignupForm } from "../components/auth/useSignupForm";
 import { useAuth } from "../context/AuthContext";
-import { MIN_PASSWORD, normalizeSignup } from "../utils/signupValidation";
+import { normalizeSignup } from "../utils/signupValidation";
 import type { PerfilOAuth, Provider } from "../types";
 
 /** Lo que el botón de Google deja en el state de la navegación. */
@@ -31,14 +31,13 @@ function CompleteProfilePage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const resumen = validate(["contrasena"]);
+    const resumen = validate();
     setError(resumen);
     if (resumen) return;
 
     setLoading(true);
     const result = await completeOAuthSignup({
       regToken,
-      contrasena: form.contrasena,
       ...normalizeSignup(form),
     });
     setLoading(false);
@@ -72,21 +71,6 @@ function CompleteProfilePage() {
             value={form.fechaNacimiento}
             onChange={update("fechaNacimiento")}
           />
-        </FormField>
-
-        <FormField label="Contraseña para DECA" id="signup-password" error={errors.contrasena}>
-          <input
-            id="signup-password"
-            type="password"
-            autoComplete="new-password"
-            required
-            placeholder={`Mínimo ${MIN_PASSWORD} caracteres`}
-            value={form.contrasena}
-            onChange={update("contrasena")}
-          />
-          <span className="form-field__hint">
-            Con tu mail y esta contraseña también vas a poder entrar sin Google.
-          </span>
         </FormField>
 
         <RoleFields form={form} errors={errors} update={update} />

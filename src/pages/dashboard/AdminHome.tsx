@@ -24,7 +24,6 @@ function AdminHome() {
     ? `${currentUser.nombre} ${currentUser.apellido || ""}`.trim()
     : currentUser.email.split("@")[0];
 
-  // Mismas fuentes que usa la pantalla de asignacion del admin.
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
 
@@ -37,15 +36,12 @@ function AdminHome() {
         setPacientes(dataPacientes.pacientes || []);
       })
       .catch(() => {
-        // El resto del dashboard sigue siendo util aunque falle el conteo.
       });
     return () => {
       cancelado = true;
     };
   }, []);
 
-  // Contamos solo asignaciones vigentes: pacientes que existen hoy y cuyo
-  // medico sigue teniendo acceso.
   const asignaciones = (() => {
     const medicosVigentes = new Set(medicos.map((m) => String(m.id)));
     return pacientes.filter((p) => p.medico_id && medicosVigentes.has(String(p.medico_id))).length;

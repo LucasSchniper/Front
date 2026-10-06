@@ -84,7 +84,7 @@ export type AuthResultado =
       error: string;
       /** El back no conoce ese mail: la pantalla ofrece registrarlo. */
       cuentaInexistente?: boolean;
-      /** Ya hay una cuenta con contraseña para ese mail. */
+      /** Ya hay una cuenta (local o de Google) con ese mail. */
       mailEnUso?: boolean;
     };
 
@@ -184,10 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  /**
-   * Si el mail ya existe porque la cuenta se creó con Google, el back le agrega
-   * la contraseña a esa misma cuenta en vez de crear otra.
-   */
+  /** Registro con mail y contraseña. Si el mail ya existe (local o Google), el back devuelve 409. */
   const signupWithPassword = async (payload: RegistroPayload): Promise<AuthResultado> => {
     try {
       return iniciarSesion(await api.auth.registro({ ...payload, mail: payload.mail.trim() }));

@@ -61,7 +61,6 @@ async function request<T extends RespuestaOk>(
   path: string,
   { method = "GET", body, auth = true }: RequestOptions = {}
 ): Promise<T> {
-  // Con FormData el Content-Type lo pone el browser (necesita el boundary).
   const esForm = typeof FormData !== "undefined" && body instanceof FormData;
   const headers: Record<string, string> = esForm ? {} : { "Content-Type": "application/json" };
   if (auth) {
@@ -109,8 +108,6 @@ interface DatosPerfilPayload {
 
 export interface CompletarRegistroPayload extends DatosPerfilPayload {
   regToken: string;
-  /** Contraseña para poder entrar después desde la web sin Google. */
-  contrasena: string;
 }
 
 export interface RegistroPayload extends DatosPerfilPayload {
