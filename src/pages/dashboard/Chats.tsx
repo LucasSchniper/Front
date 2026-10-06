@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useLocation } from "react-router-dom";
 import { useSesion } from "../../context/AuthContext";
 import { api } from "../../services/api";
-import { IconSend, IconTrash, IconUserCircle } from "../../components/icons/Icons";
+import { IconSearch, IconSend, IconTrash, IconUserCircle } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
 import type { EnviarMensajePayload } from "../../services/api";
 import type { ConversacionAdmin, Medico, Mensaje, Paciente, TipoContraparte } from "../../types";
@@ -52,7 +52,8 @@ async function cargarContactos(esAdmin: boolean, esMedico: boolean): Promise<Con
   const pedido: Promise<{ pacientes?: Paciente[]; medicos?: Medico[] }> = esMedico
     ? api.usuarios.listar()
     : api.medicos.listar();
-  const [data, admins] = await Promise.all([pedido, conversacionesAdmin]);
+  // Si fallan las conversaciones con admins, igual mostramos los chats médico-paciente.
+  const [data, admins] = await Promise.all([pedido, conversacionesAdmin.catch(() => [])]);
   // El backend ya devuelve solo los contactos asignados entre si.
   const propios: Contacto[] = (data.pacientes || data.medicos || []).map((c) => ({
     tipo: esMedico ? "paciente" : "medico",
@@ -75,6 +76,7 @@ function Chats() {
   const [messages, setMessages] = useState<Mensaje[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [draft, setDraft] = useState("");
+  const [query, setQuery] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -101,6 +103,7 @@ function Chats() {
   const borrador =
     nuevoChat && !contacts.some((c) => claveDe(c) === claveDe(nuevoChat)) ? nuevoChat : null;
   const visibles = borrador ? [borrador, ...contacts] : contacts;
+  const filtrados = visibles.filter((c) => c.nombre.toLowerCase().includes(query.trim().toLowerCase()));
   const active = visibles.find((c) => claveDe(c) === activeKey);
   const conAdmin = !!active && (esAdmin || active.tipo === "admin");
   const esBorrador = !!active && active === borrador;
@@ -203,7 +206,17 @@ function Chats() {
       {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
       <div className="chat-layout">
         <div className="chat-contacts">
-          {visibles.map((c) => {
+          <label className="dash-search">
+            <IconSearch size={16} />
+            <input
+              type="search"
+              placeholder="Buscar chats"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
+          {filtrados.length === 0 && <p className="empty-state">Sin chats que coincidan.</p>}
+          {filtrados.map((c) => {
             const clave = claveDe(c);
             return (
               <button

@@ -16,21 +16,22 @@ import {
   IconSummary,
   IconUserCircle,
 } from "../../components/icons/Icons";
-import type { AnalisisMock, ContactoMock, ProximoAnalisisMock } from "../../data/mockData";
-import type { Medico } from "../../types";
+import type { ContactoMock, ProximoAnalisisMock } from "../../data/mockData";
+import type { Analisis, Medico } from "../../types";
+import { ADVERTENCIA_TAMIZAJE, bandaDe, percentilDe } from "../../utils/banda";
 
 const fechaCorta = (iso: string) => {
-  const [y, m, d] = iso.split("-");
+  const [y, m, d] = iso.slice(0, 10).split("-");
   return `${Number(d)}/${Number(m)}/${y}`;
 };
 
 function PacienteHome() {
   const currentUser = useSesion();
-  // TODO(back): traer los analisis, el proximo turno y los contactos del paciente.
-  const misAnalisis: AnalisisMock[] = [];
+  // TODO(back): traer el proximo turno y los contactos del paciente.
+  const [misAnalisis, setMisAnalisis] = useState<Analisis[]>([]);
   const ultimo = misAnalisis[0];
-  const normales = misAnalisis.filter((a) => a.estado === "negativo").length;
-  const altos = misAnalisis.length - normales;
+  const sinPrioridad = misAnalisis.filter((a) => a.banda === "no_alta").length;
+  const altos = misAnalisis.filter((a) => a.banda === "alta").length;
 
   const proximo = null as ProximoAnalisisMock | null;
   const chats: ContactoMock[] = [];
@@ -48,6 +49,12 @@ function PacienteHome() {
       .catch(() => {
         // Sin conexion mostramos la tarjeta vacia en vez de romper el home.
       });
+    api.analisis
+      .listarPropios()
+      .then((data) => {
+        if (!cancelado) setMisAnalisis(data.analisis);
+      })
+      .catch(() => {});
     return () => {
       cancelado = true;
     };
@@ -96,17 +103,16 @@ function PacienteHome() {
           {ultimo ? (
             <>
               <div className="metric">
-                <p className="metric__label">Posibilidad de Chagas</p>
-                <p className="metric__value">{ultimo.resultado}%</p>
-                <div className="meter">
-                  <span
-                    className={`meter__fill meter__fill--${ultimo.estado}`}
-                    style={{ width: `${ultimo.resultado}%` }}
-                  />
-                </div>
-                <p className="metric__meta">
-                  {fechaCorta(ultimo.fecha)} · {ultimo.hora}hs
+                <p className="metric__label">Resultado del tamizaje</p>
+                <p className="metric__value">
+                  <span className={`badge badge--${bandaDe(ultimo).clase}`}>{bandaDe(ultimo).etiqueta}</span>
                 </p>
+                {ultimo.texto_banda && <p className="analisis-banda__texto">{ultimo.texto_banda}</p>}
+                <p className="metric__meta">
+                  {percentilDe(ultimo)} · {fechaCorta(ultimo.fecha_hora_entrega)} ·{" "}
+                  {ultimo.fecha_hora_entrega.slice(11, 16)}hs
+                </p>
+                <p className="analisis-banda__texto">{ADVERTENCIA_TAMIZAJE}</p>
               </div>
               <Link to="/paciente/analisis" className="btn btn--primary btn--sm dash-card__cta">
                 Ver resultado completo
@@ -161,14 +167,14 @@ function PacienteHome() {
               <span className="summary-row__icon summary-row__icon--ok">
                 <IconHeartCheck size={17} />
               </span>
-              <span className="summary-row__label">Resultados normales</span>
-              <span className="summary-row__value">{normales}</span>
+              <span className="summary-row__label">Sin prioridad por ECG</span>
+              <span className="summary-row__value">{sinPrioridad}</span>
             </li>
             <li className="summary-row">
               <span className="summary-row__icon summary-row__icon--alert">
                 <IconAlert size={17} />
               </span>
-              <span className="summary-row__label">Resultados altos</span>
+              <span className="summary-row__label">Prioridad alta</span>
               <span className="summary-row__value">{altos}</span>
             </li>
           </ul>

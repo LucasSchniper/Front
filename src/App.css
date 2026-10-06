@@ -1360,6 +1360,13 @@ html {
   background: #fff;
   transform: translateY(-1px);
 }
+.dashboard__notif-btn--nuevas {
+  background: var(--red-strong);
+  color: #fff;
+}
+.dashboard__notif-btn--nuevas:hover {
+  background: var(--maroon-dark);
+}
 .dashboard__notif-dot {
   position: absolute;
   top: -2px;
@@ -1803,6 +1810,17 @@ html {
   border-radius: 999px;
   color: var(--text-muted);
 }
+.dash-search--page {
+  max-width: 360px;
+  margin-top: 20px;
+}
+.chat-contacts .dash-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  flex-shrink: 0;
+  margin: 0 0 4px;
+}
 .dash-search input {
   flex: 1;
   border: none;
@@ -1903,6 +1921,10 @@ html {
   .results-table__row:not(.analysis-table__row) span:nth-child(4) {
     display: none;
   }
+}
+
+.results-table__row--envio {
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.6fr;
 }
 
 .analysis-table__row {
@@ -2702,4 +2724,89 @@ html {
     align-items: flex-start;
     flex-wrap: wrap;
   }
+}
+
+/* Envío de análisis al paciente */
+.envio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.envio-chip--enviado {
+  background: #dcf3e4;
+  color: #1f6b3a;
+}
+.envio-accion {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.envio-chip--aprobado {
+  background: #e3ecfb;
+  color: #2a4f8f;
+}
+.envio-accion__pregunta {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.envio-accion__botones {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.btn--danger {
+  background: var(--red-strong);
+  color: #fff;
+}
+.btn--danger:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+.envio-accion__error {
+  font-size: 0.76rem;
+  color: var(--red-strong);
+}
+.analysis-row__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.analisis-resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.analisis-resultado p {
+  margin: 0;
+}
+.analisis-resultado__nota {
+  font-weight: 400;
+}
+.analisis-resultado__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .results-table__row--envio {
+    grid-template-columns: 1.4fr 0.8fr 0.8fr 1.2fr;
+  }
+}
+
+.badge--neutro {
+  background: #e8eaf0;
+  color: #3d4457;
+}
+.analisis-banda__texto {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }

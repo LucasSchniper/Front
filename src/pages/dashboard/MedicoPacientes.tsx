@@ -2,20 +2,9 @@ import { useEffect, useState } from "react";
 import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
-
-type Estado = "positivo" | "seguimiento" | "negativo";
-
-function estadoDe(resultado: number): Estado {
-  if (resultado >= 70) return "positivo";
-  if (resultado >= 30) return "seguimiento";
-  return "negativo";
-}
-
-const ESTADO_LABEL: Record<Estado, string> = {
-  negativo: "Sin hallazgos",
-  positivo: "Sugestivo",
-  seguimiento: "En seguimiento",
-};
+import { IconSearch } from "../../components/icons/Icons";
+import RevisarAnalisis from "../../components/RevisarAnalisis";
+import { bandaDe, percentilDe } from "../../utils/banda";
 
 function fechaHora(iso: string) {
   const d = new Date(iso);
@@ -57,6 +46,23 @@ function MedicoPacientes() {
   // El backend ya devuelve solo los pacientes asignados a este médico.
   const pacientes = todos;
 
+  const [query, setQuery] = useState("");
+  const pacientesFiltrados = pacientes.filter((p) =>
+    `${p.nombre} ${p.apellido} ${p.dni ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())
+  );
+
+  const actualizarAnalisis = (pacienteId: Paciente["id"], actualizado: Analisis) =>
+    setAnalisisPorPaciente((prev) => ({
+      ...prev,
+      [pacienteId]: (prev[pacienteId] || []).map((a) => (a.id === actualizado.id ? actualizado : a)),
+    }));
+
+  const quitarAnalisis = (pacienteId: Paciente["id"], eliminado: Analisis) =>
+    setAnalisisPorPaciente((prev) => ({
+      ...prev,
+      [pacienteId]: (prev[pacienteId] || []).filter((a) => a.id !== eliminado.id),
+    }));
+
   const toggle = (id: Paciente["id"]) => {
     const abrir = expanded !== id;
     setExpanded(abrir ? id : null);
@@ -83,8 +89,23 @@ function MedicoPacientes() {
         </p>
       )}
 
+      {pacientes.length > 0 && (
+        <label className="dash-search dash-search--page">
+          <IconSearch size={16} />
+          <input
+            type="search"
+            placeholder="Buscar pacientes"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </label>
+      )}
+      {pacientes.length > 0 && pacientesFiltrados.length === 0 && (
+        <p className="empty-state">Sin pacientes que coincidan.</p>
+      )}
+
       <div className="patient-list">
-        {pacientes.map((p) => {
+        {pacientesFiltrados.map((p) => {
           const isOpen = expanded === p.id;
           const analisis = analisisPorPaciente[p.id] || [];
           return (
@@ -108,18 +129,27 @@ function MedicoPacientes() {
                     <p className="empty-state">Sin análisis todavía.</p>
                   )}
                   {analisis.map((a) => {
-                    const resultado = Number(a.porcentaje);
-                    const estado = estadoDe(resultado);
+                    const banda = bandaDe(a);
                     const { fecha, hora } = fechaHora(a.fecha_hora_entrega);
                     return (
                       <div className="analysis-row" key={a.id}>
                         <div>
-                          <p className="analysis-row__summary">{resultado}% de posibilidad</p>
+                          <p className="analysis-row__summary">
+                            {banda.etiqueta} · {percentilDe(a)}
+                          </p>
+                          {a.texto_banda && <p className="analisis-banda__texto">{a.texto_banda}</p>}
                           <p className="analysis-row__meta">
                             {fecha} · {hora}
                           </p>
                         </div>
-                        <span className={`badge badge--${estado}`}>{ESTADO_LABEL[estado]}</span>
+                        <div className="analysis-row__acciones">
+                          <span className={`badge badge--${banda.clase}`}>{banda.etiqueta}</span>
+                          <RevisarAnalisis
+                            analisis={a}
+                            onActualizado={(actualizado) => actualizarAnalisis(p.id, actualizado)}
+                            onEliminado={(eliminado) => quitarAnalisis(p.id, eliminado)}
+                          />
+                        </div>
                       </div>
                     );
                   })}

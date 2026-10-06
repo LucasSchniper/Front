@@ -43,8 +43,16 @@ export interface Admin {
 export interface Analisis {
   id: number | string;
   porcentaje: number | string;
+  /** Lo más importante del resultado: `alta` es la que manda a serología. */
+  banda?: "alta" | "no_alta" | null;
+  /** Explicación de la banda; para `no_alta` aclara que no descarta Chagas. */
+  texto_banda?: string | null;
+  archivo_nombre?: string | null;
   fecha_hora_entrega: string;
   paciente_id?: number | string;
+  aprobado?: boolean;
+  /** false mientras el médico no se lo mande al paciente. */
+  enviado?: boolean;
 }
 
 export interface Mensaje {
@@ -134,6 +142,11 @@ export type RespuestaPacientes = RespuestaOk & { pacientes: Paciente[] };
 export type RespuestaPaciente = RespuestaOk & { paciente: Paciente };
 export type RespuestaMedicos = RespuestaOk & { medicos: Medico[] };
 export type RespuestaAnalisis = RespuestaOk & { analisis: Analisis[] };
+export type RespuestaUnAnalisis = RespuestaOk & { analisis: Analisis };
+export type RespuestaNuevoAnalisis = RespuestaOk & {
+  analisis: Analisis;
+  interpretacion?: { texto?: string; advertencia?: string } | null;
+};
 export type RespuestaMensajes = RespuestaOk & { mensajes: Mensaje[] };
 export type RespuestaMensaje = RespuestaOk & { mensaje: Mensaje };
 export type RespuestaConversacionesAdmin = RespuestaOk & { conversaciones: ConversacionAdmin[] };

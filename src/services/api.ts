@@ -7,6 +7,8 @@ import type {
   RespuestaMensaje,
   RespuestaMensajes,
   RespuestaNotificaciones,
+  RespuestaNuevoAnalisis,
+  RespuestaUnAnalisis,
   RespuestaOk,
   RespuestaPaciente,
   RespuestaPacientes,
@@ -145,11 +147,6 @@ export interface ActualizarPerfilPayload {
   matricula?: string;
 }
 
-export interface RealizarAnalisisPayload {
-  pacienteId: number;
-  porcentaje: number;
-}
-
 export const api = {
   auth: {
     login: (payload: LoginPayload): Promise<RespuestaAuth> =>
@@ -211,10 +208,17 @@ export const api = {
       request(`/notificaciones/${id}/leida`, { method: "PUT" }),
   },
   analisis: {
-    realizar: (payload: RealizarAnalisisPayload | FormData): Promise<RespuestaOk> =>
-      request("/analisis", { method: "POST", body: payload }),
+    /** Multipart con `archivo` (el ECG) y `pacienteId`. */
+    realizar: (datos: FormData): Promise<RespuestaNuevoAnalisis> =>
+      request("/analisis", { method: "POST", body: datos }),
     listarPropios: (): Promise<RespuestaAnalisis> => request("/analisis"),
     listarDePaciente: (pacienteId: Id): Promise<RespuestaAnalisis> =>
       request(`/analisis/${pacienteId}`),
+    aprobar: (id: Id): Promise<RespuestaUnAnalisis> =>
+      request(`/analisis/${id}/aprobar`, { method: "PUT" }),
+    rechazar: (id: Id): Promise<RespuestaOk> => request(`/analisis/${id}`, { method: "DELETE" }),
+    /** Recién acá el paciente lo puede ver y le llega la notificación. */
+    enviar: (id: Id): Promise<RespuestaUnAnalisis> =>
+      request(`/analisis/${id}/enviar`, { method: "PUT" }),
   },
 };

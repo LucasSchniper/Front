@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
-import { IconChat } from "../../components/icons/Icons";
+import { IconChat, IconSearch } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
 import type { Medico, Paciente } from "../../types";
 import type { NuevoChatState } from "./Chats";
@@ -15,6 +15,10 @@ function AdminPacientes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [asignandoId, setAsignandoId] = useState<Paciente["id"] | null>(null);
+  const [query, setQuery] = useState("");
+  const pacientesFiltrados = pacientes.filter((p) =>
+    `${p.nombre} ${p.apellido} ${p.dni ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())
+  );
 
   const cargar = () => {
     setLoading(true);
@@ -76,6 +80,16 @@ function AdminPacientes() {
         </p>
       )}
 
+      <label className="dash-search dash-search--page">
+        <IconSearch size={16} />
+        <input
+          type="search"
+          placeholder="Buscar pacientes"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </label>
+
       <div className="data-table-wrap">
         <table className="data-table">
           <thead>
@@ -87,7 +101,7 @@ function AdminPacientes() {
             </tr>
           </thead>
           <tbody>
-            {pacientes.map((p) => (
+            {pacientesFiltrados.map((p) => (
               <tr key={p.id}>
                 <td>
                   {p.nombre} {p.apellido}
@@ -119,6 +133,13 @@ function AdminPacientes() {
               <tr>
                 <td colSpan={4} className="data-table__empty">
                   Todavía no hay pacientes registrados.
+                </td>
+              </tr>
+            )}
+            {pacientes.length > 0 && pacientesFiltrados.length === 0 && (
+              <tr>
+                <td colSpan={4} className="data-table__empty">
+                  Sin pacientes que coincidan.
                 </td>
               </tr>
             )}

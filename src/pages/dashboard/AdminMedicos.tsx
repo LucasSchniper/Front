@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
-import { IconChat, IconCheck, IconClose, IconShield, IconTrash } from "../../components/icons/Icons";
+import { IconChat, IconCheck, IconClose, IconSearch, IconShield, IconTrash } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
 import type { Medico } from "../../types";
 import type { NuevoChatState } from "./Chats";
@@ -13,6 +13,12 @@ function AdminMedicos() {
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+  const medicosFiltrados = medicos.filter((m) =>
+    `${m.nombre} ${m.apellido} ${m.mail ?? ""} ${m.matricula ?? ""}`
+      .toLowerCase()
+      .includes(query.trim().toLowerCase())
+  );
 
   const cargarMedicos = () => {
     setLoading(true);
@@ -112,6 +118,16 @@ function AdminMedicos() {
       </section>
 
       <h2 className="section-title">Médicos con acceso</h2>
+      <label className="dash-search dash-search--page">
+        <IconSearch size={16} />
+        <input
+          type="search"
+          placeholder="Buscar médicos"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </label>
+
       <div className="data-table-wrap">
         <table className="data-table">
           <thead>
@@ -123,7 +139,7 @@ function AdminMedicos() {
             </tr>
           </thead>
           <tbody>
-            {medicos.map((m) => (
+            {medicosFiltrados.map((m) => (
               <tr key={m.id}>
                 <td>
                   {m.nombre} {m.apellido}
@@ -148,6 +164,13 @@ function AdminMedicos() {
               <tr>
                 <td colSpan={4} className="data-table__empty">
                   Todavía no hay médicos aprobados.
+                </td>
+              </tr>
+            )}
+            {medicos.length > 0 && medicosFiltrados.length === 0 && (
+              <tr>
+                <td colSpan={4} className="data-table__empty">
+                  Sin médicos que coincidan.
                 </td>
               </tr>
             )}

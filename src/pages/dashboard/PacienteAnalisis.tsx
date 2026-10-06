@@ -2,20 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
 import type { Analisis } from "../../types";
-
-type Estado = "positivo" | "seguimiento" | "negativo";
-
-function estadoDe(resultado: number): Estado {
-  if (resultado >= 70) return "positivo";
-  if (resultado >= 30) return "seguimiento";
-  return "negativo";
-}
-
-const ESTADO_LABEL: Record<Estado, string> = {
-  negativo: "Sin hallazgos",
-  positivo: "Sugestivo",
-  seguimiento: "En seguimiento",
-};
+import { ADVERTENCIA_TAMIZAJE, bandaDe } from "../../utils/banda";
 
 function fechaHora(iso: string) {
   const d = new Date(iso);
@@ -27,9 +14,8 @@ function fechaHora(iso: string) {
 }
 
 /**
- * Patient results, following the "Mis analisis" reference: a table of
- * fecha / hora / resultado, where the resultado is a bar with the model's
- * confidence percentage.
+ * Patient results: a table of fecha / hora / resultado, where the resultado
+ * is the model's band followed by the risk percentile.
  */
 function PacienteAnalisis() {
   const [analisis, setAnalisis] = useState<Analisis[]>([]);
@@ -70,30 +56,28 @@ function PacienteAnalisis() {
           <div className="results-table__row analysis-table__row results-table__row--head">
             <span>Fecha</span>
             <span>Hora</span>
-            <span className="analysis-table__result-head">Resultado</span>
+            <span className="analysis-table__result-head">Resultado · percentil de riesgo</span>
           </div>
           {analisis.map((a) => {
-            const resultado = Number(a.porcentaje);
-            const estado = estadoDe(resultado);
+            const banda = bandaDe(a);
             const { fecha, hora } = fechaHora(a.fecha_hora_entrega);
             return (
               <div className="results-table__row analysis-table__row" key={a.id}>
                 <span className="analysis-table__date">{fecha}</span>
                 <span className="analysis-table__time">{hora}</span>
-                <span
-                  className="result-bar"
-                  role="img"
-                  aria-label={`${resultado}% · ${ESTADO_LABEL[estado]}`}
-                  title={ESTADO_LABEL[estado]}
-                >
-                  <span className="result-bar__fill" style={{ width: `${resultado}%` }} />
+                <span title={a.texto_banda ?? undefined}>
+                  <span className={`badge badge--${banda.clase}`}>{banda.etiqueta}</span>
+                  {a.texto_banda && <span className="analisis-banda__texto">{a.texto_banda}</span>}
                 </span>
-                <span className="analysis-table__value">{resultado}%</span>
+                <span className="analysis-table__value" title="Percentil de riesgo">
+                  {Math.round(Number(a.porcentaje))}
+                </span>
               </div>
             );
           })}
         </div>
       )}
+      {analisis.length > 0 && <p className="analisis-banda__texto">{ADVERTENCIA_TAMIZAJE}</p>}
     </div>
   );
 }
