@@ -772,6 +772,21 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.85);
 }
+
+/* Letra más fina en las secciones de la landing, a tono con el hero.
+   Va acotado a estas secciones porque .eyebrow y .section-heading se comparten. */
+:is(.how, .chagas, .stats) :is(h2, h3),
+:is(.how, .chagas, .stats) .eyebrow,
+.how__number,
+.accordion__trigger,
+.accordion__number,
+.stat-card__number {
+  font-weight: 500;
+}
+.stat-card__label,
+.stats__source {
+  font-weight: 400;
+}
 @media (max-width: 760px) {
   .stats__grid {
     grid-template-columns: repeat(2, 1fr);
