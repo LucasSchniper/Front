@@ -2058,9 +2058,11 @@ html {
   color: var(--red);
 }
 .stat-orb__img {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
+  filter: drop-shadow(0.6px 0 0 var(--red-strong)) drop-shadow(-0.6px 0 0 var(--red-strong))
+    drop-shadow(0 0.6px 0 var(--red-strong)) drop-shadow(0 -0.6px 0 var(--red-strong));
 }
 .stat-orb__label {
   font-size: 0.78rem;
