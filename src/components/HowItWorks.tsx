@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Reveal from "./Reveal";
 import { UNIT_PATH } from "./EcgLine";
 import { IconHeartCheck, IconPulse, IconUpload } from "./icons/Icons";
@@ -52,15 +53,21 @@ function HowItWorks() {
               delay={i * 110}
               className="how__step"
             >
-              <span className="how__badge">
-                <Icon size={22} />
-                <span className="how__number">{i + 1}</span>
-              </span>
-              <h3>{title}</h3>
+              <div className="how__step-head">
+                <span className="how__badge">
+                  <Icon size={30} />
+                  <span className="how__number">{i + 1}</span>
+                </span>
+                <h3>{title}</h3>
+              </div>
               <p>{body}</p>
             </Reveal>
           ))}
         </div>
+
+        <Link to="/signup" className="how__cta">
+          ¡Comenzá ahora!
+        </Link>
       </div>
     </section>
   );
