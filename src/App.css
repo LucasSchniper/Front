@@ -554,10 +554,12 @@
 .how > .container {
   max-width: 1320px;
 }
-.how .section-heading {
+.how .section-heading,
+.chagas .section-heading {
   max-width: 980px;
 }
-.how .section-heading h2 {
+.how .section-heading h2,
+.chagas .section-heading h2 {
   font-size: clamp(1.7rem, 3vw, 2.7rem);
   font-weight: 700;
 }
@@ -825,11 +827,15 @@
 :is(.how, .chagas, .stats) .eyebrow,
 .how__number,
 .accordion__trigger,
-.accordion__number,
-.stat-card__number {
+.accordion__number {
   font-weight: 500;
 }
-.stat-card__label,
+.stat-card__number {
+  font-weight: 700;
+}
+.stat-card__label {
+  font-weight: 600;
+}
 .stats__source {
   font-weight: 400;
 }
