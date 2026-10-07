@@ -1456,7 +1456,7 @@ html {
   border: 1.5px solid var(--dash-line);
   background: var(--dash-soft);
   color: var(--maroon);
-  font-weight: 700;
+  font-weight: 500;
   font-size: 0.9rem;
   width: 100%;
   text-align: left;
@@ -2014,7 +2014,7 @@ html {
 
 .page-title {
   font-size: 1.5rem;
-  color: var(--text-dark);
+  color: #ba3232;
 }
 .page-subtitle {
   margin-top: 6px;
