@@ -15,6 +15,7 @@ import {
   IconUsers,
 } from "../../components/icons/Icons";
 import type { Medico, Paciente } from "../../types";
+import medicoMark from "../../assets/brand/arcticons_medicare.png";
 
 function AdminHome() {
   const currentUser = useSesion();
@@ -48,10 +49,10 @@ function AdminHome() {
   })();
 
   const stats = [
-    { icon: IconDoctor, label: "Médicos registrados", value: medicos.length },
-    { icon: IconPatient, label: "Pacientes registrados", value: pacientes.length },
-    { icon: IconUsers, label: "Asignaciones activas", value: asignaciones },
-    { icon: IconTrendUp, label: "Análisis realizados", value: MOCK_ANALISIS.length },
+    { icon: IconDoctor, img: medicoMark, label: "Médicos registrados", value: medicos.length },
+    { icon: IconPatient, img: undefined, label: "Pacientes registrados", value: pacientes.length },
+    { icon: IconUsers, img: undefined, label: "Asignaciones activas", value: asignaciones },
+    { icon: IconTrendUp, img: undefined, label: "Análisis realizados", value: MOCK_ANALISIS.length },
   ];
 
   const acciones = [
@@ -82,10 +83,10 @@ function AdminHome() {
       <p className="page-subtitle">Gestioná usuarios y asignaciones en la plataforma.</p>
 
       <div className="admin-stats">
-        {stats.map(({ icon: Icon, label, value }) => (
+        {stats.map(({ icon: Icon, img, label, value }) => (
           <article className="stat-orb" key={label}>
             <span className="stat-orb__ring">
-              <Icon size={30} />
+              {img ? <img src={img} alt="" className="stat-orb__img" /> : <Icon size={30} />}
             </span>
             <p className="stat-orb__label">{label}</p>
             <p className="stat-orb__value">{value}</p>
