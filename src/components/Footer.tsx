@@ -50,7 +50,7 @@ function Footer() {
             <h3>Contacto</h3>
             <ul>
               <li>
-                <a href="mailto:deca@gmail.com">deca@gmail.com</a>
+                <a href="mailto:decaadmin@gmail.com">decaadmin@gmail.com</a>
               </li>
             </ul>
           </div>

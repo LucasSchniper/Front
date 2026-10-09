@@ -95,7 +95,9 @@ function DashboardLayout() {
       </div>
 
       <footer className="dashboard__footer">
-        <span>Contáctanos: deca@gmail.com</span>
+        <span>
+          Contáctanos: <a href="mailto:decaadmin@gmail.com">decaadmin@gmail.com</a>
+        </span>
       </footer>
     </div>
   );

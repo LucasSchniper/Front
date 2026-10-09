@@ -1533,15 +1533,27 @@ html {
   flex-shrink: 0;
   background: var(--maroon);
   color: #fff;
-  font-weight: 800;
-  font-size: 0.98rem;
-  padding: 16px 28px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 12px 28px;
+}
+.dashboard__footer a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 @media (max-width: 900px) {
   .dashboard__header {
     padding: 10px 16px;
     gap: 10px;
+  }
+  .dashboard__footer {
+    min-height: 60px;
+    padding: 10px 16px;
   }
   .dashboard__brand .logo {
     gap: 9px;
