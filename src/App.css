@@ -1392,7 +1392,7 @@ html {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--dash-soft);
+  background: #ffffff;
   overflow: hidden;
 }
 
@@ -1551,7 +1551,7 @@ html {
 .dashboard__main {
   flex: 1;
   min-width: 0;
-  background: linear-gradient(180deg, var(--dash-soft) 0%, var(--dash-soft) 42%, var(--dash-fade) 100%);
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   min-height: 0;
