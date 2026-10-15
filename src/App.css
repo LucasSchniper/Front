@@ -2891,3 +2891,104 @@ html {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
+
+/* Paciente · Mis análisis */
+.mis-analisis {
+  margin-top: 24px;
+  background: var(--pink-bg-2);
+  border: 1px solid var(--pink-card);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(135, 42, 34, 0.06);
+}
+.mis-analisis__row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 2fr 52px;
+  column-gap: 18px;
+  align-items: center;
+  padding: 14px 22px;
+  background: #fdf3f2;
+  color: var(--text-dark);
+}
+.mis-analisis__row:not(:last-child) {
+  border-bottom: 2px solid #f6e6e5;
+}
+.mis-analisis__row--head {
+  background: var(--pink-input);
+  color: var(--header-bg);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding-top: 16px;
+  padding-bottom: 12px;
+}
+.mis-analisis__row.mis-analisis__row--head {
+  border-bottom: 2px solid var(--header-bg);
+}
+.mis-analisis__result-head {
+  grid-column: 3 / -1;
+}
+.mis-analisis__fecha {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.98rem;
+}
+.mis-analisis__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--pink-circle);
+  color: #fff;
+  flex-shrink: 0;
+}
+.mis-analisis__hora {
+  font-size: 0.98rem;
+}
+.mis-analisis__resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.mis-analisis__bar {
+  display: block;
+  height: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+.mis-analisis__bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--red);
+}
+.mis-analisis__banda .analisis-banda__texto {
+  margin-top: 4px;
+}
+.mis-analisis__valor {
+  text-align: right;
+  font-size: 0.98rem;
+}
+
+@media (max-width: 640px) {
+  .mis-analisis__row {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 10px;
+    column-gap: 12px;
+    padding: 14px 16px;
+  }
+  .mis-analisis__result-head {
+    display: none;
+  }
+  .mis-analisis__resultado {
+    grid-column: 1;
+  }
+  .mis-analisis__valor {
+    grid-column: 2;
+    align-self: start;
+  }
+}
