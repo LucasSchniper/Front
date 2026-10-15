@@ -18,7 +18,7 @@ import {
 } from "../../components/icons/Icons";
 import type { ContactoMock, ProximoAnalisisMock } from "../../data/mockData";
 import type { Analisis, Medico } from "../../types";
-import { ADVERTENCIA_TAMIZAJE, bandaDe, percentilDe } from "../../utils/banda";
+import { bandaDe } from "../../utils/banda";
 
 const fechaCorta = (iso: string) => {
   const [y, m, d] = iso.slice(0, 10).split("-");
@@ -29,6 +29,7 @@ function PacienteHome() {
   const currentUser = useSesion();
   const [misAnalisis, setMisAnalisis] = useState<Analisis[]>([]);
   const ultimo = misAnalisis[0];
+  const percentilUltimo = ultimo ? Math.round(Number(ultimo.porcentaje)) : 0;
   const sinPrioridad = misAnalisis.filter((a) => a.banda === "no_alta").length;
   const altos = misAnalisis.filter((a) => a.banda === "alta").length;
 
@@ -91,28 +92,28 @@ function PacienteHome() {
       </article>
 
       <div className="paciente-home__top">
-        <article className="dash-card dash-card--highlight">
-          <div className="dash-card__header">
-            <IconClipboard size={20} />
-            <h2>Último resultado</h2>
+        <article className="dash-card ultimo-resultado">
+          <div className="ultimo-resultado__header">
+            <IconClipboard size={30} />
+            <div>
+              <h2 className="ultimo-resultado__title">Último resultado</h2>
+              <p className="ultimo-resultado__subtitle">Percentil de riesgo de Chagas</p>
+            </div>
           </div>
 
           {ultimo ? (
             <>
-              <div className="metric">
-                <p className="metric__label">Resultado del tamizaje</p>
-                <p className="metric__value">
-                  <span className={`badge badge--${bandaDe(ultimo).clase}`}>{bandaDe(ultimo).etiqueta}</span>
-                </p>
-                {ultimo.texto_banda && <p className="analisis-banda__texto">{ultimo.texto_banda}</p>}
-                <p className="metric__meta">
-                  {percentilDe(ultimo)} · {fechaCorta(ultimo.fecha_hora_entrega)} ·{" "}
-                  {ultimo.fecha_hora_entrega.slice(11, 16)}hs
-                </p>
-                <p className="analisis-banda__texto">{ADVERTENCIA_TAMIZAJE}</p>
-              </div>
-              <Link to="/paciente/analisis" className="btn btn--primary btn--sm dash-card__cta">
-                Ver resultado completo
+              <p className="ultimo-resultado__value" title={bandaDe(ultimo).etiqueta}>
+                {percentilUltimo}%
+              </p>
+              <span className="ultimo-resultado__bar" aria-hidden="true">
+                <span
+                  className="ultimo-resultado__bar-fill"
+                  style={{ width: `${Math.min(100, Math.max(0, percentilUltimo))}%` }}
+                />
+              </span>
+              <Link to="/paciente/analisis" className="ultimo-resultado__cta">
+                Ver análisis
               </Link>
             </>
           ) : (

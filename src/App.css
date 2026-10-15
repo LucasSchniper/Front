@@ -1664,6 +1664,66 @@ html {
   border-color: var(--pink-card-strong);
 }
 
+.ultimo-resultado__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--header-bg);
+}
+.ultimo-resultado__header svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.ultimo-resultado__title {
+  font-size: 1.45rem;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--header-bg);
+}
+.ultimo-resultado__subtitle {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.ultimo-resultado__value {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+.ultimo-resultado__bar {
+  display: block;
+  width: 100%;
+  height: 7px;
+  margin: 12px 0 18px;
+  background: var(--pink-input);
+  overflow: hidden;
+}
+.ultimo-resultado__bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--red);
+}
+.ultimo-resultado__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+.ultimo-resultado__cta:hover {
+  background: var(--maroon-dark);
+  color: #fff;
+}
+
 .paciente-home__top {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
