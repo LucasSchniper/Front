@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import EcgLine from "../EcgLine";
+import ContactFooter from "../ContactFooter";
 import Logo, { BrandTagline } from "../Logo";
 
 interface AuthShellProps {
@@ -33,11 +34,7 @@ function AuthShell({ title, subtitle, children }: AuthShellProps) {
         </div>
       </main>
 
-      <footer className="auth-page__footer">
-        <span>
-          Contactanos: <a href="mailto:decaadmin@gmail.com">decaadmin@gmail.com</a>
-        </span>
-      </footer>
+      <ContactFooter />
     </div>
   );
 }

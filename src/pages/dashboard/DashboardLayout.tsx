@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useAuth, useSesion } from "../../context/AuthContext";
+import ContactFooter from "../../components/ContactFooter";
 import Logo, { BrandTagline } from "../../components/Logo";
 import { IconMenu, IconClose, IconBell } from "../../components/icons/Icons";
 import { api } from "../../services/api";
@@ -95,11 +96,7 @@ function DashboardLayout() {
         </main>
       </div>
 
-      <footer className="dashboard__footer">
-        <span>
-          Contáctanos: <a href="mailto:decaadmin@gmail.com">decaadmin@gmail.com</a>
-        </span>
-      </footer>
+      <ContactFooter />
     </div>
   );
 }

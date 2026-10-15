@@ -1105,7 +1105,8 @@ html {
   padding: 48px 16px;
   background: var(--pink-bg);
 }
-.auth-page__footer {
+.contact-footer {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   min-height: 52px;
@@ -1115,7 +1116,12 @@ html {
   font-weight: 500;
   font-size: 0.9rem;
 }
-.auth-page__footer a {
+@media (max-width: 480px) {
+  .contact-footer {
+    padding: 10px 16px;
+  }
+}
+.contact-footer a {
   color: inherit;
   font-weight: 500;
   text-decoration: none;
@@ -1565,31 +1571,10 @@ html {
   width: 100%;
 }
 
-.dashboard__footer {
-  flex-shrink: 0;
-  background: var(--maroon);
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  min-height: 64px;
-  padding: 12px 28px;
-}
-.dashboard__footer a {
-  color: inherit;
-  font-weight: 500;
-  text-decoration: none;
-}
-
 @media (max-width: 900px) {
   .dashboard__header {
     padding: 10px 16px;
     gap: 10px;
-  }
-  .dashboard__footer {
-    min-height: 60px;
-    padding: 10px 16px;
   }
   .dashboard__brand {
     gap: 10px;
