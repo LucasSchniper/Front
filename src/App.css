@@ -438,35 +438,52 @@
 .hero__visual {
   display: flex;
   justify-content: flex-end;
-  align-self: end;
-  margin-bottom: -44px;
+  align-self: center;
   padding-right: clamp(0px, 3vw, 6rem);
 }
 .hero-heart {
   position: relative;
-  width: min(38vw, calc(75vh - 125px));
+  width: min(36vw, calc(72vh - 125px));
   display: flex;
   align-items: center;
   justify-content: center;
 }
+/* halo suave pegado al corazon */
 .hero-heart::before {
   content: "";
   position: absolute;
   left: 50%;
   top: 52%;
-  width: 165%;
-  padding-top: 165%;
+  width: 170%;
+  padding-top: 170%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(214, 120, 116, 1) 0%,
-    rgba(219, 140, 136, 0.85) 30%,
-    rgba(223, 161, 158, 0.5) 48%,
-    rgba(223, 161, 158, 0.2) 60%,
-    rgba(223, 161, 158, 0) 71%
+    rgba(205, 100, 96, 1) 0%,
+    rgba(214, 128, 124, 0.85) 34%,
+    rgba(224, 160, 157, 0.5) 52%,
+    rgba(235, 195, 193, 0) 70%
   );
   z-index: 0;
+}
+/* disco grande y muy tenue de fondo */
+.hero-heart::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200%;
+  padding-top: 200%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(240, 205, 203, 1) 0%,
+    rgba(243, 215, 213, 0.9) 55%,
+    rgba(247, 228, 227, 0) 70%
+  );
+  z-index: -1;
 }
 .hero-heart__img {
   position: relative;
@@ -499,7 +516,6 @@
     order: -1;
     justify-content: center;
     align-self: auto;
-    margin-bottom: 0;
     padding-right: 0;
   }
   .hero__text {
