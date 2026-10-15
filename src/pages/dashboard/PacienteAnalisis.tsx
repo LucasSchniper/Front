@@ -85,7 +85,7 @@ function PacienteAnalisis() {
                   </span>
                 </span>
                 <span className="mis-analisis__valor" title="Percentil de riesgo">
-                  {percentil}
+                  {percentil}%
                 </span>
               </div>
             );
