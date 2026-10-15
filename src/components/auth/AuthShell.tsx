@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import EcgLine from "../EcgLine";
-import Logo from "../Logo";
+import Logo, { BrandTagline } from "../Logo";
 
 interface AuthShellProps {
   title: ReactNode;
@@ -14,14 +14,12 @@ function AuthShell({ title, subtitle, children }: AuthShellProps) {
     <div className="auth-page">
       <header className="auth-page__top">
         <Link to="/" className="auth-page__brand" aria-label="Volver al inicio de DECA">
-          <Logo pulse />
+          <Logo pulse className="logo--white" />
+          <BrandTagline />
         </Link>
       </header>
 
       <main className="auth-page__body">
-        <div className="auth-page__circle auth-page__circle--a" />
-        <div className="auth-page__circle auth-page__circle--b" />
-
         <div className="auth-page__row">
           <EcgLine className="auth-page__ecg auth-page__ecg--left" height={80} color="var(--maroon)" />
 
@@ -35,7 +33,11 @@ function AuthShell({ title, subtitle, children }: AuthShellProps) {
         </div>
       </main>
 
-      <div className="section-divider" role="presentation" />
+      <footer className="auth-page__footer">
+        <span>
+          Contactanos: <a href="mailto:decaadmin@gmail.com">decaadmin@gmail.com</a>
+        </span>
+      </footer>
     </div>
   );
 }

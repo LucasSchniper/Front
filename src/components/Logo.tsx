@@ -29,4 +29,15 @@ function Logo({ size = LOGO_SIZE, pulse = false, className = "" }: LogoProps) {
   );
 }
 
+/** Bajada de marca que acompaña al logo en los headers. */
+export function BrandTagline() {
+  return (
+    <span className="brand-tagline">
+      Deteccion de la enfermedad de
+      <br />
+      Chagas automatizado
+    </span>
+  );
+}
+
 export default Logo;

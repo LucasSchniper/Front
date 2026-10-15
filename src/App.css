@@ -162,6 +162,36 @@
   width: auto;
   object-fit: contain;
 }
+/* Logo en blanco para los headers en --header-bg: el ECG del corazón es transparente y deja ver el fondo */
+.logo--white .logo__mark,
+.logo--white .logo__word {
+  filter: brightness(0) invert(1);
+}
+
+/* Bajada de marca que acompaña al logo en todos los headers */
+.brand-tagline {
+  padding-left: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.7);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+@media (max-width: 840px) {
+  .brand-tagline {
+    padding-left: 10px;
+    font-size: 0.54rem;
+    letter-spacing: 0.06em;
+  }
+}
+@media (max-width: 560px) {
+  .brand-tagline {
+    display: none;
+  }
+}
 
 @keyframes heartbeat {
   0%,
@@ -192,7 +222,7 @@
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 50;
-  background: linear-gradient(120deg, var(--pink-header-1), var(--pink-header-2));
+  background: var(--header-bg);
   transition: box-shadow 0.3s ease;
 }
 .site-header--scrolled {
@@ -210,17 +240,6 @@
   align-items: center;
   gap: 16px;
   flex-shrink: 0;
-}
-.site-header__tagline {
-  padding-left: 16px;
-  border-left: 1px solid rgba(186, 35, 35, 0.45);
-  color: var(--maroon);
-  font-family: var(--font-heading);
-  font-size: 0.66rem;
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 .site-header__nav {
   display: flex;
@@ -265,14 +284,24 @@
   border-width: 1px;
   font-weight: 400;
   font-size: 0.95rem;
-  min-height: 34px;
-  padding: 5px 30px;
-  min-width: 112px;
+  min-height: 38px;
+  padding: 6px 48px;
+  min-width: 160px;
+}
+.site-header__auth .btn--light,
+.site-header__auth--mobile .btn--light {
+  background: #fff;
+  color: var(--header-bg);
+}
+.site-header__auth .btn--light:hover,
+.site-header__auth--mobile .btn--light:hover {
+  background: var(--pink-bg-2);
 }
 .site-header__auth .btn--light {
-  min-width: 140px;
+  min-width: 190px;
 }
-.site-header__auth .btn--outline-light {
+.site-header__auth .btn--outline-light,
+.site-header__auth--mobile .btn--outline-light {
   border-color: #fff;
   color: #fff;
   text-shadow: 0 1px 2px rgba(120, 20, 20, 0.35);
@@ -342,17 +371,6 @@
   }
   .site-header__brand {
     gap: 10px;
-  }
-  .site-header__tagline {
-    padding-left: 10px;
-    font-size: 0.54rem;
-    letter-spacing: 0.06em;
-  }
-}
-
-@media (max-width: 560px) {
-  .site-header__tagline {
-    display: none;
   }
 }
 
@@ -440,7 +458,14 @@
   padding-top: 165%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: var(--pink-circle);
+  background: radial-gradient(
+    circle,
+    rgba(214, 120, 116, 1) 0%,
+    rgba(219, 140, 136, 0.85) 30%,
+    rgba(223, 161, 158, 0.5) 48%,
+    rgba(223, 161, 158, 0.2) 60%,
+    rgba(223, 161, 158, 0) 71%
+  );
   z-index: 0;
 }
 .hero-heart__img {
@@ -1054,7 +1079,7 @@ html {
   display: flex;
   align-items: center;
   padding: 14px 24px;
-  background: var(--pink-header-1);
+  background: var(--header-bg);
 }
 @media (max-width: 480px) {
   .auth-page__top {
@@ -1064,6 +1089,12 @@ html {
 .auth-page__brand {
   display: flex;
   align-items: center;
+  gap: 16px;
+}
+@media (max-width: 840px) {
+  .auth-page__brand {
+    gap: 10px;
+  }
 }
 .auth-page__body {
   position: relative;
@@ -1072,25 +1103,22 @@ html {
   display: flex;
   align-items: center;
   padding: 48px 16px;
-  background: linear-gradient(180deg, var(--pink-bg) 0%, var(--pink-bg-2) 45%, var(--pink-header-1) 100%);
-}
-.auth-page__circle {
-  position: absolute;
-  border-radius: 50%;
   background: var(--pink-bg);
-  z-index: 0;
 }
-.auth-page__circle--a {
-  width: 420px;
-  height: 420px;
-  bottom: -210px;
-  left: -130px;
+.auth-page__footer {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 10px 24px;
+  background: var(--header-bg);
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
-.auth-page__circle--b {
-  width: 380px;
-  height: 380px;
-  top: -210px;
-  right: -60px;
+.auth-page__footer a {
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
 }
 .auth-page__row {
   position: relative;
@@ -1112,23 +1140,23 @@ html {
 
 .auth-card {
   width: 100%;
-  max-width: 400px;
+  /* Ocupa la mitad del ancho: deja ~1/4 de pantalla libre a cada lado */
+  max-width: max(400px, 50vw);
   flex-shrink: 0;
-  background: var(--pink-header-1);
+  background: #ffdddd;
   border: 2px solid var(--maroon-dark);
-  border-radius: 28px;
-  padding: 26px 24px 28px;
-  box-shadow: 0 24px 50px -24px rgba(122, 22, 38, 0.45);
+  border-radius: 26px;
+  padding: 34px clamp(20px, 3.5vw, 40px) 40px;
 }
 .auth-card__title {
   font-family: var(--font-heading);
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--maroon-dark);
   text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 40px;
 }
 .auth-card__subtitle {
   margin-top: -8px;
@@ -1141,18 +1169,25 @@ html {
 .auth-card__form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
 }
 .auth-card .form-field input,
 .auth-card .form-field select {
-  background: var(--pink-bg);
-  border-radius: 10px;
-  color: var(--maroon-dark);
-  font-weight: 600;
+  background: #fff2f2;
+  border: 1px solid #ba3232;
+  border-radius: 8px;
+  padding: 17px 20px;
+  font-size: 1rem;
+  color: #ba3232;
+  font-weight: 500;
+}
+.auth-card .form-field input:focus,
+.auth-card .form-field select:focus {
+  background: #fff2f2;
 }
 .auth-card .form-field input::placeholder,
 .auth-card .form-field select.is-placeholder {
-  color: var(--maroon-dark);
+  color: #ba3232;
   opacity: 1;
   font-weight: 500;
 }
@@ -1367,11 +1402,12 @@ html {
   align-items: center;
   gap: 16px;
   padding: 12px 28px;
-  background: var(--dash-header);
+  background: var(--header-bg);
 }
 .dashboard__brand {
   display: flex;
   align-items: center;
+  gap: 16px;
   margin-right: auto;
 }
 .dashboard__notif-btn {
@@ -1392,11 +1428,11 @@ html {
   transform: translateY(-1px);
 }
 .dashboard__notif-btn--nuevas {
-  background: var(--red-strong);
-  color: #fff;
+  background: #fff;
+  color: var(--red-strong);
 }
 .dashboard__notif-btn--nuevas:hover {
-  background: var(--maroon-dark);
+  background: var(--pink-bg-2);
 }
 .dashboard__notif-dot {
   position: absolute;
@@ -1413,7 +1449,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--dash-header);
+  border: 2px solid var(--header-bg);
 }
 .dashboard__burger {
   display: none;
@@ -1423,7 +1459,7 @@ html {
   height: 40px;
   border: none;
   background: transparent;
-  color: var(--maroon-dark);
+  color: #fff;
 }
 
 .dashboard__body {
@@ -1542,7 +1578,7 @@ html {
 }
 .dashboard__footer a {
   color: inherit;
-  font-weight: 700;
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -1554,6 +1590,9 @@ html {
   .dashboard__footer {
     min-height: 60px;
     padding: 10px 16px;
+  }
+  .dashboard__brand {
+    gap: 10px;
   }
   .dashboard__brand .logo {
     gap: 9px;

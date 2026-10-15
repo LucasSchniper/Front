@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useAuth, useSesion } from "../../context/AuthContext";
-import Logo from "../../components/Logo";
+import Logo, { BrandTagline } from "../../components/Logo";
 import { IconMenu, IconClose, IconBell } from "../../components/icons/Icons";
 import { api } from "../../services/api";
 import { EVENTO_NOTIFICACIONES } from "../../utils/eventos";
@@ -62,7 +62,8 @@ function DashboardLayout() {
         </button>
 
         <Link to={`/${currentUser.role}`} className="dashboard__brand">
-          <Logo />
+          <Logo className="logo--white" />
+          <BrandTagline />
         </Link>
 
         <Link

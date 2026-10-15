@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Logo from "./Logo";
+import Logo, { BrandTagline } from "./Logo";
 import { IconMenu, IconClose } from "./icons/Icons";
 
 const LINKS = [
@@ -25,12 +25,8 @@ function Header() {
     <header className={`site-header ${scrolled ? "site-header--scrolled" : ""}`}>
       <div className="container site-header__row">
         <a href="#inicio" className="site-header__brand" onClick={() => setOpen(false)}>
-          <Logo />
-          <span className="site-header__tagline">
-            Deteccion de la enfermedad de
-            <br />
-            Chagas automatizado
-          </span>
+          <Logo className="logo--white" />
+          <BrandTagline />
         </a>
 
         <nav className={`site-header__nav ${open ? "site-header__nav--open" : ""}`}>
