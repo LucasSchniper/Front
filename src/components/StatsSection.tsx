@@ -13,7 +13,7 @@ function StatsSection() {
   return (
     <section id="datos" className="stats">
       <div className="container">
-        <Reveal as="div" className="section-heading section-heading--light">
+        <Reveal as="div" className="section-heading">
           <p className="eyebrow">Datos clave</p>
           <h2>El Chagas en números</h2>
         </Reveal>
@@ -35,7 +35,7 @@ function StatsSection() {
         </p>
       </div>
 
-      <EcgLine color="var(--maroon)" height={70} opacity={0.5} className="stats__ecg" />
+      <EcgLine color="#ba3232" height={70} opacity={1} className="stats__ecg" />
     </section>
   );
 }

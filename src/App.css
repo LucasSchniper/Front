@@ -454,8 +454,8 @@
   position: absolute;
   left: 50%;
   top: 52%;
-  width: 170%;
-  padding-top: 170%;
+  width: 155%;
+  padding-top: 155%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(
@@ -473,8 +473,8 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 200%;
-  padding-top: 200%;
+  width: 185%;
+  padding-top: 185%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(
@@ -534,8 +534,8 @@
   }
   .hero-heart::before {
     top: 44%;
-    width: 132%;
-    padding-top: 132%;
+    width: 122%;
+    padding-top: 122%;
   }
 }
 @media (max-width: 420px) {
@@ -552,11 +552,7 @@
 .chagas {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--pink-bg) 0%, var(--pink-bg-2) 45%, var(--pink-header-1) 100%);
-}
-/* Invertido: arranca oscuro y termina claro para empalmar con el inicio de .chagas */
-.how {
-  background: linear-gradient(0deg, var(--pink-bg) 0%, var(--pink-bg-2) 45%, var(--pink-header-1) 100%);
+  background: #ffffff;
 }
 .how::before,
 .how::after,
@@ -565,7 +561,7 @@
   content: "";
   position: absolute;
   border-radius: 50%;
-  background: var(--pink-bg);
+  background: #fff2f2;
   z-index: 0;
   pointer-events: none;
 }
@@ -582,6 +578,18 @@
   height: 380px;
   top: -210px;
   right: -60px;
+}
+/* En Chagas los círculos van espejados: arriba a la izquierda, abajo a la derecha */
+.chagas::before {
+  left: auto;
+  right: -130px;
+}
+/* Mismo tamaño y posición que el de abajo de .how, así las dos mitades arman un círculo entero */
+.chagas::after {
+  width: 420px;
+  height: 420px;
+  right: auto;
+  left: -130px;
 }
 .how > .container,
 .chagas > .container {
@@ -802,7 +810,7 @@
   min-height: calc(100vh - var(--divider-h));
   min-height: calc(100svh - var(--divider-h));
   padding: 100px 0 130px;
-  background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon) 20%, var(--pink-circle) 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #fff2f2 100%);
 }
 .stats__ecg {
   position: absolute;
@@ -822,6 +830,7 @@
 .stats .section-heading h2 {
   text-transform: uppercase;
   letter-spacing: 0.01em;
+  color: #ba3232;
 }
 .stats__grid {
   margin-top: 54px;
@@ -836,20 +845,19 @@
   justify-content: center;
   text-align: center;
   padding: 38px 22px;
-  background: var(--pink-circle);
-  border: 1px solid rgba(186, 35, 35, 0.28);
+  background: #fff2f2;
+  border: 2px solid #ba3232;
   border-radius: 20px;
-  box-shadow: 0 14px 30px -18px rgba(92, 16, 29, 0.6);
 }
 .stat-card__number {
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: clamp(1.9rem, 4.4vw, 2.5rem);
-  color: var(--maroon);
+  color: #ba3232;
 }
 .stat-card__label {
   margin-top: 10px;
-  color: rgba(186, 35, 35, 0.82);
+  color: #ba3232;
   font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.5;
@@ -859,7 +867,7 @@
   text-align: center;
   font-size: 0.82rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: #ba3232;
 }
 
 /* Letra más fina en las secciones de la landing, a tono con el hero.
@@ -878,7 +886,7 @@
   font-weight: 600;
 }
 .stats__source {
-  font-weight: 400;
+  font-weight: 600;
 }
 @media (max-width: 760px) {
   .stats__grid {
