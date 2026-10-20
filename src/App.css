@@ -1802,6 +1802,38 @@ html {
 .paciente-home .chat-preview:hover {
   background: #fbe6e6;
 }
+.proximo-turno__fecha {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--text-dark);
+}
+.proximo-turno__hora {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 1.15rem;
+  color: var(--text-dark);
+}
+.proximo-turno__hora svg {
+  color: var(--header-bg);
+}
+.proximo-turno__error {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--red-strong);
+}
+.proximo-turno__cancelar {
+  width: 100%;
+  margin-top: 18px;
+  border-radius: 10px;
+  background: var(--header-bg);
+}
 .dash-card__header .dash-card__open {
   margin-left: auto;
   padding: 3px 14px;

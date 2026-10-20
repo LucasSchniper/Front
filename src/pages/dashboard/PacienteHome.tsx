@@ -19,11 +19,15 @@ import {
 import type { ContactoMock } from "../../data/mockData";
 import type { Analisis, Medico, Turno } from "../../types";
 import { bandaDe } from "../../utils/banda";
+import { mensajeDeError } from "../../utils/errors";
+import ConfirmModal from "../../components/ConfirmModal";
 
 const fechaCorta = (iso: string) => {
   const [y, m, d] = iso.slice(0, 10).split("-");
-  return `${Number(d)}/${Number(m)}/${y}`;
+  return `${d}/${m}/${y}`;
 };
+
+const horaCorta = (iso: string) => iso.slice(11, 16);
 
 function PacienteHome() {
   const currentUser = useSesion();
@@ -35,6 +39,9 @@ function PacienteHome() {
 
   const [turnos, setTurnos] = useState<Turno[]>([]);
   const proximo = turnos[0];
+  const [confirmandoCancelacion, setConfirmandoCancelacion] = useState(false);
+  const [cancelando, setCancelando] = useState(false);
+  const [errorTurno, setErrorTurno] = useState("");
   const chats: ContactoMock[] = [];
 
   const [miMedico, setMiMedico] = useState<Medico | null>(null);
@@ -55,15 +62,43 @@ function PacienteHome() {
       })
       .catch(() => {});
     api.turnos
-      .listar()
+      .listar({ estado: "pendiente" })
       .then((data) => {
-        if (!cancelado) setTurnos(data.turnos);
+        if (!cancelado)
+          setTurnos(
+            data.turnos
+              .filter((t) => t.estado === "pendiente")
+              .sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora))
+          );
       })
       .catch(() => {});
     return () => {
       cancelado = true;
     };
   }, []);
+
+  /** Cancela el turno (el médico recupera ese horario) y le avisa por chat. */
+  const cancelarTurno = async () => {
+    if (!proximo) return;
+    setErrorTurno("");
+    setCancelando(true);
+    try {
+      await api.turnos.cancelar(proximo.id);
+      setTurnos((prev) => prev.filter((t) => t.id !== proximo.id));
+      setConfirmandoCancelacion(false);
+      api.mensajes
+        .enviar({
+          medicoId: proximo.medico_id,
+          contenido: `Cancelé mi turno del ${fechaCorta(proximo.fecha_hora)} a las ${horaCorta(proximo.fecha_hora)}hs. Ese horario quedó libre.`,
+        })
+        .catch(() => {});
+    } catch (err) {
+      setErrorTurno(mensajeDeError(err));
+      setConfirmandoCancelacion(false);
+    } finally {
+      setCancelando(false);
+    }
+  };
 
   const nombre = currentUser.nombre
     ? `${currentUser.nombre} ${currentUser.apellido || ""}`.trim()
@@ -128,33 +163,30 @@ function PacienteHome() {
           )}
         </article>
 
-        <article className="dash-card">
-          <div className="dash-card__header">
+        <article className="dash-card proximo-turno">
+          <div className="ultimo-resultado__header">
             <IconCalendar size={30} />
-            <h2>Próximo turno</h2>
+            <div>
+              <h2 className="ultimo-resultado__title">Próximo análisis</h2>
+              <p className="ultimo-resultado__subtitle">Fecha programada</p>
+            </div>
           </div>
 
           {proximo ? (
             <>
-              <div className="metric">
-                <p className="metric__label">Fecha programada</p>
-                <p className="metric__value metric__value--date">{fechaCorta(proximo.fecha_hora)}</p>
-                <p className="metric__time">
-                  <IconClock size={16} />
-                  {proximo.fecha_hora.slice(11, 16)}hs
-                </p>
-                {proximo.motivo && <p className="metric__meta">{proximo.motivo}</p>}
-                {proximo.medico_nombre && (
-                  <p className="metric__meta">
-                    Con Dr./Dra. {proximo.medico_nombre} {proximo.medico_apellido}
-                  </p>
-                )}
-                {turnos.length > 1 && (
-                  <p className="metric__meta">
-                    {turnos.length - 1 === 1 ? "Tenés 1 turno más" : `Tenés ${turnos.length - 1} turnos más`}
-                  </p>
-                )}
-              </div>
+              <p className="proximo-turno__fecha">{fechaCorta(proximo.fecha_hora)}</p>
+              <p className="proximo-turno__hora">
+                <IconClock size={22} />
+                {horaCorta(proximo.fecha_hora)}hs
+              </p>
+              {errorTurno && <p className="proximo-turno__error">{errorTurno}</p>}
+              <button
+                type="button"
+                className="btn btn--danger proximo-turno__cancelar"
+                onClick={() => setConfirmandoCancelacion(true)}
+              >
+                Cancelar turno
+              </button>
             </>
           ) : (
             <p className="empty-state">No tenés turnos programados.</p>
@@ -240,6 +272,19 @@ function PacienteHome() {
           </ul>
         </article>
       </div>
+
+      {confirmandoCancelacion && proximo && (
+        <ConfirmModal
+          icon={<IconCalendar size={30} />}
+          titulo="¿Querés cancelar el turno?"
+          texto={`Tu turno del ${fechaCorta(proximo.fecha_hora)} a las ${horaCorta(proximo.fecha_hora)}hs se va a cancelar y le vamos a avisar a tu médico.`}
+          confirmarLabel={cancelando ? "Cancelando…" : "Cancelar turno"}
+          cancelarLabel="Volver"
+          cargando={cancelando}
+          onConfirm={cancelarTurno}
+          onCancel={() => !cancelando && setConfirmandoCancelacion(false)}
+        />
+      )}
     </div>
   );
 }
