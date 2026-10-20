@@ -103,7 +103,7 @@ function MedicoHome() {
     : currentUser.email.split("@")[0];
 
   return (
-    <div>
+    <div className="medico-home">
       <h1 className="page-title">¡Bienvenido, Dr./Dra. {nombreDoctor}!</h1>
       <p className="page-subtitle">Gestioná tus pacientes y análisis de ECG.</p>
       {errorCarga && <p className="auth-card__feedback auth-card__feedback--error">{errorCarga}</p>}
@@ -113,6 +113,9 @@ function MedicoHome() {
           <div className="dash-card__header">
             <IconUserCircle size={20} />
             <h2>Pacientes</h2>
+            <Link to="/medico/pacientes" className="dash-card__open">
+              Abrir
+            </Link>
           </div>
 
           <label className="dash-search">

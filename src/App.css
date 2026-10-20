@@ -3235,3 +3235,12 @@ html {
 @keyframes confirm-modal-pop {
   from { opacity: 0; transform: translateY(10px) scale(0.97); }
 }
+
+/* Inicio del médico: encabezados en rojo y línea bajo el encabezado de la tabla de resultados */
+.medico-home .results-table__row--head {
+  color: #ba2323;
+  border-bottom: 1px solid #ba3232;
+}
+.medico-home__grid > .dash-card:first-child .dash-card__header h2 {
+  color: #ba2323;
+}
