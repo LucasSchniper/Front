@@ -1102,33 +1102,22 @@ html {
   z-index: 2;
   display: flex;
   align-items: center;
-  /* mismas medidas que .dashboard__header para que la barra tenga el mismo alto */
-  padding: 12px 28px;
+  padding: 14px 24px;
   background: var(--header-bg);
+}
+@media (max-width: 480px) {
+  .auth-page__top {
+    padding: 14px 16px;
+  }
 }
 .auth-page__brand {
   display: flex;
   align-items: center;
   gap: 16px;
-  /* alto de los botones (40px) que tiene la barra del panel */
-  min-height: 40px;
 }
-@media (max-width: 900px) {
-  .auth-page__top {
-    padding: 10px 16px;
-  }
+@media (max-width: 840px) {
   .auth-page__brand {
     gap: 10px;
-  }
-  .auth-page__brand .logo {
-    gap: 9px;
-  }
-  .auth-page__brand .logo__mark {
-    width: 38px !important;
-    height: 38px !important;
-  }
-  .auth-page__brand .logo__word {
-    height: 21px !important;
   }
 }
 .auth-page__body {

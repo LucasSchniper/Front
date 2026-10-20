@@ -23,7 +23,7 @@
   --dash-fade: #f29d9d;
 
   --beat-duration: 1.6s;
-  --divider-h: 20px;
+  --divider-h: 52px; /* mismo alto que .contact-footer */
 
   --eyebrow-beat: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 12"><path d="M0 6h7l2.5-5 3 10 2.5-8 2 3H30" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>');
 
