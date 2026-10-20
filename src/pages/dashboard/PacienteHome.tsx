@@ -123,7 +123,7 @@ function PacienteHome() {
 
         <article className="dash-card">
           <div className="dash-card__header">
-            <IconCalendar size={20} />
+            <IconCalendar size={30} />
             <h2>Próximo análisis</h2>
           </div>
 
@@ -149,7 +149,7 @@ function PacienteHome() {
 
         <article className="dash-card">
           <div className="dash-card__header">
-            <IconSummary size={20} />
+            <IconSummary size={30} />
             <h2>Resumen</h2>
           </div>
 
@@ -182,7 +182,7 @@ function PacienteHome() {
       <div className="paciente-home__bottom">
         <article className="dash-card">
           <div className="dash-card__header">
-            <IconChat size={20} />
+            <IconChat size={30} />
             <h2>Chats</h2>
             <Link to="/paciente/chats" className="dash-card__open">
               Abrir
@@ -211,7 +211,7 @@ function PacienteHome() {
 
         <article className="dash-card">
           <div className="dash-card__header">
-            <IconNews size={20} />
+            <IconNews size={30} />
             <h2>Novedades</h2>
           </div>
 

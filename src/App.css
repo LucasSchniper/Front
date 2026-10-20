@@ -1768,6 +1768,19 @@ html {
   border: 1px solid #ecdcdc;
   border-radius: 20px;
 }
+.paciente-home .ultimo-resultado__header > div {
+  flex: 1;
+  text-align: center;
+}
+.paciente-home .dash-card__header {
+  color: var(--header-bg);
+}
+.paciente-home .dash-card__header h2 {
+  font-size: 1.45rem;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--header-bg);
+}
 .paciente-home .summary-list,
 .paciente-home .chat-preview-list,
 .paciente-home .news-list {
