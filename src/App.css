@@ -1771,6 +1771,9 @@ html {
 .paciente-home .ultimo-resultado__header > div {
   flex: 1;
   text-align: center;
+  /* compensa el ancho del ícono (30px) + gap (12px) para que el texto quede
+     centrado en la card, alineado con el porcentaje */
+  padding-right: 42px;
 }
 .paciente-home .dash-card__header {
   color: var(--header-bg);
