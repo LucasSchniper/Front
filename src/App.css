@@ -1734,12 +1734,14 @@ html {
   align-items: center;
   justify-content: center;
   margin-top: auto;
-  padding: 12px 16px;
-  border-radius: 8px;
+  /* mismo tamaño que el botón "Cancelar turno" de la card de al lado */
+  padding: 14px 30px;
+  border: 2px solid transparent;
+  border-radius: 10px;
   background: #ba3232;
   color: #fff;
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 0.96rem;
   text-decoration: none;
   transition: background 0.2s ease;
 }
@@ -1815,7 +1817,7 @@ html {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  margin-top: 12px;
+  margin: 12px 0 18px;
   font-size: 1.15rem;
   color: var(--text-dark);
 }
@@ -1830,7 +1832,7 @@ html {
 }
 .proximo-turno__cancelar {
   width: 100%;
-  margin-top: 18px;
+  margin-top: auto;
   border-radius: 10px;
   background: var(--header-bg);
 }
