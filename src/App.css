@@ -3245,3 +3245,15 @@ html {
 .medico-home__grid > .dash-card:first-child .dash-card__header h2 {
   color: #ba2323;
 }
+.medico-home .dash-card,
+.medico-home .results-table {
+  background: #fff2f2;
+}
+.medico-home__grid > .dash-card:last-child .dash-card__header,
+.medico-home__grid > .dash-card:last-child .dash-card__header h2,
+.medico-home__grid > .dash-card:last-child .form-field label {
+  color: #ba2323;
+}
+.medico-home .dash-patient-row:hover {
+  background: #fbe6e6;
+}
