@@ -15,6 +15,9 @@ import type {
   RespuestaPerfilAdmin,
   RespuestaPerfilMedico,
   RespuestaPerfilPaciente,
+  RespuestaTurno,
+  RespuestaTurnos,
+  EstadoTurno,
   TipoContraparte,
 } from "../types";
 
@@ -144,6 +147,25 @@ export interface ActualizarPerfilPayload {
   matricula?: string;
 }
 
+export interface CrearTurnoPayload {
+  pacienteId: Id;
+  fechaHora: string;
+  motivo?: string;
+}
+
+export interface FiltroTurnos {
+  pacienteId?: Id;
+  estado?: EstadoTurno | "todos";
+}
+
+function queryTurnos({ pacienteId, estado }: FiltroTurnos = {}): string {
+  const params = new URLSearchParams();
+  if (pacienteId !== undefined) params.set("pacienteId", String(pacienteId));
+  if (estado) params.set("estado", estado);
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
 export const api = {
   auth: {
     login: (payload: LoginPayload): Promise<RespuestaAuth> =>
@@ -203,6 +225,16 @@ export const api = {
     listar: (): Promise<RespuestaNotificaciones> => request("/notificaciones"),
     marcarLeida: (id: Id): Promise<RespuestaOk> =>
       request(`/notificaciones/${id}/leida`, { method: "PUT" }),
+  },
+  turnos: {
+    listar: (filtro?: FiltroTurnos): Promise<RespuestaTurnos> => request(`/turnos${queryTurnos(filtro)}`),
+    crear: (payload: CrearTurnoPayload): Promise<RespuestaTurno> =>
+      request("/turnos", { method: "POST", body: payload }),
+    reprogramar: (id: Id, fechaHora: string, motivo?: string): Promise<RespuestaTurno> =>
+      request(`/turnos/${id}`, { method: "PUT", body: { fechaHora, motivo } }),
+    cancelar: (id: Id): Promise<RespuestaTurno> => request(`/turnos/${id}/cancelar`, { method: "PUT" }),
+    marcarRealizado: (id: Id): Promise<RespuestaTurno> =>
+      request(`/turnos/${id}/realizado`, { method: "PUT" }),
   },
   analisis: {
     /** Multipart con `archivo` (el ECG) y `pacienteId`. */

@@ -39,11 +39,6 @@ export interface NotificacionMock {
   fecha: string;
 }
 
-export interface ProximoAnalisisMock {
-  fecha: string;
-  hora: string;
-  lugar: string;
-}
 export const ROLE_LABEL: Record<Rol, string> = {
   administrador: "Administrador",
   medico: "Médico",
@@ -120,12 +115,6 @@ export const MOCK_CONTACTS: Record<Rol, ContactoMock[]> = {
     { id: "m1", nombre: "Dra. Laura Gómez", ultimo: "Perfecto, nos vemos en el control.", hora: "09:42" },
     { id: "c1", nombre: "Centro DECA", ultimo: "Tu turno quedó confirmado para el 20/8.", hora: "ayer" },
   ],
-};
-
-export const MOCK_PROXIMO_ANALISIS: ProximoAnalisisMock = {
-  fecha: "2026-08-20",
-  hora: "09:00",
-  lugar: "Centro DECA · Sede Centro",
 };
 
 export const MOCK_NOVEDADES: NovedadMock[] = [

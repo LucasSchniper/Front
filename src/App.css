@@ -3257,3 +3257,17 @@ html {
 .medico-home .dash-patient-row:hover {
   background: #fbe6e6;
 }
+
+.turnos-paciente {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--pink-card);
+}
+.turnos-paciente__form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
+  gap: 10px;
+}

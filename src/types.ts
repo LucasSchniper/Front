@@ -78,6 +78,21 @@ export interface ConversacionAdmin {
   ultimo_mensaje_en: string;
 }
 
+export type EstadoTurno = "pendiente" | "cancelado" | "realizado";
+
+export interface Turno {
+  id: number | string;
+  paciente_id: number | string;
+  medico_id: number | string;
+  fecha_hora: string;
+  motivo?: string | null;
+  estado: EstadoTurno;
+  paciente_nombre?: string;
+  paciente_apellido?: string;
+  medico_nombre?: string;
+  medico_apellido?: string;
+}
+
 export interface Notificacion {
   id: number | string;
   contenido: string;
@@ -151,6 +166,8 @@ export type RespuestaMensajes = RespuestaOk & { mensajes: Mensaje[] };
 export type RespuestaMensaje = RespuestaOk & { mensaje: Mensaje };
 export type RespuestaConversacionesAdmin = RespuestaOk & { conversaciones: ConversacionAdmin[] };
 export type RespuestaNotificaciones = RespuestaOk & { notificaciones: Notificacion[] };
+export type RespuestaTurnos = RespuestaOk & { turnos: Turno[] };
+export type RespuestaTurno = RespuestaOk & { turno: Turno };
 
 /* ------------------------------------------------------- Formularios ---- */
 

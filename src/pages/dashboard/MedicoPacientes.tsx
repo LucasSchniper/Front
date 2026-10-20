@@ -4,6 +4,7 @@ import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
 import { IconSearch } from "../../components/icons/Icons";
 import RevisarAnalisis from "../../components/RevisarAnalisis";
+import TurnosPaciente from "../../components/TurnosPaciente";
 import { bandaDe, percentilDe } from "../../utils/banda";
 
 function fechaHora(iso: string) {
@@ -78,7 +79,7 @@ function MedicoPacientes() {
   return (
     <div>
       <h1 className="page-title">Pacientes</h1>
-      <p className="page-subtitle">Los pacientes que tenés asignados y sus análisis.</p>
+      <p className="page-subtitle">Los pacientes que tenés asignados, sus turnos y sus análisis.</p>
 
       {loading && <p className="empty-state">Cargando…</p>}
       {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
@@ -121,6 +122,7 @@ function MedicoPacientes() {
 
               {isOpen && (
                 <div className="patient-card__body">
+                  <TurnosPaciente pacienteId={p.id} />
                   {cargandoAnalisis && !analisisPorPaciente[p.id] && (
                     <p className="empty-state">Cargando análisis…</p>
                   )}

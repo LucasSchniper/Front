@@ -16,8 +16,8 @@ import {
   IconSummary,
   IconUserCircle,
 } from "../../components/icons/Icons";
-import type { ContactoMock, ProximoAnalisisMock } from "../../data/mockData";
-import type { Analisis, Medico } from "../../types";
+import type { ContactoMock } from "../../data/mockData";
+import type { Analisis, Medico, Turno } from "../../types";
 import { bandaDe } from "../../utils/banda";
 
 const fechaCorta = (iso: string) => {
@@ -33,7 +33,8 @@ function PacienteHome() {
   const sinPrioridad = misAnalisis.filter((a) => a.banda === "no_alta").length;
   const altos = misAnalisis.filter((a) => a.banda === "alta").length;
 
-  const proximo = null as ProximoAnalisisMock | null;
+  const [turnos, setTurnos] = useState<Turno[]>([]);
+  const proximo = turnos[0];
   const chats: ContactoMock[] = [];
 
   const [miMedico, setMiMedico] = useState<Medico | null>(null);
@@ -51,6 +52,12 @@ function PacienteHome() {
       .listarPropios()
       .then((data) => {
         if (!cancelado) setMisAnalisis(data.analisis);
+      })
+      .catch(() => {});
+    api.turnos
+      .listar()
+      .then((data) => {
+        if (!cancelado) setTurnos(data.turnos);
       })
       .catch(() => {});
     return () => {
@@ -124,26 +131,33 @@ function PacienteHome() {
         <article className="dash-card">
           <div className="dash-card__header">
             <IconCalendar size={30} />
-            <h2>Próximo análisis</h2>
+            <h2>Próximo turno</h2>
           </div>
 
           {proximo ? (
             <>
               <div className="metric">
                 <p className="metric__label">Fecha programada</p>
-                <p className="metric__value metric__value--date">{fechaCorta(proximo.fecha)}</p>
+                <p className="metric__value metric__value--date">{fechaCorta(proximo.fecha_hora)}</p>
                 <p className="metric__time">
                   <IconClock size={16} />
-                  {proximo.hora}hs
+                  {proximo.fecha_hora.slice(11, 16)}hs
                 </p>
-                <p className="metric__meta">{proximo.lugar}</p>
+                {proximo.motivo && <p className="metric__meta">{proximo.motivo}</p>}
+                {proximo.medico_nombre && (
+                  <p className="metric__meta">
+                    Con Dr./Dra. {proximo.medico_nombre} {proximo.medico_apellido}
+                  </p>
+                )}
+                {turnos.length > 1 && (
+                  <p className="metric__meta">
+                    {turnos.length - 1 === 1 ? "Tenés 1 turno más" : `Tenés ${turnos.length - 1} turnos más`}
+                  </p>
+                )}
               </div>
-              <Link to="/paciente/analisis" className="btn btn--primary btn--sm dash-card__cta">
-                Ver detalles
-              </Link>
             </>
           ) : (
-            <p className="empty-state">No tenés estudios programados.</p>
+            <p className="empty-state">No tenés turnos programados.</p>
           )}
         </article>
 
