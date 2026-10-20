@@ -63,7 +63,7 @@ function PacienteHome() {
     : currentUser.email.split("@")[0];
 
   return (
-    <div>
+    <div className="paciente-home">
       <h1 className="page-title">¡Bienvenido/a, {nombre}!</h1>
       <p className="page-subtitle">Este es un resumen de tu salud y tu actividad.</p>
 
@@ -183,9 +183,9 @@ function PacienteHome() {
         <article className="dash-card">
           <div className="dash-card__header">
             <IconChat size={20} />
-            <h2>Chats recientes</h2>
-            <Link to="/paciente/chats" className="dash-card__link">
-              Ver todos
+            <h2>Chats</h2>
+            <Link to="/paciente/chats" className="dash-card__open">
+              Abrir
             </Link>
           </div>
 
