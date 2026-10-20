@@ -3238,6 +3238,7 @@ html {
 
 /* Inicio del médico: encabezados en rojo y línea bajo el encabezado de la tabla de resultados */
 .medico-home .results-table__row--head {
+  background: #ffdddd;
   color: #ba2323;
   border-bottom: 1px solid #ba3232;
 }
