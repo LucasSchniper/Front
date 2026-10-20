@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useAuth, useSesion } from "../../context/AuthContext";
 import ContactFooter from "../../components/ContactFooter";
+import ConfirmLogoutModal from "../../components/ConfirmLogoutModal";
 import Logo, { BrandTagline } from "../../components/Logo";
 import { IconMenu, IconClose, IconBell } from "../../components/icons/Icons";
 import { api } from "../../services/api";
@@ -19,6 +20,7 @@ function DashboardLayout() {
   const mainRef = useRef<HTMLElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sinLeer, setSinLeer] = useState(0);
+  const [confirmandoSalida, setConfirmandoSalida] = useState(false);
 
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
@@ -82,7 +84,7 @@ function DashboardLayout() {
       <div className="dashboard__body">
         <Sidebar
           role={currentUser.role}
-          onLogout={handleLogout}
+          onLogout={() => setConfirmandoSalida(true)}
           open={sidebarOpen}
           onNavigate={() => setSidebarOpen(false)}
         />
@@ -97,6 +99,13 @@ function DashboardLayout() {
       </div>
 
       <ContactFooter />
+
+      {confirmandoSalida && (
+        <ConfirmLogoutModal
+          onConfirm={handleLogout}
+          onCancel={() => setConfirmandoSalida(false)}
+        />
+      )}
     </div>
   );
 }
