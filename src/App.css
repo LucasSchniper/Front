@@ -1173,7 +1173,7 @@ html {
   /* Ocupa la mitad del ancho: deja ~1/4 de pantalla libre a cada lado */
   max-width: max(400px, 50vw);
   flex-shrink: 0;
-  background: #ffdddd;
+  background: #fff2f2;
   border: 2px solid var(--maroon-dark);
   border-radius: 26px;
   padding: 34px clamp(20px, 3.5vw, 40px) 40px;
@@ -1184,7 +1184,7 @@ html {
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--maroon-dark);
+  color: #ba2323;
   text-align: center;
   margin-bottom: 40px;
 }
@@ -1192,7 +1192,7 @@ html {
   margin-top: -8px;
   margin-bottom: 20px;
   text-align: center;
-  color: var(--maroon-dark);
+  color: #ba2323;
   font-size: 0.92rem;
   line-height: 1.5;
 }
@@ -1208,7 +1208,7 @@ html {
   border-radius: 8px;
   padding: 17px 20px;
   font-size: 1rem;
-  color: #ba3232;
+  color: #ba2323;
   font-weight: 500;
 }
 .auth-card .form-field input:focus,
@@ -1217,7 +1217,7 @@ html {
 }
 .auth-card .form-field input::placeholder,
 .auth-card .form-field select.is-placeholder {
-  color: #ba3232;
+  color: #ba2323;
   opacity: 1;
   font-weight: 500;
 }
@@ -1225,16 +1225,16 @@ html {
   color: var(--text-dark);
 }
 .auth-card .form-field label {
-  color: var(--maroon-dark);
+  color: #ba2323;
 }
 .auth-card .form-field__hint {
-  color: var(--maroon-dark);
+  color: #ba2323;
 }
 .auth-card__divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--maroon-dark);
+  color: #ba2323;
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -1243,7 +1243,7 @@ html {
   content: "";
   flex: 1;
   height: 1px;
-  background: rgba(135, 42, 34, 0.35);
+  background: rgba(186, 35, 35, 0.35);
 }
 .auth-card__google {
   display: flex;
@@ -1280,7 +1280,7 @@ html {
 .auth-card__switch {
   text-align: center;
   font-size: 0.88rem;
-  color: var(--maroon-dark);
+  color: #ba2323;
   margin-top: 4px;
 }
 .auth-card__switch a {
@@ -1290,7 +1290,7 @@ html {
 .auth-card__hint {
   text-align: center;
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: #ba2323;
   margin-top: 2px;
 }
 .auth-card__notice {
@@ -1303,7 +1303,7 @@ html {
   padding: 12px 14px;
   font-size: 0.83rem;
   line-height: 1.5;
-  color: var(--maroon-dark);
+  color: #ba2323;
 }
 .auth-card__notice--stack {
   flex-direction: column;
