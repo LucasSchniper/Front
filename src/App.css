@@ -3258,16 +3258,19 @@ html {
   background: #fbe6e6;
 }
 
-.turnos-paciente {
+.turnos-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--pink-card);
+  gap: 12px;
+  margin-bottom: 20px;
 }
-.turnos-paciente__form {
+.turnos-form__campos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   align-items: end;
   gap: 10px;
+}
+.turnos-filtro {
+  max-width: 220px;
+  margin-bottom: 12px;
 }

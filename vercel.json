@@ -8,6 +8,7 @@
     { "source": "/mensajes-admin/:path*", "destination": "https://deca-back.vercel.app/mensajes-admin/:path*" },
     { "source": "/notificaciones/:path*", "destination": "https://deca-back.vercel.app/notificaciones/:path*" },
     { "source": "/analisis/:path*", "destination": "https://deca-back.vercel.app/analisis/:path*" },
+    { "source": "/turnos/:path*", "destination": "https://deca-back.vercel.app/turnos/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

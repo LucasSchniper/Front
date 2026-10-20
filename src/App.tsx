@@ -14,6 +14,7 @@ import AdminPacientes from "./pages/dashboard/AdminPacientes";
 import MedicoHome from "./pages/dashboard/MedicoHome";
 import MedicoPacientes from "./pages/dashboard/MedicoPacientes";
 import MedicoAnalisis from "./pages/dashboard/MedicoAnalisis";
+import MedicoTurnos from "./pages/dashboard/MedicoTurnos";
 import PacienteHome from "./pages/dashboard/PacienteHome";
 import PacienteAnalisis from "./pages/dashboard/PacienteAnalisis";
 import Chats from "./pages/dashboard/Chats";
@@ -55,6 +56,7 @@ function App() {
         <Route index element={<MedicoHome />} />
         <Route path="pacientes" element={<MedicoPacientes />} />
         <Route path="analisis" element={<MedicoAnalisis />} />
+        <Route path="turnos" element={<MedicoTurnos />} />
         <Route path="chats" element={<Chats />} />
         <Route path="perfil" element={<Perfil />} />
         <Route path="notificaciones" element={<Notificaciones />} />

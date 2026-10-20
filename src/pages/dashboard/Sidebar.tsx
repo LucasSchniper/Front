@@ -5,6 +5,7 @@ import {
   IconHome,
   IconUsers,
   IconPatient,
+  IconCalendar,
   IconEcgUpload,
   IconChat,
   IconSettings,
@@ -32,6 +33,7 @@ const NAV_BY_ROLE: Record<Rol, NavItem[]> = {
   medico: [
     { to: "/medico", label: "Inicio", icon: IconHome, end: true },
     { to: "/medico/pacientes", label: "Pacientes", icon: IconPatient },
+    { to: "/medico/turnos", label: "Turnos", icon: IconCalendar },
     { to: "/medico/chats", label: "Chats", icon: IconChat },
     { to: "/medico/perfil", label: "Mi perfil", icon: IconSettings },
   ],
