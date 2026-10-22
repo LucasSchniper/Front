@@ -206,33 +206,10 @@ function MedicoHome() {
           {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
           {aviso && <p className="auth-card__feedback">{aviso}</p>}
           {resultado && (
-            <div className="auth-card__feedback auth-card__feedback--success analisis-resultado">
-              <p>
-                <IconCheck size={16} /> Resultado de la IA para {nombrePaciente(resultado.paciente_id)}:{" "}
-                {bandaDe(resultado).etiqueta} ({percentilDe(resultado)}).
-              </p>
-              {resultado.texto_banda && <p className="analisis-resultado__nota">{resultado.texto_banda}</p>}
-              <p className="analisis-banda__texto">{ADVERTENCIA_TAMIZAJE}</p>
-              {resultado.enviado === false ? (
-                <>
-                  <p className="analisis-resultado__nota">
-                    {resultado.aprobado === false
-                      ? "Revisá el resultado antes de decidir si se lo enviás al paciente."
-                      : "Aprobaste el resultado. ¿Querés mandárselo al paciente?"}
-                  </p>
-                  <div className="analisis-resultado__acciones">
-                    <RevisarAnalisis analisis={resultado} onActualizado={actualizarAnalisis} onEliminado={quitarAnalisis} />
-                    {resultado.aprobado !== false && (
-                      <button type="button" className="btn btn--ghost btn--sm" onClick={() => setResultado(null)}>
-                        No enviar por ahora
-                      </button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <p className="analisis-resultado__nota">Se lo enviaste al paciente.</p>
-              )}
-            </div>
+            <p className="auth-card__feedback auth-card__feedback--success">
+              <IconCheck size={16} /> Análisis de {nombrePaciente(resultado.paciente_id)} listo: revisalo en la tabla de
+              abajo.
+            </p>
           )}
         </div>
       </div>
@@ -247,21 +224,38 @@ function MedicoHome() {
         </div>
         {misAnalisis.length === 0 && <p className="empty-state">Todavía no hay análisis cargados.</p>}
         {misAnalisis.map((a) => (
-          <div className="results-table__row results-table__row--envio" key={a.id}>
+          <div
+            className={`results-table__row results-table__row--envio${
+              a.id === resultado?.id ? " results-table__row--nuevo" : ""
+            }`}
+            key={a.id}
+          >
             <span className="results-table__patient">
               <IconUserCircle size={22} />
               {nombrePaciente(a.paciente_id)}
             </span>
-            <span title={a.texto_banda ?? undefined}>
-              <span className={`badge badge--${bandaDe(a).clase}`}>{bandaDe(a).etiqueta}</span> {percentilDe(a)}
+            <span className="results-table__resultado">
+              <span className={`badge badge--${bandaDe(a).clase}`}>{bandaDe(a).etiqueta}</span>
+              {percentilDe(a)}
             </span>
             <span>{fechaCorta(a.fecha_hora_entrega)}</span>
             <span>{horaCorta(a.fecha_hora_entrega)}hs</span>
             <span>
               <RevisarAnalisis analisis={a} onActualizado={actualizarAnalisis} onEliminado={quitarAnalisis} />
             </span>
+            {a.enviado === false && (
+              <div className="results-table__detalle">
+                {a.texto_banda && <p>{a.texto_banda}</p>}
+                <p className="results-table__detalle-nota">
+                  {a.aprobado === false
+                    ? "Revisá el resultado antes de decidir si se lo enviás al paciente."
+                    : "Aprobaste el resultado. ¿Querés mandárselo al paciente?"}
+                </p>
+              </div>
+            )}
           </div>
         ))}
+        {misAnalisis.length > 0 && <p className="results-table__advertencia">{ADVERTENCIA_TAMIZAJE}</p>}
       </div>
     </div>
   );
