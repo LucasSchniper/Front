@@ -218,9 +218,10 @@ function MedicoHome() {
         </div>
       </div>
 
-      <div className="results-table">
+      <div className="results-table results-table--medico">
         <div className="results-table__row results-table__row--envio results-table__row--head">
           <span>Paciente</span>
+          <span>Prioridad</span>
           <span>Resultado</span>
           <span>Fecha</span>
           <span>Hora</span>
@@ -242,10 +243,10 @@ function MedicoHome() {
                 <IconUserCircle size={22} />
                 {nombrePaciente(a.paciente_id)}
               </span>
-              <span className="results-table__resultado">
+              <span>
                 <span className={`badge badge--${bandaDe(a).clase}`}>{bandaDe(a).etiqueta}</span>
-                {Math.round(Number(a.porcentaje))}%
               </span>
+              <span>{Math.round(Number(a.porcentaje))}%</span>
               <span>{fechaCorta(a.fecha_hora_entrega)}</span>
               <span>{horaCorta(a.fecha_hora_entrega)}hs</span>
               <span>
@@ -275,6 +276,10 @@ function MedicoHome() {
               </button>
               {abierto && (
                 <div className="results-table__detalle">
+                  <p className="results-table__detalle-movil">
+                    Resultado {Math.round(Number(a.porcentaje))}% · {fechaCorta(a.fecha_hora_entrega)}{" "}
+                    {horaCorta(a.fecha_hora_entrega)}hs
+                  </p>
                   {a.texto_banda && <p>{a.texto_banda}</p>}
                   <p className="results-table__detalle-nota">
                     {a.enviado !== false
