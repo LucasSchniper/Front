@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { useSesion } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
-import { ADVERTENCIA_TAMIZAJE, bandaDe, percentilDe } from "../../utils/banda";
+import { ADVERTENCIA_TAMIZAJE, bandaDe } from "../../utils/banda";
 import type { Analisis, Paciente } from "../../types";
-import { IconUserCircle, IconSearch, IconUpload, IconCheck } from "../../components/icons/Icons";
+import { IconUserCircle, IconSearch, IconUpload, IconCheck, IconChevronRight } from "../../components/icons/Icons";
 import RevisarAnalisis from "../../components/RevisarAnalisis";
 
 /** Vercel corta los requests de más de 4.5 MB: avisamos antes de subirlo. */
@@ -38,6 +38,10 @@ function MedicoHome() {
   const [error, setError] = useState("");
   const [resultado, setResultado] = useState<Analisis | null>(null);
   const [aviso, setAviso] = useState("");
+  const [abiertos, setAbiertos] = useState<Analisis["id"][]>([]);
+
+  const toggleDetalle = (id: Analisis["id"]) =>
+    setAbiertos((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   useEffect(() => {
     let cancelado = false;
@@ -221,41 +225,70 @@ function MedicoHome() {
           <span>Fecha</span>
           <span>Hora</span>
           <span>Revisión</span>
+          <span>Envío</span>
+          <span aria-hidden="true" />
         </div>
         {misAnalisis.length === 0 && <p className="empty-state">Todavía no hay análisis cargados.</p>}
-        {misAnalisis.map((a) => (
-          <div
-            className={`results-table__row results-table__row--envio${
-              a.id === resultado?.id ? " results-table__row--nuevo" : ""
-            }`}
-            key={a.id}
-          >
-            <span className="results-table__patient">
-              <IconUserCircle size={22} />
-              {nombrePaciente(a.paciente_id)}
-            </span>
-            <span className="results-table__resultado">
-              <span className={`badge badge--${bandaDe(a).clase}`}>{bandaDe(a).etiqueta}</span>
-              {percentilDe(a)}
-            </span>
-            <span>{fechaCorta(a.fecha_hora_entrega)}</span>
-            <span>{horaCorta(a.fecha_hora_entrega)}hs</span>
-            <span>
-              <RevisarAnalisis analisis={a} onActualizado={actualizarAnalisis} onEliminado={quitarAnalisis} />
-            </span>
-            {a.enviado === false && (
-              <div className="results-table__detalle">
-                {a.texto_banda && <p>{a.texto_banda}</p>}
-                <p className="results-table__detalle-nota">
-                  {a.aprobado === false
-                    ? "Revisá el resultado antes de decidir si se lo enviás al paciente."
-                    : "Aprobaste el resultado. ¿Querés mandárselo al paciente?"}
-                </p>
-              </div>
-            )}
-          </div>
-        ))}
-        {misAnalisis.length > 0 && <p className="results-table__advertencia">{ADVERTENCIA_TAMIZAJE}</p>}
+        {misAnalisis.map((a) => {
+          const abierto = abiertos.includes(a.id);
+          return (
+            <div
+              className={`results-table__row results-table__row--envio${
+                a.id === resultado?.id ? " results-table__row--nuevo" : ""
+              }`}
+              key={a.id}
+            >
+              <span className="results-table__patient">
+                <IconUserCircle size={22} />
+                {nombrePaciente(a.paciente_id)}
+              </span>
+              <span className="results-table__resultado">
+                <span className={`badge badge--${bandaDe(a).clase}`}>{bandaDe(a).etiqueta}</span>
+                {Math.round(Number(a.porcentaje))}%
+              </span>
+              <span>{fechaCorta(a.fecha_hora_entrega)}</span>
+              <span>{horaCorta(a.fecha_hora_entrega)}hs</span>
+              <span>
+                <RevisarAnalisis
+                  analisis={a}
+                  parte="revision"
+                  onActualizado={actualizarAnalisis}
+                  onEliminado={quitarAnalisis}
+                />
+              </span>
+              <span>
+                <RevisarAnalisis
+                  analisis={a}
+                  parte="envio"
+                  onActualizado={actualizarAnalisis}
+                  onEliminado={quitarAnalisis}
+                />
+              </span>
+              <button
+                type="button"
+                className={`results-table__toggle${abierto ? " results-table__toggle--abierto" : ""}`}
+                aria-expanded={abierto}
+                aria-label={abierto ? "Ocultar detalle" : "Ver detalle"}
+                onClick={() => toggleDetalle(a.id)}
+              >
+                <IconChevronRight size={18} />
+              </button>
+              {abierto && (
+                <div className="results-table__detalle">
+                  {a.texto_banda && <p>{a.texto_banda}</p>}
+                  <p className="results-table__detalle-nota">
+                    {a.enviado !== false
+                      ? "Ya se lo enviaste al paciente."
+                      : a.aprobado === false
+                        ? "Revisá el resultado antes de decidir si se lo enviás al paciente."
+                        : "Aprobaste el resultado. ¿Querés mandárselo al paciente?"}
+                  </p>
+                  <p className="results-table__detalle-nota">{ADVERTENCIA_TAMIZAJE}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

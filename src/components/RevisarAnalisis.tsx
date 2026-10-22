@@ -8,9 +8,11 @@ interface RevisarAnalisisProps {
   analisis: Analisis;
   onActualizado: (analisis: Analisis) => void;
   onEliminado: (analisis: Analisis) => void;
+  /** Para tablas con columnas separadas: solo la revisión o solo el envío. */
+  parte?: "revision" | "envio";
 }
 
-function RevisarAnalisis({ analisis, onActualizado, onEliminado }: RevisarAnalisisProps) {
+function RevisarAnalisis({ analisis, onActualizado, onEliminado, parte }: RevisarAnalisisProps) {
   const [cargando, setCargando] = useState(false);
   const [confirmarRechazo, setConfirmarRechazo] = useState(false);
   const [error, setError] = useState("");
@@ -26,6 +28,18 @@ function RevisarAnalisis({ analisis, onActualizado, onEliminado }: RevisarAnalis
       setCargando(false);
     }
   };
+
+  const chipAprobado = (
+    <span className="envio-chip envio-chip--aprobado">
+      <IconCheck size={13} /> Aprobado
+    </span>
+  );
+
+  if (parte === "revision" && analisis.aprobado !== false) return chipAprobado;
+
+  if (parte === "envio" && analisis.enviado === false && analisis.aprobado === false) {
+    return <span className="envio-accion__pendiente">Falta aprobar</span>;
+  }
 
   if (analisis.enviado !== false) {
     return (
@@ -114,9 +128,7 @@ function RevisarAnalisis({ analisis, onActualizado, onEliminado }: RevisarAnalis
 
   return (
     <span className="envio-accion">
-      <span className="envio-chip envio-chip--aprobado">
-        <IconCheck size={13} /> Aprobado
-      </span>
+      {parte !== "envio" && chipAprobado}
       <button type="button" className="btn btn--primary btn--sm" disabled={cargando} onClick={handleEnviar}>
         <IconSend size={14} /> {cargando ? "Enviando…" : "Enviar al paciente"}
       </button>
