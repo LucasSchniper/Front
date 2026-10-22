@@ -18,7 +18,7 @@ export function bandaDe(analisis: Pick<Analisis, "banda">) {
 
 /** `porcentaje` es el percentil de riesgo, no una probabilidad de tener Chagas. */
 export function percentilDe(analisis: Pick<Analisis, "porcentaje">) {
-  return `percentil ${Math.round(Number(analisis.porcentaje))}`;
+  return `${Math.round(Number(analisis.porcentaje))}%`;
 }
 
 export const ADVERTENCIA_TAMIZAJE =
