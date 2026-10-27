@@ -1248,10 +1248,39 @@ html {
   height: 1px;
   background: rgba(186, 35, 35, 0.35);
 }
+/* Misma caja que los inputs; el botón real de Google va invisible por encima */
 .auth-card__google {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #ba3232;
+  border-radius: 8px;
+  background: #fff2f2;
+  transition: background 0.2s ease;
+}
+.auth-card__google:hover {
+  background: #ffdddd;
+}
+.auth-card__google:focus-within {
+  outline: 2px solid #ba3232;
+  outline-offset: 2px;
+}
+.auth-card__google-cara {
   display: flex;
+  align-items: center;
   justify-content: center;
-  min-height: 44px;
+  gap: 12px;
+  padding: 17px 20px;
+  font-size: 1rem;
+  line-height: normal;
+  font-weight: 500;
+  color: #ba2323;
+}
+.auth-card__google-real {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  opacity: 0.01;
 }
 .auth-card__submit {
   margin-top: 6px;
