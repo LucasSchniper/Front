@@ -78,7 +78,7 @@ function AdminHome() {
   ];
 
   return (
-    <div>
+    <div className="admin-home">
       <h1 className="page-title">¡Bienvenido/a, {nombre}!</h1>
       <p className="page-subtitle">Gestioná usuarios y asignaciones en la plataforma.</p>
 

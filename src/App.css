@@ -2085,7 +2085,7 @@ html {
 }
 .dash-search--page {
   max-width: 360px;
-  margin-top: 20px;
+  margin: 20px 0;
 }
 .chat-contacts .dash-search {
   position: sticky;
@@ -2406,6 +2406,22 @@ html {
   gap: 18px;
   margin-top: 18px;
 }
+/* Inicio del admin: las cards van en #fff2f2 y lo de adentro en blanco para que contraste */
+.admin-home .stat-orb,
+.admin-home .dash-card {
+  background: #fff2f2;
+}
+.admin-home .stat-orb__ring,
+.admin-home .quick-action,
+.admin-home .news-item {
+  background: #fff;
+}
+.admin-home .quick-action:hover {
+  background: #fbe6e6;
+}
+.admin-home .quick-action__icon {
+  background: #ffdddd;
+}
 @media (max-width: 860px) {
   .admin-home__bottom {
     grid-template-columns: 1fr;
@@ -2542,33 +2558,65 @@ html {
   font-size: 0.9rem;
 }
 
+/* Tablas del administrador: mismos colores que las tablas del médico */
 .data-table-wrap {
-  background: #fff;
+  background: #fff2f2;
   border: 1px solid var(--pink-card);
   border-radius: 16px;
   overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(135, 42, 34, 0.06);
 }
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 .data-table th {
   text-align: left;
-  padding: 14px 18px;
-  color: var(--text-muted);
-  font-size: 0.78rem;
+  padding: 14px 20px 12px;
+  background: #ffdddd;
+  color: #ba2323;
+  font-size: 0.82rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--pink-card);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  border-bottom: 2px solid #ba3232;
 }
 .data-table td {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--pink-bg);
+  padding: 12px 20px;
+  border-bottom: 2px solid #f6e6e5;
   color: var(--text-dark);
+  vertical-align: middle;
+}
+.data-table tbody tr {
+  transition: background 0.2s ease;
+}
+.data-table tbody tr:hover {
+  background: #fbe6e6;
 }
 .data-table tr:last-child td {
   border-bottom: none;
+}
+.data-table__nombre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+.data-table__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #f29c9c;
+  color: #ba3232;
+  flex-shrink: 0;
+}
+.data-table__muted {
+  color: var(--text-muted);
 }
 .data-table__actions {
   display: flex;
@@ -2576,10 +2624,64 @@ html {
   justify-content: flex-end;
   gap: 8px;
 }
+.data-table .btn--sm {
+  min-height: 32px;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  gap: 6px;
+  white-space: nowrap;
+}
+.data-table .icon-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+}
+.data-table .icon-btn--danger:hover {
+  background: #fbdada;
+}
 .data-table__empty {
   text-align: center;
   color: var(--text-muted);
   padding: 28px;
+}
+
+/* Select con flecha propia (asignación de médico) */
+.data-table__select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-width: 190px;
+  max-width: 260px;
+  padding: 8px 36px 8px 14px;
+  border: 1px solid #ba3232;
+  border-radius: 8px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ba2323' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center;
+  color: #ba2323;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.data-table__select:hover:not(:disabled) {
+  background-color: #fff8f8;
+}
+.data-table__select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(186, 35, 35, 0.2);
+}
+.data-table__select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.data-table__select--vacio {
+  border-style: dashed;
+  background-color: #fff2f2;
+  color: var(--text-muted);
+}
+.data-table__select option {
+  color: var(--text-dark);
 }
 
 .icon-btn {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
-import { IconChat, IconCheck, IconClose, IconSearch, IconShield, IconTrash } from "../../components/icons/Icons";
+import { IconChat, IconCheck, IconClose, IconDoctor, IconSearch, IconShield, IconTrash } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
 import type { Medico } from "../../types";
 import type { NuevoChatState } from "./Chats";
@@ -142,10 +142,15 @@ function AdminMedicos() {
             {medicosFiltrados.map((m) => (
               <tr key={m.id}>
                 <td>
-                  {m.nombre} {m.apellido}
+                  <span className="data-table__nombre">
+                    <span className="data-table__avatar" aria-hidden="true">
+                      <IconDoctor size={16} />
+                    </span>
+                    {m.nombre} {m.apellido}
+                  </span>
                 </td>
-                <td>{m.mail}</td>
-                <td>{m.matricula || "—"}</td>
+                <td className="data-table__muted">{m.mail}</td>
+                <td className="data-table__muted">{m.matricula || "—"}</td>
                 <td className="data-table__actions">
                   <button className="btn btn--ghost btn--sm" onClick={() => handleEscribir(m)}>
                     <IconChat size={16} /> Escribir

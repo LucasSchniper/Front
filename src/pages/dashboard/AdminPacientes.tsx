@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
-import { IconChat, IconSearch } from "../../components/icons/Icons";
+import { IconChat, IconPatient, IconSearch } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
 import type { Medico, Paciente } from "../../types";
 import type { NuevoChatState } from "./Chats";
@@ -104,11 +104,17 @@ function AdminPacientes() {
             {pacientesFiltrados.map((p) => (
               <tr key={p.id}>
                 <td>
-                  {p.nombre} {p.apellido}
+                  <span className="data-table__nombre">
+                    <span className="data-table__avatar" aria-hidden="true">
+                      <IconPatient size={16} />
+                    </span>
+                    {p.nombre} {p.apellido}
+                  </span>
                 </td>
-                <td>{p.dni}</td>
+                <td className="data-table__muted">{p.dni || "—"}</td>
                 <td>
                   <select
+                    className={`data-table__select${p.medico_id ? "" : " data-table__select--vacio"}`}
                     aria-label={`Médico asignado a ${p.nombre}`}
                     value={p.medico_id || SIN_ASIGNAR}
                     disabled={asignandoId === p.id || medicos.length === 0}
@@ -122,7 +128,7 @@ function AdminPacientes() {
                     ))}
                   </select>
                 </td>
-                <td>
+                <td className="data-table__actions">
                   <button className="btn btn--ghost btn--sm" onClick={() => handleEscribir(p)}>
                     <IconChat size={16} /> Escribir
                   </button>
