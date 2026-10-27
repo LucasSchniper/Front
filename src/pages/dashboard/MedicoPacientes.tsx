@@ -105,10 +105,6 @@ function MedicoPacientes() {
 
       {pacientesFiltrados.length > 0 && (
         <div className="mis-analisis mis-analisis--pacientes">
-          <div className="mis-analisis__row mis-analisis__row--head mis-analisis__row--paciente">
-            <span>Paciente</span>
-            <span>DNI</span>
-          </div>
           {pacientesFiltrados.map((p) => {
             const isOpen = expanded === p.id;
             const analisis = analisisPorPaciente[p.id] || [];
@@ -118,9 +114,13 @@ function MedicoPacientes() {
                   <span className="mis-analisis__avatar" aria-hidden="true">
                     <IconPatient size={16} />
                   </span>
-                  {p.nombre} {p.apellido}
+                  <span>
+                    <span className="mis-analisis__nombre">
+                      {p.nombre} {p.apellido}
+                    </span>
+                    <span className="mis-analisis__dni">DNI {p.dni}</span>
+                  </span>
                 </span>
-                <span className="mis-analisis__hora">{p.dni}</span>
                 <button
                   type="button"
                   className={`mis-analisis__toggle${isOpen ? " mis-analisis__toggle--abierto" : ""}`}
@@ -139,6 +139,15 @@ function MedicoPacientes() {
                     )}
                     {analisisPorPaciente[p.id] && analisis.length === 0 && (
                       <p className="empty-state">Sin análisis todavía.</p>
+                    )}
+                    {analisis.length > 0 && (
+                      <div className="mis-analisis__analisis mis-analisis__analisis--head">
+                        <span>Fecha</span>
+                        <span>Horario</span>
+                        <span className="mis-analisis__result-head" title="Percentil de riesgo">
+                          Resultado
+                        </span>
+                      </div>
                     )}
                     {analisis.map((a) => {
                       const banda = bandaDe(a);
