@@ -21,9 +21,7 @@ function SignupPage() {
   const location = useLocation();
   const mailInicial = (location.state as { mail?: string } | null)?.mail ?? "";
 
-  const { form, errors, update, validate } = useSignupForm({
-    mail: mailInicial,
-  });
+  const { form, errors, update, validate } = useSignupForm({ mail: mailInicial });
   const [error, setError] = useState("");
   const [mailEnUso, setMailEnUso] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -62,20 +60,13 @@ function SignupPage() {
   };
 
   if (solicitudEnviada) {
-    return (
-      <SolicitudEnviada matricula={form.matricula} email={form.mail.trim()} />
-    );
+    return <SolicitudEnviada matricula={form.matricula} email={form.mail.trim()} />;
   }
 
   return (
     <AuthShell title="Sign up">
       <form className="auth-card__form" onSubmit={handleSubmit} noValidate>
-        <FormField
-          label="Nombre y apellido"
-          id="signup-nombre"
-          error={errors.nombreCompleto}
-          hideLabel
-        >
+        <FormField label="Nombre y apellido" id="signup-nombre" error={errors.nombreCompleto} hideLabel>
           <input
             id="signup-nombre"
             autoComplete="name"
@@ -87,12 +78,7 @@ function SignupPage() {
           />
         </FormField>
 
-        <FormField
-          label="Fecha de nacimiento"
-          id="signup-fecha"
-          error={errors.fechaNacimiento}
-          hideLabel
-        >
+        <FormField label="Fecha de nacimiento" id="signup-fecha" error={errors.fechaNacimiento} hideLabel>
           <input
             id="signup-fecha"
             type={form.fechaNacimiento ? "date" : "text"}
@@ -122,12 +108,7 @@ function SignupPage() {
           />
         </FormField>
 
-        <FormField
-          label="Contraseña"
-          id="signup-password"
-          error={errors.contrasena}
-          hideLabel
-        >
+        <FormField label="Contraseña" id="signup-password" error={errors.contrasena} hideLabel>
           <input
             id="signup-password"
             type="password"
@@ -159,18 +140,10 @@ function SignupPage() {
             </Link>
           </div>
         ) : (
-          error && (
-            <p className="auth-card__feedback auth-card__feedback--error">
-              {error}
-            </p>
-          )
+          error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>
         )}
 
-        <button
-          type="submit"
-          className="btn btn--primary auth-card__submit"
-          disabled={loading}
-        >
+        <button type="submit" className="btn btn--primary auth-card__submit" disabled={loading}>
           {loading ? "Creando cuenta…" : "Crear cuenta"}
         </button>
 
@@ -178,9 +151,7 @@ function SignupPage() {
           text="signup_with"
           onError={mostrarError}
           onPendingApproval={() =>
-            mostrarError(
-              "Tu cuenta de médico está esperando la aprobación del administrador.",
-            )
+            mostrarError("Tu cuenta de médico está esperando la aprobación del administrador.")
           }
         />
 
