@@ -1133,7 +1133,7 @@ html {
   display: flex;
   align-items: center;
   min-height: var(--divider-h);
-  padding: 12px 24px;
+  padding: 6px 24px;
   background: var(--header-bg);
   color: #fff;
   font-weight: 500;
@@ -1141,7 +1141,7 @@ html {
 }
 @media (max-width: 480px) {
   .contact-footer {
-    padding: 10px 16px;
+    padding: 6px 16px;
   }
 }
 .contact-footer a {
