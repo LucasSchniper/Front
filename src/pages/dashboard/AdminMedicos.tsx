@@ -151,17 +151,19 @@ function AdminMedicos() {
                 </td>
                 <td className="data-table__muted">{m.mail}</td>
                 <td className="data-table__muted">{m.matricula || "—"}</td>
-                <td className="data-table__actions">
-                  <button className="btn btn--ghost btn--sm" onClick={() => handleEscribir(m)}>
-                    <IconChat size={16} /> Escribir
-                  </button>
-                  <button
-                    className="icon-btn icon-btn--danger"
-                    aria-label={`Eliminar a ${m.nombre}`}
-                    onClick={() => handleEliminar(m.id)}
-                  >
-                    <IconTrash size={17} />
-                  </button>
+                <td>
+                  <div className="data-table__actions">
+                    <button className="btn btn--ghost btn--sm" onClick={() => handleEscribir(m)}>
+                      <IconChat size={16} /> Escribir
+                    </button>
+                    <button
+                      className="icon-btn icon-btn--danger"
+                      aria-label={`Eliminar a ${m.nombre}`}
+                      onClick={() => handleEliminar(m.id)}
+                    >
+                      <IconTrash size={17} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

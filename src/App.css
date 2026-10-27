@@ -2646,6 +2646,55 @@ html {
   padding: 28px;
 }
 
+/* Aviso de pacientes sin médico asignado (admin · Pacientes) */
+.aviso-asignacion {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  padding: 14px 18px;
+  background: #fff2f2;
+  border: 1px solid var(--pink-card);
+  border-left: 4px solid #ba2323;
+  border-radius: 14px;
+}
+.aviso-asignacion__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffdddd;
+  color: #ba2323;
+  flex-shrink: 0;
+}
+.aviso-asignacion__texto {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.aviso-asignacion__titulo {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #ba2323;
+}
+.aviso-asignacion__detalle {
+  margin-top: 2px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.aviso-asignacion__btn {
+  min-height: 34px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.aviso-asignacion__btn[aria-pressed="true"] {
+  background: #ba2323;
+  border-color: #ba2323;
+  color: #fff;
+}
+
 /* Select con flecha propia (asignación de médico) */
 .data-table__select {
   appearance: none;

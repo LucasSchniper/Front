@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
-import { IconChat, IconPatient, IconSearch } from "../../components/icons/Icons";
+import { IconAlert, IconChat, IconPatient, IconSearch } from "../../components/icons/Icons";
 import { mensajeDeError } from "../../utils/errors";
 import type { Medico, Paciente } from "../../types";
 import type { NuevoChatState } from "./Chats";
@@ -16,9 +16,7 @@ function AdminPacientes() {
   const [error, setError] = useState("");
   const [asignandoId, setAsignandoId] = useState<Paciente["id"] | null>(null);
   const [query, setQuery] = useState("");
-  const pacientesFiltrados = pacientes.filter((p) =>
-    `${p.nombre} ${p.apellido} ${p.dni ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())
-  );
+  const [soloSinAsignar, setSoloSinAsignar] = useState(false);
 
   const cargar = () => {
     setLoading(true);
@@ -39,6 +37,14 @@ function AdminPacientes() {
   const sinAsignar = useMemo(
     () => pacientes.filter((p) => !p.medico_id).length,
     [pacientes]
+  );
+
+  // Si ya no quedan pacientes sin médico, el filtro deja de tener sentido y se muestran todos.
+  const filtrarSinAsignar = soloSinAsignar && sinAsignar > 0;
+  const pacientesFiltrados = pacientes.filter(
+    (p) =>
+      (!filtrarSinAsignar || !p.medico_id) &&
+      `${p.nombre} ${p.apellido} ${p.dni ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())
   );
 
   const handleAsignar = async (pacienteId: Paciente["id"], medicoId: string) => {
@@ -73,11 +79,29 @@ function AdminPacientes() {
       {error && <p className="auth-card__feedback auth-card__feedback--error">{error}</p>}
 
       {sinAsignar > 0 && (
-        <p className="auth-card__feedback">
-          {sinAsignar === 1
-            ? "Hay 1 paciente sin médico asignado."
-            : `Hay ${sinAsignar} pacientes sin médico asignado.`}
-        </p>
+        <div className="aviso-asignacion" role="status">
+          <span className="aviso-asignacion__icon" aria-hidden="true">
+            <IconAlert size={18} />
+          </span>
+          <div className="aviso-asignacion__texto">
+            <p className="aviso-asignacion__titulo">
+              {sinAsignar === 1
+                ? "Hay 1 paciente sin médico asignado"
+                : `Hay ${sinAsignar} pacientes sin médico asignado`}
+            </p>
+            <p className="aviso-asignacion__detalle">
+              Asignales un médico para que puedan empezar su seguimiento.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn--ghost btn--sm aviso-asignacion__btn"
+            aria-pressed={filtrarSinAsignar}
+            onClick={() => setSoloSinAsignar((v) => !v)}
+          >
+            {filtrarSinAsignar ? "Ver todos" : "Ver sin asignar"}
+          </button>
+        </div>
       )}
 
       <label className="dash-search dash-search--page">
@@ -128,10 +152,12 @@ function AdminPacientes() {
                     ))}
                   </select>
                 </td>
-                <td className="data-table__actions">
-                  <button className="btn btn--ghost btn--sm" onClick={() => handleEscribir(p)}>
-                    <IconChat size={16} /> Escribir
-                  </button>
+                <td>
+                  <div className="data-table__actions">
+                    <button className="btn btn--ghost btn--sm" onClick={() => handleEscribir(p)}>
+                      <IconChat size={16} /> Escribir
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
