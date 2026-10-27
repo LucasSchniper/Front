@@ -1556,7 +1556,7 @@ html {
   height: 16.25rem;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: var(--dash-soft);
+  background: #ffdddd;
 }
 .sidebar__decor-img {
   position: relative;
@@ -3373,19 +3373,225 @@ html {
   background: #fbe6e6;
 }
 
-.turnos-form {
+/* Turnos del médico: calendario mensual */
+.turnos-cal__toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.turnos-cal__mes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.turnos-cal__titulo {
+  min-width: 11ch;
+  font-size: 1.45rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #ba2323;
+}
+.turnos-cal__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #ba2323;
+}
+.turnos-cal__nav:hover {
+  background: #ffdddd;
+}
+.turnos-cal__nav--prev .icon {
+  transform: rotate(180deg);
+}
+.turnos-cal__agregar {
+  font-weight: 500;
+}
+
+.turnos-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.turnos-form__campos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  align-items: end;
   gap: 10px;
+  width: 240px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #e4e4e4;
+  border-radius: 14px;
+  box-shadow: 0 14px 30px -12px rgba(122, 22, 38, 0.35);
+  animation: confirm-modal-pop 0.15s ease;
 }
-.turnos-filtro {
-  max-width: 220px;
-  margin-bottom: 12px;
+.turnos-pop__fila {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+.turnos-pop__fila span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: #ba2323;
+}
+.turnos-pop__fila select,
+.turnos-pop__fila input {
+  width: 100%;
+  min-width: 0;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 6px;
+  background: #ececec;
+  color: var(--text-dark);
+  font-size: 0.78rem;
+}
+.turnos-pop__fila select:focus,
+.turnos-pop__fila input:focus {
+  outline: 1.5px solid #ba2323;
+}
+.turnos-pop__submit {
+  margin-top: 4px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 8px;
+}
+.turnos-pop__titulo {
+  font-weight: 500;
+  color: #ba2323;
+}
+.turnos-pop__detalle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.turnos-pop__acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.turnos-pop__acciones .btn {
+  min-height: 34px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
+.turnos-pop__error {
+  font-size: 0.78rem;
+  color: #ba2323;
+}
+
+.turnos-cal__grilla {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e4e4e4;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px -18px rgba(122, 22, 38, 0.35);
+}
+.turnos-cal__fila {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.turnos-cal__fila + .turnos-cal__fila {
+  border-top: 2px solid #ececec;
+}
+.turnos-cal__dia-semana {
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: #ba2323;
+}
+.turnos-cal__dia-semana + .turnos-cal__dia-semana,
+.turnos-cal__celda + .turnos-cal__celda {
+  border-left: 2px solid #ececec;
+}
+.turnos-cal__celda {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 6px 6px 8px;
+}
+.turnos-cal__numero {
+  padding-left: 2px;
+  font-size: 0.88rem;
+  color: #ba2323;
+}
+.turnos-cal__celda--fuera .turnos-cal__numero {
+  opacity: 0.45;
+}
+.turnos-cal__celda--hoy .turnos-cal__numero {
+  align-self: flex-start;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #ba2323;
+  color: #fff;
+}
+.turnos-cal__turno {
+  display: block;
+  width: 100%;
+  padding: 5px 7px;
+  border: none;
+  border-radius: 7px;
+  background: #ba2323;
+  color: #fff;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.2s ease;
+}
+.turnos-cal__turno strong {
+  font-weight: 500;
+}
+.turnos-cal__turno span {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0.85;
+}
+.turnos-cal__turno:hover {
+  background: var(--maroon-dark);
+}
+.turnos-cal__turno--realizado {
+  background: #ffdddd;
+  color: #ba2323;
+}
+.turnos-cal__turno--realizado:hover {
+  background: #fbcaca;
+}
+
+@media (max-width: 720px) {
+  .turnos-cal__titulo {
+    font-size: 1.1rem;
+  }
+  .turnos-cal__dia-semana {
+    font-size: 0;
+  }
+  .turnos-cal__dia-semana::first-letter {
+    font-size: 0.78rem;
+  }
+  .turnos-cal__celda {
+    min-height: 64px;
+    padding: 4px 3px;
+  }
+  .turnos-cal__turno {
+    padding: 3px 4px;
+    font-size: 0.6rem;
+  }
+  .turnos-cal__turno span {
+    display: none;
+  }
 }
