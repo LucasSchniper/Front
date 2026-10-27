@@ -3347,6 +3347,22 @@ html {
 .mis-analisis__info .analysis-row__acciones {
   margin-left: auto;
 }
+.mis-analisis--pacientes .mis-analisis__row--paciente {
+  background: #ffdddd;
+}
+.mis-analisis--pacientes .mis-analisis__avatar {
+  background: #f29c9c;
+  color: #ba3232;
+}
+.mis-analisis--pacientes .mis-analisis__detalle--lista {
+  overflow: hidden;
+  background: #fff2f2;
+}
+.mis-analisis--pacientes .mis-analisis__analisis--head {
+  margin: -4px -14px 0;
+  padding: 10px 14px 8px;
+  background: #ffdddd;
+}
 /* Acciones compactas y en una sola línea para no romper la fila */
 .mis-analisis__info .envio-accion {
   flex-direction: row;
