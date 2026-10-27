@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { api } from "../../services/api";
 import { mensajeDeError } from "../../utils/errors";
 import type { Analisis, Paciente } from "../../types";
-import { IconSearch } from "../../components/icons/Icons";
+import { IconCalendar, IconChevronRight, IconPatient, IconSearch } from "../../components/icons/Icons";
 import RevisarAnalisis from "../../components/RevisarAnalisis";
-import { bandaDe, percentilDe } from "../../utils/banda";
+import { bandaDe } from "../../utils/banda";
 
 function fechaHora(iso: string) {
   const d = new Date(iso);
@@ -103,61 +103,84 @@ function MedicoPacientes() {
         <p className="empty-state">Sin pacientes que coincidan.</p>
       )}
 
-      <div className="patient-list">
-        {pacientesFiltrados.map((p) => {
-          const isOpen = expanded === p.id;
-          const analisis = analisisPorPaciente[p.id] || [];
-          return (
-            <div className="patient-card" key={p.id}>
-              <button className="patient-card__header" onClick={() => toggle(p.id)}>
-                <div>
-                  <p className="patient-card__name">
-                    {p.nombre} {p.apellido}
-                  </p>
-                  <p className="patient-card__meta">DNI {p.dni}</p>
-                </div>
-                <span className="patient-card__toggle">{isOpen ? "−" : "+"}</span>
-              </button>
+      {pacientesFiltrados.length > 0 && (
+        <div className="mis-analisis mis-analisis--pacientes">
+          <div className="mis-analisis__row mis-analisis__row--head mis-analisis__row--paciente">
+            <span>Paciente</span>
+            <span>DNI</span>
+          </div>
+          {pacientesFiltrados.map((p) => {
+            const isOpen = expanded === p.id;
+            const analisis = analisisPorPaciente[p.id] || [];
+            return (
+              <div className="mis-analisis__row mis-analisis__row--paciente" key={p.id}>
+                <span className="mis-analisis__fecha">
+                  <span className="mis-analisis__avatar" aria-hidden="true">
+                    <IconPatient size={16} />
+                  </span>
+                  {p.nombre} {p.apellido}
+                </span>
+                <span className="mis-analisis__hora">{p.dni}</span>
+                <button
+                  type="button"
+                  className={`mis-analisis__toggle${isOpen ? " mis-analisis__toggle--abierto" : ""}`}
+                  onClick={() => toggle(p.id)}
+                  aria-expanded={isOpen}
+                  aria-controls={`analisis-${p.id}`}
+                  aria-label={isOpen ? "Ocultar análisis del paciente" : "Ver análisis del paciente"}
+                >
+                  <IconChevronRight size={18} />
+                </button>
 
-              {isOpen && (
-                <div className="patient-card__body">
-                  {cargandoAnalisis && !analisisPorPaciente[p.id] && (
-                    <p className="empty-state">Cargando análisis…</p>
-                  )}
-                  {analisisPorPaciente[p.id] && analisis.length === 0 && (
-                    <p className="empty-state">Sin análisis todavía.</p>
-                  )}
-                  {analisis.map((a) => {
-                    const banda = bandaDe(a);
-                    const { fecha, hora } = fechaHora(a.fecha_hora_entrega);
-                    return (
-                      <div className="analysis-row" key={a.id}>
-                        <div>
-                          <p className="analysis-row__summary">
-                            {banda.etiqueta} · {percentilDe(a)}
-                          </p>
-                          {a.texto_banda && <p className="analisis-banda__texto">{a.texto_banda}</p>}
-                          <p className="analysis-row__meta">
-                            {fecha} · {hora}
-                          </p>
+                {isOpen && (
+                  <div className="mis-analisis__detalle mis-analisis__detalle--lista" id={`analisis-${p.id}`}>
+                    {cargandoAnalisis && !analisisPorPaciente[p.id] && (
+                      <p className="empty-state">Cargando análisis…</p>
+                    )}
+                    {analisisPorPaciente[p.id] && analisis.length === 0 && (
+                      <p className="empty-state">Sin análisis todavía.</p>
+                    )}
+                    {analisis.map((a) => {
+                      const banda = bandaDe(a);
+                      const { fecha, hora } = fechaHora(a.fecha_hora_entrega);
+                      const percentil = Math.round(Number(a.porcentaje));
+                      const relleno = Math.min(100, Math.max(0, percentil));
+                      return (
+                        <div className="mis-analisis__analisis" key={a.id}>
+                          <span className="mis-analisis__fecha">
+                            <span className="mis-analisis__avatar" aria-hidden="true">
+                              <IconCalendar size={16} />
+                            </span>
+                            {fecha}
+                          </span>
+                          <span className="mis-analisis__hora">{hora}</span>
+                          <span className="mis-analisis__bar" aria-hidden="true">
+                            <span className="mis-analisis__bar-fill" style={{ width: `${relleno}%` }} />
+                          </span>
+                          <span className="mis-analisis__valor" title="Percentil de riesgo">
+                            {percentil}%
+                          </span>
+                          <div className="mis-analisis__info">
+                            <span className={`badge badge--${banda.clase}`}>{banda.etiqueta}</span>
+                            {a.texto_banda && <p className="mis-analisis__detalle-texto">{a.texto_banda}</p>}
+                            <div className="analysis-row__acciones">
+                              <RevisarAnalisis
+                                analisis={a}
+                                onActualizado={(actualizado) => actualizarAnalisis(p.id, actualizado)}
+                                onEliminado={(eliminado) => quitarAnalisis(p.id, eliminado)}
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div className="analysis-row__acciones">
-                          <span className={`badge badge--${banda.clase}`}>{banda.etiqueta}</span>
-                          <RevisarAnalisis
-                            analisis={a}
-                            onActualizado={(actualizado) => actualizarAnalisis(p.id, actualizado)}
-                            onEliminado={(eliminado) => quitarAnalisis(p.id, eliminado)}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

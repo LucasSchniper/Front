@@ -3289,6 +3289,64 @@ html {
   }
 }
 
+/* Médico · Pacientes: misma tabla que "Mis análisis", con un paciente por fila */
+.mis-analisis--pacientes {
+  margin-top: 20px;
+}
+.mis-analisis__row--paciente {
+  grid-template-columns: 2fr 1fr 28px;
+}
+.mis-analisis__detalle--lista {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 4px 14px;
+}
+.mis-analisis__analisis {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 2fr 52px;
+  column-gap: 18px;
+  row-gap: 10px;
+  align-items: center;
+  padding: 12px 0;
+}
+.mis-analisis__analisis:not(:last-child) {
+  border-bottom: 2px solid #f6e6e5;
+}
+.mis-analisis__analisis .mis-analisis__bar {
+  background: var(--pink-input);
+}
+.mis-analisis__info {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+.mis-analisis__info .analysis-row__acciones {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .mis-analisis__row--paciente,
+  .mis-analisis__row--head.mis-analisis__row--paciente {
+    grid-template-columns: 1fr auto 28px;
+  }
+  .mis-analisis__row--paciente > .mis-analisis__hora {
+    grid-column: auto;
+  }
+  .mis-analisis__analisis {
+    grid-template-columns: 1fr auto;
+    column-gap: 12px;
+  }
+  .mis-analisis__analisis .mis-analisis__hora {
+    text-align: right;
+  }
+  .mis-analisis__info .analysis-row__acciones {
+    margin-left: 0;
+  }
+}
+
 /* Pop-up de confirmación (cerrar sesión) */
 .confirm-modal__backdrop {
   position: fixed;
