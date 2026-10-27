@@ -2654,8 +2654,7 @@ html {
   gap: 12px 14px;
   padding: 14px 18px;
   background: #fff2f2;
-  border: 1px solid var(--pink-card);
-  border-left: 4px solid #ba2323;
+  border: 1px solid #ba3232;
   border-radius: 14px;
 }
 .aviso-asignacion__icon {
