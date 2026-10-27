@@ -50,7 +50,7 @@ function Footer() {
             <h3>Contacto</h3>
             <ul>
               <li>
-                <a href="mailto:decaadmin@gmail.com">decaadmin@gmail.com</a>
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=decaadmin@gmail.com" target="_blank" rel="noopener noreferrer">decaadmin@gmail.com</a>
               </li>
             </ul>
           </div>

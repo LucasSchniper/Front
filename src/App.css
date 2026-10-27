@@ -1132,12 +1132,12 @@ html {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  min-height: 52px;
-  padding: 10px 24px;
+  min-height: var(--divider-h);
+  padding: 12px 24px;
   background: var(--header-bg);
   color: #fff;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 1.15rem;
 }
 @media (max-width: 480px) {
   .contact-footer {
@@ -1148,6 +1148,10 @@ html {
   color: inherit;
   font-weight: 500;
   text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+.contact-footer a:hover {
+  opacity: 0.8;
 }
 .auth-page__row {
   position: relative;

@@ -3,7 +3,7 @@ function ContactFooter() {
   return (
     <footer className="contact-footer">
       <span>
-        Contactanos: <a href="mailto:decaadmin@gmail.com">decaadmin@gmail.com</a>
+        Contactanos: <a href="https://mail.google.com/mail/?view=cm&fs=1&to=decaadmin@gmail.com" target="_blank" rel="noopener noreferrer">decaadmin@gmail.com</a>
       </span>
     </footer>
   );
