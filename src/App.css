@@ -3347,6 +3347,26 @@ html {
 .mis-analisis__info .analysis-row__acciones {
   margin-left: auto;
 }
+/* Acciones compactas y en una sola línea para no romper la fila */
+.mis-analisis__info .envio-accion {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px 8px;
+}
+.mis-analisis__info .btn--sm {
+  min-height: 30px;
+  padding: 5px 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  gap: 5px;
+  box-shadow: none;
+}
+.mis-analisis__info .envio-chip {
+  padding: 4px 10px;
+  font-size: 0.72rem;
+}
 
 @media (max-width: 640px) {
   .mis-analisis__analisis {
