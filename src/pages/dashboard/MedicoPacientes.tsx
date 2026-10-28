@@ -105,6 +105,11 @@ function MedicoPacientes() {
 
       {pacientesFiltrados.length > 0 && (
         <div className="mis-analisis mis-analisis--pacientes">
+          <div className="mis-analisis__row mis-analisis__row--head mis-analisis__row--paciente">
+            <span>Nombre</span>
+            <span>DNI</span>
+            <span aria-hidden="true" />
+          </div>
           {pacientesFiltrados.map((p) => {
             const isOpen = expanded === p.id;
             const analisis = analisisPorPaciente[p.id] || [];
@@ -114,13 +119,11 @@ function MedicoPacientes() {
                   <span className="mis-analisis__avatar" aria-hidden="true">
                     <IconPatient size={16} />
                   </span>
-                  <span>
-                    <span className="mis-analisis__nombre">
-                      {p.nombre} {p.apellido}
-                    </span>
-                    <span className="mis-analisis__dni">DNI {p.dni}</span>
+                  <span className="mis-analisis__nombre">
+                    {p.nombre} {p.apellido}
                   </span>
                 </span>
+                <span className="mis-analisis__dni">{p.dni || "—"}</span>
                 <button
                   type="button"
                   className={`mis-analisis__toggle${isOpen ? " mis-analisis__toggle--abierto" : ""}`}
