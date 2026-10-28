@@ -3467,6 +3467,47 @@ html {
   }
 }
 
+/* Paciente · Mis análisis: mismos colores que la tabla de Pacientes del administrador (.data-table) */
+.mis-analisis--propios {
+  background: #fff2f2;
+}
+.mis-analisis--propios .mis-analisis__row {
+  padding: 12px 20px;
+  background: transparent;
+  font-size: 0.92rem;
+  transition: background 0.2s ease;
+}
+.mis-analisis--propios .mis-analisis__row:not(.mis-analisis__row--head):hover {
+  background: #fbe6e6;
+}
+.mis-analisis--propios .mis-analisis__row.mis-analisis__row--head {
+  padding: 14px 20px 12px;
+  background: #ffdddd;
+  color: #ba2323;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  border-bottom: 2px solid #ba3232;
+}
+.mis-analisis--propios .mis-analisis__fecha,
+.mis-analisis--propios .mis-analisis__hora,
+.mis-analisis--propios .mis-analisis__valor {
+  font-size: inherit;
+}
+.mis-analisis--propios .mis-analisis__fecha {
+  gap: 12px;
+  font-weight: 500;
+}
+.mis-analisis--propios .mis-analisis__hora {
+  color: var(--text-muted);
+}
+.mis-analisis--propios .mis-analisis__avatar {
+  background: #f29c9c;
+  color: #ba3232;
+}
+.mis-analisis--propios .mis-analisis__bar {
+  background: #ffdddd;
+}
+
 /* Médico · Pacientes: misma tabla que "Mis análisis", con un paciente por fila */
 .mis-analisis--pacientes {
   margin-top: 20px;

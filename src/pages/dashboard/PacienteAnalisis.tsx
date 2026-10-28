@@ -54,7 +54,7 @@ function PacienteAnalisis() {
       )}
 
       {analisis.length > 0 && (
-        <div className="mis-analisis">
+        <div className="mis-analisis mis-analisis--propios">
           <div className="mis-analisis__row mis-analisis__row--head">
             <span>Fecha</span>
             <span>Horario</span>
