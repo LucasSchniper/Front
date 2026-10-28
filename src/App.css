@@ -3167,8 +3167,7 @@ html {
   flex-wrap: wrap;
   gap: 14px;
   background: #fff;
-  border: 1px solid var(--pink-card);
-  border-left: 4px solid var(--maroon);
+  border: 1px solid #ba2323;
   border-radius: 14px;
   padding: 16px 18px;
 }
