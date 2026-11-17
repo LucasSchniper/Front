@@ -16,8 +16,7 @@ import {
   IconSummary,
   IconUserCircle,
 } from "../../components/icons/Icons";
-import type { ContactoMock } from "../../data/mockData";
-import type { Analisis, Medico, Turno } from "../../types";
+import type { Analisis, Medico, Mensaje, Turno } from "../../types";
 import { bandaDe } from "../../utils/banda";
 import { mensajeDeError } from "../../utils/errors";
 import ConfirmModal from "../../components/ConfirmModal";
@@ -28,6 +27,70 @@ const fechaCorta = (iso: string) => {
 };
 
 const horaCorta = (iso: string) => iso.slice(11, 16);
+
+/** Cada cuánto revisamos si llegaron mensajes nuevos. */
+const INTERVALO_CHATS = 30_000;
+
+interface ChatPreview {
+  clave: string;
+  nombre: string;
+  ultimo: string;
+  hora: string;
+  /** Fecha del último mensaje, para ordenar los chats del más nuevo al más viejo. */
+  orden: string;
+}
+
+/** Hoy muestra la hora; otro día, la fecha (dd/mm). */
+function cuandoFue(iso: string) {
+  const hoy = new Date();
+  const hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+  if (iso.slice(0, 10) === hoyIso) return horaCorta(iso);
+  return fechaCorta(iso).slice(0, 5);
+}
+
+function previewDe(clave: string, nombre: string, mensajes: Mensaje[]): ChatPreview | null {
+  const ultimo = mensajes[mensajes.length - 1];
+  if (!ultimo) return null;
+  const texto = ultimo.eliminado || ultimo.contenido == null ? "Mensaje eliminado" : ultimo.contenido;
+  return {
+    clave,
+    nombre,
+    ultimo: ultimo.emisor === "paciente" ? `Vos: ${texto}` : texto,
+    hora: cuandoFue(ultimo.fecha_hora_entrega),
+    orden: ultimo.fecha_hora_entrega,
+  };
+}
+
+/** Último mensaje con mi médico y con cada admin que me escribió. */
+async function cargarChats(medico: Medico | null): Promise<ChatPreview[]> {
+  const conMedico = medico
+    ? api.mensajes
+        .conversacion(medico.id)
+        .then((d) => previewDe(`medico-${medico.id}`, `Dr./Dra. ${medico.nombre} ${medico.apellido}`, d.mensajes))
+        .catch(() => null)
+    : Promise.resolve(null);
+
+  const conAdmins = api.mensajesAdmin
+    .conversaciones()
+    .then((d) =>
+      Promise.all(
+        d.conversaciones
+          .filter((c) => c.admin_id !== undefined)
+          .map((c) =>
+            api.mensajesAdmin
+              .conversacion("admin", c.admin_id!)
+              .then((m) => previewDe(`admin-${c.admin_id}`, `${c.nombre} ${c.apellido} (Administración)`, m.mensajes))
+              .catch(() => null)
+          )
+      )
+    )
+    .catch(() => []);
+
+  const [medicoPreview, adminPreviews] = await Promise.all([conMedico, conAdmins]);
+  return [medicoPreview, ...adminPreviews]
+    .filter((c): c is ChatPreview => c !== null)
+    .sort((a, b) => b.orden.localeCompare(a.orden));
+}
 
 function PacienteHome() {
   const currentUser = useSesion();
@@ -42,9 +105,10 @@ function PacienteHome() {
   const [confirmandoCancelacion, setConfirmandoCancelacion] = useState(false);
   const [cancelando, setCancelando] = useState(false);
   const [errorTurno, setErrorTurno] = useState("");
-  const chats: ContactoMock[] = [];
+  const [chats, setChats] = useState<ChatPreview[]>([]);
 
   const [miMedico, setMiMedico] = useState<Medico | null>(null);
+  const [medicoCargado, setMedicoCargado] = useState(false);
 
   useEffect(() => {
     let cancelado = false;
@@ -53,7 +117,9 @@ function PacienteHome() {
       .then((data) => {
         if (!cancelado) setMiMedico((data.medicos || [])[0] || null);
       })
-      .catch(() => {
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelado) setMedicoCargado(true);
       });
     api.analisis
       .listarPropios()
@@ -76,6 +142,21 @@ function PacienteHome() {
       cancelado = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!medicoCargado) return;
+    let cancelado = false;
+    const refrescar = () =>
+      cargarChats(miMedico).then((lista) => {
+        if (!cancelado) setChats(lista);
+      });
+    refrescar();
+    const intervalo = window.setInterval(refrescar, INTERVALO_CHATS);
+    return () => {
+      cancelado = true;
+      window.clearInterval(intervalo);
+    };
+  }, [medicoCargado, miMedico]);
 
   /** Cancela el turno (el médico recupera ese horario) y le avisa por chat. */
   const cancelarTurno = async () => {
@@ -240,7 +321,7 @@ function PacienteHome() {
           ) : (
             <ul className="chat-preview-list">
               {chats.map((c) => (
-                <li key={c.id}>
+                <li key={c.clave}>
                   <Link to="/paciente/chats" className="chat-preview">
                     <IconUserCircle size={30} />
                     <span className="chat-preview__info">
