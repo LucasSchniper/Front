@@ -42,7 +42,7 @@ function contactoDesdeConversacion(c: ConversacionAdmin): Contacto {
   return { tipo: c.usuario_tipo ?? "paciente", id: c.usuario_id ?? "", nombre };
 }
 
-async function cargarContactos(esAdmin: boolean, esMedico: boolean): Promise<Contacto[]> {
+export async function cargarContactos(esAdmin: boolean, esMedico: boolean): Promise<Contacto[]> {
   const conversacionesAdmin = api.mensajesAdmin
     .conversaciones()
     .then((d) => d.conversaciones.map(contactoDesdeConversacion));

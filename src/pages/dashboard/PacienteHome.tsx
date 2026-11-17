@@ -16,7 +16,7 @@ import {
   IconSummary,
   IconUserCircle,
 } from "../../components/icons/Icons";
-import type { ContactoMock } from "../../data/mockData";
+import { cargarContactos } from "./Chats";
 import type { Analisis, Medico, Turno } from "../../types";
 import { bandaDe } from "../../utils/banda";
 import { mensajeDeError } from "../../utils/errors";
@@ -28,6 +28,45 @@ const fechaCorta = (iso: string) => {
 };
 
 const horaCorta = (iso: string) => iso.slice(11, 16);
+
+interface ChatPreview {
+  id: string;
+  nombre: string;
+  ultimo: string;
+  hora: string;
+  fecha: string;
+}
+
+/** Trae mis conversaciones (médico y admins) con su último mensaje, las más recientes primero. */
+async function cargarChatsRecientes(): Promise<ChatPreview[]> {
+  const contactos = await cargarContactos(false, false);
+  const previews = await Promise.all(
+    contactos.map(async (c): Promise<ChatPreview | null> => {
+      try {
+        const { mensajes } = await (c.tipo === "admin"
+          ? api.mensajesAdmin.conversacion(c.tipo, c.id)
+          : api.mensajes.conversacion(c.id));
+        const ultimo = [...(mensajes || [])]
+          .sort((a, b) => a.fecha_hora_entrega.localeCompare(b.fecha_hora_entrega))
+          .pop();
+        if (!ultimo) return null;
+        return {
+          id: `${c.tipo}-${c.id}`,
+          nombre: c.nombre,
+          ultimo: ultimo.eliminado || !ultimo.contenido ? "Mensaje eliminado" : ultimo.contenido,
+          hora: horaCorta(ultimo.fecha_hora_entrega),
+          fecha: ultimo.fecha_hora_entrega,
+        };
+      } catch {
+        return null;
+      }
+    })
+  );
+  return previews
+    .filter((p): p is ChatPreview => p !== null)
+    .sort((a, b) => b.fecha.localeCompare(a.fecha))
+    .slice(0, 4);
+}
 
 function PacienteHome() {
   const currentUser = useSesion();
@@ -42,12 +81,17 @@ function PacienteHome() {
   const [confirmandoCancelacion, setConfirmandoCancelacion] = useState(false);
   const [cancelando, setCancelando] = useState(false);
   const [errorTurno, setErrorTurno] = useState("");
-  const chats: ContactoMock[] = [];
+  const [chats, setChats] = useState<ChatPreview[]>([]);
 
   const [miMedico, setMiMedico] = useState<Medico | null>(null);
 
   useEffect(() => {
     let cancelado = false;
+    cargarChatsRecientes()
+      .then((lista) => {
+        if (!cancelado) setChats(lista);
+      })
+      .catch(() => {});
     api.medicos
       .listar()
       .then((data) => {
